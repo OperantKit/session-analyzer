@@ -1,17 +1,29 @@
-"""Generalized Matching Law (GML) parameter estimation.
+"""Generalized Matching Law (GML) and single-alternative matching fits.
 
-The Generalized Matching Law (Baum, 1974) expresses choice as
+**Generalized Matching Law** (Baum, 1974):
 
     log(B1 / B2) = a * log(R1 / R2) + log(b)
 
 where ``a`` is sensitivity (slope) and ``log b`` is the bias (intercept).
 Perfect matching corresponds to ``a = 1`` and ``log b = 0``.
 
+**Single-alternative hyperbola** (Herrnstein, 1970):
+
+    B = k * R / (R + R_e)
+
+where ``B`` is response rate, ``R`` is reinforcement rate, ``k`` is the
+asymptotic response rate, and ``R_e`` is the rate of extraneous
+reinforcement (all other competing reinforcement sources combined).
+
 References
 ----------
 Baum, W. M. (1974). On two types of deviation from the matching law: bias
-and undermatching. Journal of the Experimental Analysis of Behavior, 22(1),
-231-242. https://doi.org/10.1901/jeab.1974.22-231
+    and undermatching. *Journal of the Experimental Analysis of Behavior*,
+    22(1), 231-242. https://doi.org/10.1901/jeab.1974.22-231
+
+Herrnstein, R. J. (1970). On the law of effect. *Journal of the
+    Experimental Analysis of Behavior*, 13(2), 243-266.
+    https://doi.org/10.1901/jeab.1970.13-243
 """
 
 from __future__ import annotations
@@ -115,4 +127,103 @@ def estimate_matching_parameters(
         bias=log_b,
         r_squared=float(r_squared),
         n=len(valid_indices),
+    )
+
+
+@dataclass(frozen=True)
+class SingleAlternativeMatchingParameters:
+    """Herrnstein (1970) single-alternative hyperbola fit result.
+
+    Attributes
+    ----------
+    k : float
+        Asymptotic response rate, in the same units as the input
+        ``response_rates``. Represents the maximum response rate the
+        subject can emit.
+    r_e : float
+        Rate of extraneous (non-programmed) reinforcement, in the same
+        units as the input ``reinforcement_rates``.
+    r_squared : float
+        Coefficient of determination of the non-linear fit.
+    n : int
+        Number of (R, B) data pairs used for the fit.
+    """
+
+    k: float
+    r_e: float
+    r_squared: float
+    n: int
+
+
+def _herrnstein_hyperbola(r: np.ndarray, k: float, r_e: float) -> np.ndarray:
+    return k * r / (r + r_e)
+
+
+def fit_single_alternative_matching(
+    reinforcement_rates: list[float],
+    response_rates: list[float],
+) -> SingleAlternativeMatchingParameters:
+    """Fit Herrnstein's (1970) single-alternative hyperbola ``B = k R / (R + R_e)``.
+
+    Parameters
+    ----------
+    reinforcement_rates : list of float
+        Per-condition reinforcement rates ``R`` (non-negative).
+    response_rates : list of float
+        Per-condition response rates ``B`` (non-negative).
+
+    Returns
+    -------
+    SingleAlternativeMatchingParameters
+
+    Raises
+    ------
+    ValueError
+        If input lengths differ, or if fewer than 2 pairs remain after
+        filtering out pairs with negative values.
+    """
+    if len(reinforcement_rates) != len(response_rates):
+        raise ValueError(
+            "reinforcement_rates and response_rates must have the same length "
+            f"(got {len(reinforcement_rates)} and {len(response_rates)})"
+        )
+
+    pairs = [
+        (r, b)
+        for r, b in zip(reinforcement_rates, response_rates, strict=False)
+        if r >= 0.0 and b >= 0.0
+    ]
+    if len(pairs) < 2:
+        raise ValueError(
+            "single-alternative matching fit requires at least 2 non-negative pairs; "
+            f"got {len(pairs)} after filtering"
+        )
+
+    r_arr = np.array([p[0] for p in pairs], dtype=np.float64)
+    b_arr = np.array([p[1] for p in pairs], dtype=np.float64)
+
+    k_init = float(b_arr.max()) * 1.2 if b_arr.max() > 0.0 else 1.0
+    r_e_init = float(np.median(r_arr)) if r_arr.size else 1.0
+    r_e_init = max(r_e_init, 1e-3)
+
+    popt, _ = curve_fit(
+        _herrnstein_hyperbola,
+        r_arr,
+        b_arr,
+        p0=[k_init, r_e_init],
+        bounds=([1e-9, 1e-12], [np.inf, np.inf]),
+        maxfev=20_000,
+    )
+    k_fit, r_e_fit = float(popt[0]), float(popt[1])
+
+    predicted = _herrnstein_hyperbola(r_arr, k_fit, r_e_fit)
+    ss_res = float(np.sum((b_arr - predicted) ** 2))
+    ss_tot = float(np.sum((b_arr - np.mean(b_arr)) ** 2))
+    r_squared = 1.0 - ss_res / ss_tot if ss_tot != 0.0 else 0.0
+
+    return SingleAlternativeMatchingParameters(
+        k=k_fit,
+        r_e=r_e_fit,
+        r_squared=float(r_squared),
+        n=len(pairs),
     )
