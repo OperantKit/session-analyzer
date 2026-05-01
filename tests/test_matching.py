@@ -13,6 +13,7 @@ import pytest
 from session_analyzer.analytics.matching import (
     MatchingParameters,
     estimate_matching_parameters,
+    estimate_single_observation_gml,
     generalized_matching_law,
 )
 
@@ -105,3 +106,74 @@ def test_raises_on_insufficient_data() -> None:
 def test_raises_on_empty_input() -> None:
     with pytest.raises(ValueError, match="at least 2"):
         estimate_matching_parameters([], [])
+
+
+# ---------------------------------------------------------------------------
+# estimate_single_observation_gml
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_single_obs_gml_strict_matching_when_b_equals_r() -> None:
+    # B1/B2 = R1/R2 = 2 ⇒ a=1.0, b=1.0.
+    result = estimate_single_observation_gml(20, 10, 4, 2)
+    assert result is not None
+    a, b = result
+    assert a == pytest.approx(1.0)
+    assert b == pytest.approx(1.0)
+
+
+@pytest.mark.unit
+def test_single_obs_gml_equal_responses_and_reinforcers_returns_one_one() -> None:
+    # Equal everything: convention a=1, b=1.
+    result = estimate_single_observation_gml(10, 10, 5, 5)
+    assert result == (1.0, 1.0)
+
+
+@pytest.mark.unit
+def test_single_obs_gml_undermatching() -> None:
+    # B1/B2 = 2 with R1/R2 = 4 ⇒ a = log(2)/log(4) = 0.5.
+    result = estimate_single_observation_gml(20, 10, 8, 2)
+    assert result is not None
+    a, _b = result
+    assert a == pytest.approx(0.5)
+
+
+@pytest.mark.unit
+def test_single_obs_gml_overmatching() -> None:
+    # B1/B2 = 4 with R1/R2 = 2 ⇒ a = log(4)/log(2) = 2.0.
+    result = estimate_single_observation_gml(20, 5, 4, 2)
+    assert result is not None
+    a, _b = result
+    assert a == pytest.approx(2.0)
+
+
+@pytest.mark.unit
+def test_single_obs_gml_negative_counts_returns_none() -> None:
+    assert estimate_single_observation_gml(-1, 10, 5, 5) is None
+    assert estimate_single_observation_gml(10, 10, -1, 5) is None
+
+
+@pytest.mark.unit
+def test_single_obs_gml_both_responses_zero_returns_none() -> None:
+    assert estimate_single_observation_gml(0, 0, 5, 5) is None
+
+
+@pytest.mark.unit
+def test_single_obs_gml_both_reinforcements_zero_returns_none() -> None:
+    assert estimate_single_observation_gml(10, 10, 0, 0) is None
+
+
+@pytest.mark.unit
+def test_single_obs_gml_b_denominator_zero_returns_none() -> None:
+    # responses_b = 0: cannot form a finite response ratio.
+    assert estimate_single_observation_gml(10, 0, 5, 5) is None
+    # reinforcements_b = 0: cannot form a finite reinforcement ratio.
+    assert estimate_single_observation_gml(10, 10, 5, 0) is None
+
+
+@pytest.mark.unit
+def test_single_obs_gml_unequal_responses_with_equal_reinforcers_returns_none() -> None:
+    # R1 == R2 but B1 != B2 ⇒ sensitivity is undetermined ⇒ None.
+    assert estimate_single_observation_gml(20, 10, 5, 5) is None
+

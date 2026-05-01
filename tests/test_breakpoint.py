@@ -6,7 +6,9 @@ import pytest
 
 from session_analyzer.analytics.breakpoint import (
     BreakpointResult,
+    IRTBreakpointResult,
     detect_breakpoint,
+    estimate_irt_breakpoint,
 )
 
 
@@ -73,3 +75,101 @@ def test_default_threshold_is_300_sec() -> None:
     result = detect_breakpoint(completions, session_end_time=301.0)
     assert result.breakpoint_ratio == 1
     assert result.method == "pause_threshold"
+
+
+# ---------------------------------------------------------------------------
+# IRT-within-current-step (live) breakpoint
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_status_active_when_irts_well_below_threshold() -> None:
+    # Reinforcer at t=10. Then 4 responses 1 s apart inside the current step.
+    response_times = [1.0, 2.0, 3.0, 4.0, 5.0, 11.0, 12.0, 13.0, 14.0]
+    reinforcement_times = [10.0]
+    result = estimate_irt_breakpoint(
+        response_times,
+        reinforcement_times,
+        irt_threshold_sec=60.0,
+    )
+    assert isinstance(result, IRTBreakpointResult)
+    assert result.status == "active"
+    assert result.breakpoint_reached is False
+    assert result.last_irt_sec == pytest.approx(1.0)
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_status_approaching_when_last_irt_above_half_threshold() -> None:
+    # Last IRT = 35 s, threshold = 60 s ⇒ status "approaching" (35 >= 30).
+    response_times = [11.0, 12.0, 47.0]
+    reinforcement_times = [10.0]
+    result = estimate_irt_breakpoint(
+        response_times,
+        reinforcement_times,
+        irt_threshold_sec=60.0,
+    )
+    assert result.status == "approaching"
+    assert result.breakpoint_reached is False
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_status_reached_when_any_irt_exceeds_threshold() -> None:
+    # IRT 100 s exceeds threshold 60 s ⇒ reached.
+    response_times = [11.0, 12.0, 112.0]
+    reinforcement_times = [10.0]
+    result = estimate_irt_breakpoint(
+        response_times,
+        reinforcement_times,
+        irt_threshold_sec=60.0,
+    )
+    assert result.status == "reached"
+    assert result.breakpoint_reached is True
+    assert result.last_irt_sec == pytest.approx(100.0)
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_insufficient_data_when_zero_or_one_response_in_step() -> None:
+    response_times = [11.0]  # only one response after the last reinforcer
+    reinforcement_times = [10.0]
+    result = estimate_irt_breakpoint(response_times, reinforcement_times)
+    assert result.status == "insufficient_data"
+    assert result.last_irt_sec is None
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_uses_all_responses_when_no_reinforcement_yet() -> None:
+    # No reinforcement yet ⇒ inspect all responses.
+    response_times = [0.0, 1.0, 2.0, 100.0]
+    reinforcement_times: list[float] = []
+    result = estimate_irt_breakpoint(
+        response_times,
+        reinforcement_times,
+        irt_threshold_sec=60.0,
+    )
+    assert result.status == "reached"
+    assert result.n_completed == 0
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_reports_metadata_unchanged() -> None:
+    response_times = [11.0, 12.0]
+    reinforcement_times = [10.0]
+    result = estimate_irt_breakpoint(
+        response_times,
+        reinforcement_times,
+        irt_threshold_sec=60.0,
+        last_completed_ratio=8,
+        current_requirement=12,
+    )
+    assert result.last_completed_ratio == 8
+    assert result.current_requirement == 12
+    assert result.n_completed == 1
+
+
+@pytest.mark.unit
+def test_irt_breakpoint_raises_on_non_positive_threshold() -> None:
+    with pytest.raises(ValueError, match="positive"):
+        estimate_irt_breakpoint([1.0, 2.0], [], irt_threshold_sec=0.0)
+    with pytest.raises(ValueError, match="positive"):
+        estimate_irt_breakpoint([1.0, 2.0], [], irt_threshold_sec=-1.0)
+

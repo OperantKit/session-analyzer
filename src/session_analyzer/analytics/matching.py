@@ -7,6 +7,17 @@
 where ``a`` is sensitivity (slope) and ``log b`` is the bias (intercept).
 Perfect matching corresponds to ``a = 1`` and ``log b = 0``.
 
+Two estimators are provided:
+
+- :func:`estimate_matching_parameters` — multi-condition log-log curve
+  fit using ``scipy.optimize.curve_fit``. Reports ``a``, ``log b``,
+  ``r_squared``, and ``n``. Use this for cross-condition designs where
+  you have several (B1/B2, R1/R2) pairs.
+- :func:`estimate_single_observation_gml` — closed-form solver from a
+  single (B1, B2, R1, R2) tuple. Pure Python, no numpy/scipy. Use this
+  on a live dashboard where only running totals are available; the
+  returned bias is the multiplicative ``b`` (not ``log b``).
+
 **Single-alternative hyperbola** (Herrnstein, 1970):
 
     B = k * R / (R + R_e)
@@ -28,6 +39,7 @@ Herrnstein, R. J. (1970). On the law of effect. *Journal of the
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -227,3 +239,84 @@ def fit_single_alternative_matching(
         r_squared=float(r_squared),
         n=len(pairs),
     )
+
+
+def estimate_single_observation_gml(
+    responses_a: int,
+    responses_b: int,
+    reinforcements_a: int,
+    reinforcements_b: int,
+) -> tuple[float, float] | None:
+    """Closed-form Generalized Matching Law estimate from a single observation.
+
+    Solves the GML
+
+        log(B1 / B2) = a * log(R1 / R2) + log b
+
+    for ``(a, b)`` from one (B1, B2, R1, R2) tuple. With a single
+    observation there are two unknowns and effectively one usable
+    equation, so the system is solved by setting ``log b = 0`` whenever
+    the reinforcement ratio is nontrivial — i.e. attribute all of the
+    log response ratio to sensitivity. This closed form is appropriate
+    on a live dashboard where only running totals from a single
+    condition are available.
+
+    For proper multi-condition fitting (with non-trivial bias and a
+    reported R^2), use :func:`estimate_matching_parameters`.
+
+    Parameters
+    ----------
+    responses_a, responses_b : int
+        Total responses on alternative A / B during the observation
+        window.
+    reinforcements_a, reinforcements_b : int
+        Total reinforcements obtained on alternative A / B during the
+        same window.
+
+    Returns
+    -------
+    (sensitivity, bias) : tuple of float
+        ``sensitivity`` is the slope ``a``; ``bias`` is the
+        multiplicative constant ``b`` (not ``log b``). Both are floats.
+        Strict matching corresponds to ``a = 1.0, b = 1.0``.
+    None
+        Returned when the inputs cannot support an estimate: any
+        negative count, both responses zero, both reinforcements zero,
+        or B's denominator zero (cannot form a finite ratio).
+    """
+    if (
+        responses_a < 0
+        or responses_b < 0
+        or reinforcements_a < 0
+        or reinforcements_b < 0
+    ):
+        return None
+    if responses_a == 0 and responses_b == 0:
+        return None
+    if reinforcements_a == 0 and reinforcements_b == 0:
+        return None
+    if responses_b == 0 or reinforcements_b == 0:
+        return None
+
+    resp_ratio = responses_a / responses_b
+    rf_ratio = reinforcements_a / reinforcements_b
+
+    if resp_ratio <= 0 or rf_ratio <= 0:
+        return None
+
+    log_resp_ratio = math.log(resp_ratio)
+    log_rf_ratio = math.log(rf_ratio)
+
+    if log_rf_ratio == 0:
+        # r_A == r_B; sensitivity is undetermined from a single point.
+        if log_resp_ratio == 0:
+            # Equal responses + equal reinforcers: convention a = 1.
+            return 1.0, 1.0
+        # Unequal responses with equal reinforcers implies infinite
+        # sensitivity or extreme bias; either way not estimable.
+        return None
+
+    a = log_resp_ratio / log_rf_ratio
+    log_b = log_resp_ratio - a * log_rf_ratio
+    b = math.exp(log_b)
+    return float(a), float(b)
