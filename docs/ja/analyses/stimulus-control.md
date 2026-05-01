@@ -22,11 +22,15 @@
 - **出力** — `ExponentialGradientParameters(peak_response=48.3, length_scale=175.0, r_squared=0.97, n=9)`
 - **引用** — Shepard, R. N. (1987). Toward a universal law of generalization for psychological science. *Science*, 237(4820), 1317-1323. <https://doi.org/10.1126/science.3629243>
 
+![指数型 般化勾配](../../assets/figures/exponential_gradient.png)
+
 ### Discrimination ratio — `DiscriminationRatio`
 
 - **テーマ** — S+ / S- 弁別の最も簡素な要約は S+ 期に応答した割合 `DR = R(S+) / [R(S+) + R(S-)]`。等価な *suppression ratio*（Annau & Kamin, 1961）は `R(S-) / [R(S+) + R(S-)]`。`DR ≥ 0.75` を「弁別成立」の慣例しきい値とする。
 - **出力** — `DiscriminationRatio(discrimination_ratio=0.85, suppression_ratio=0.15, s_plus_count=170, s_minus_count=30, is_discriminated=True)`
 - **引用** — Annau, Z., & Kamin, L. J. (1961). The conditioned emotional response as a function of intensity of the US. *J. Comp. Physiol. Psychol.*, 54(4), 428-432. <https://doi.org/10.1037/h0042199>
+
+![S+ vs S- 応答数と DR](../../assets/figures/discrimination_ratio.png)
 
 ### Peak shift — `PeakShiftResult`
 
@@ -35,6 +39,8 @@
 - **出力** — `PeakShiftResult(empirical_peak_value=560.0, fitted_peak_value=559.7, fitted_sigma=12.4, fitted_peak_response=49.8, s_plus=550.0, s_minus=540.0, shift_magnitude=9.7, shift_direction="away_from_s_minus", r_squared=0.99, n=8)`
 - **引用** — Hanson, H. M. (1959). Effects of discrimination training on stimulus generalization. *J. Exp. Psychol.*, 58(5), 321-334. <https://doi.org/10.1037/h0042606>
 
+![Free-peak Gaussian fit が S- から離れた方向にシフト](../../assets/figures/peak_shift.png)
+
 ### 信号検出 — `SignalDetectionMetrics` / `ROCCurve`
 
 - **テーマ** — yes/no 検出課題で感度と応答バイアスが交絡している場合、信号検出理論（Green & Swets, 1966）が `d'`（感度）と `c` / `β`（バイアス）に分解する。非パラ `A'` / `B''` はバイアス耐性のある代替。`compute_roc` は複数の operating point から経験的 ROC と台形 AUC を構成する。Hautus (1995) の log-linear 補正を常に適用してceiling / floor を扱う。
@@ -42,3 +48,14 @@
 - **出力（sdt）** — `SignalDetectionMetrics(hit_rate=0.84, false_alarm_rate=0.16, d_prime=2.0, criterion=0.0, beta=1.0, a_prime=0.92, b_double_prime=0.0, n_signal_trials=100, n_noise_trials=100)`
 - **出力（roc）** — `ROCCurve(fa_rates=[0.0, 0.01, 0.10, 0.30, 0.55, 0.90, 1.0], hit_rates=[0.0, 0.05, 0.30, 0.60, 0.85, 0.99, 1.0], auc=0.85)`
 - **引用** — Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley. / Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behav. Res. Methods Instrum. Comput.*, 27(1), 46-51. <https://doi.org/10.3758/BF03203619>
+
+![基準を掃引した経験的 ROC 曲線（chance line と AUC 注釈付き）](../../assets/figures/signal_detection_roc.png)
+
+### 心理測定関数 — `PsychometricFit`
+
+- **テーマ** — 刺激量の関数としての選択確率。fitter は logit (`P = γ + (1 − γ − λ) / (1 + exp(-(x − μ) / σ))`) または probit（cumulative-Gaussian）リンクをサポートし、必要に応じて lapse rate `λ` を同時推定。2AFC では `gamma = 0.5` を指定して chance を下漸近に固定。
+- **式** — `P(yes | x) = γ + (1 − γ − λ) · F((x − μ) / σ)`、`F = logistic` または `Φ`
+- **出力** — `PsychometricFit(link="logit", mu=0.0, sigma=1.5, gamma=0.0, lapse=0.0, log_likelihood=-235.6, n=11)`
+- **引用** — Wichmann, F. A., & Hill, N. J. (2001). The psychometric function: I. Fitting, sampling, and goodness of fit. *Perception & Psychophysics*, 63(8), 1293-1313. <https://doi.org/10.3758/BF03194544>
+
+![ロジスティック心理測定 fit と閾値マーカ](../../assets/figures/psychometric.png)

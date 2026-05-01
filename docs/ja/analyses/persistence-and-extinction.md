@@ -31,6 +31,8 @@
 - **出力** — `ResurgenceMetrics(baseline_target_rate=42.7, suppression_target_rate=2.7, test_target_rate=15.0, resurgence_magnitude=12.3, resurgence_ratio=0.35, alt_baseline_rate=41.5, alt_test_rate=30.0, resurged=True, n_phase1=5, n_phase2=5, n_phase3=5)`
 - **引用** — Epstein, R. (1985). Extinction-induced resurgence. *Psychological Record*, 35(2), 143-153. / Shahan, T. A., & Sweeney, M. M. (2011). A model of resurgence based on behavioral momentum theory. *JEAB*, 95(1), 91-108. <https://doi.org/10.1901/jeab.2011.95-91>
 
+![3 相のターゲット / 代替応答 rate](../../assets/figures/resurgence.png)
+
 ### Renewal（ABA / ABC / AAB）— `RenewalMetrics`
 
 - **テーマ** — Renewal は消去文脈と異なる文脈でテストすると消去応答が回復する現象（Bouton, 2004）。3 つの正典設計：**ABA**（A で訓練、B で消去、A でテスト）、**ABC**（A 訓練、B 消去、C テスト）、**AAB**（A 訓練、A 消去、B テスト）。3 件の `PhaseSummary` を入力に文脈ラベルから設計を分類し magnitude を報告。
@@ -42,3 +44,13 @@
 > ``phase_enter`` / ``phase_exit`` レコードを emit し、オプションの
 > 文脈座標（``name`` / ``time`` / ``location`` / ``cue``）を保持する。
 > 下流側で `PhaseSummary` のリストに変換して本 analyzer に与える。
+
+![訓練 / 消去 / テスト rate と test 時の renewal](../../assets/figures/renewal.png)
+
+### 消去バースト — `ExtinctionBurstResult`
+
+- **テーマ** — 消去開始直後にしばしば応答 rate が一過的に **上昇** してから減衰する。検出器はベースライン rate と消去開始後初期窓の rate を比較し、比が `ratio_threshold`（既定 1.5）を満たすと burst をフラグ。
+- **出力** — `ExtinctionBurstResult(baseline_rate=0.5, burst_rate=1.0, burst_ratio=2.0, burst_detected=True, burst_window_sec=60.0, ratio_threshold=1.5)`
+- **引用** — Lerman, D. C., & Iwata, B. A. (1995). Prevalence of the extinction burst and its attenuation during treatment. *JABA*, 28(1), 93-94. <https://doi.org/10.1901/jaba.1995.28-93>
+
+![消去開始前後の rate 軌跡と burst 窓](../../assets/figures/extinction_burst.png)

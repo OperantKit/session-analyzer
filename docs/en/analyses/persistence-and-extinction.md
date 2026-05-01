@@ -32,6 +32,8 @@ withdrawal of an alternative (resurgence).
 - **Output** — `ResurgenceMetrics(baseline_target_rate=42.7, suppression_target_rate=2.7, test_target_rate=15.0, resurgence_magnitude=12.3, resurgence_ratio=0.35, alt_baseline_rate=41.5, alt_test_rate=30.0, resurged=True, n_phase1=5, n_phase2=5, n_phase3=5)`
 - **References** — Epstein, R. (1985). Extinction-induced resurgence. *Psychological Record*, 35(2), 143-153. — Shahan, T. A., & Sweeney, M. M. (2011). A model of resurgence based on behavioral momentum theory. *JEAB*, 95(1), 91-108. <https://doi.org/10.1901/jeab.2011.95-91>
 
+![Three-phase target / alternative response rates](../../assets/figures/resurgence.png)
+
 ### Renewal (ABA / ABC / AAB) — `RenewalMetrics`
 
 - **Theme** — Renewal is the recovery of an extinguished response when the test context differs from the extinction context (Bouton, 2004). Three canonical designs: **ABA** (train A, extinguish B, test A), **ABC** (train A, extinguish B, test C), **AAB** (train A, extinguish A, test B). The analyzer takes three `PhaseSummary` records, classifies the design from context labels, and reports the renewal magnitude.
@@ -44,3 +46,13 @@ withdrawal of an alternative (resurgence).
 > context coordinates (``name`` / ``time`` / ``location`` / ``cue``);
 > downstream callers turn these into the ``PhaseSummary`` list this
 > analyzer consumes.
+
+![Train / extinction / test rates with renewal at test](../../assets/figures/renewal.png)
+
+### Extinction-burst — `ExtinctionBurstResult`
+
+- **Theme** — Onset of extinction often produces a *transient* increase in response rate before decay. The detector compares baseline rate to rate within the first window of extinction; a burst is flagged when the ratio meets `ratio_threshold` (default 1.5).
+- **Output** — `ExtinctionBurstResult(baseline_rate=0.5, burst_rate=1.0, burst_ratio=2.0, burst_detected=True, burst_window_sec=60.0, ratio_threshold=1.5)`
+- **Reference** — Lerman, D. C., & Iwata, B. A. (1995). Prevalence of the extinction burst and its attenuation during treatment. *JABA*, 28(1), 93-94. <https://doi.org/10.1901/jaba.1995.28-93>
+
+![Rate trajectory across extinction onset showing burst window](../../assets/figures/extinction_burst.png)

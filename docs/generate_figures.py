@@ -38,17 +38,41 @@ from session_analyzer.analytics import (  # noqa: E402
     analyze_latencies,
     analyze_peak_trial_binned,
     analyze_prps,
+    analyze_stay_switch,
+    compute_block_entropy,
     compute_choice_allocation,
+    compute_cross_elasticity_matrix,
+    compute_irt_autocorrelation,
+    compute_irt_spectrum,
+    compute_log_survivor,
+    compute_roc,
+    compute_sdt,
+    compute_tracking_index,
     compute_u_value,
     detect_breakpoint,
+    detect_extinction_burst,
+    detect_peak_shift,
+    estimate_indifference_point,
     estimate_matching_parameters,
     estimate_resistance_to_change,
+    estimate_time_matching_parameters,
+    fit_bilinear_log_survivor,
     fit_exponential_demand,
     fit_exponential_gradient,
+    fit_ez_diffusion,
     fit_gaussian_gradient,
+    fit_gaussian_hmm,
+    fit_hierarchical_gml,
     fit_hyperbolic_discounting,
+    fit_killeen_law,
+    fit_psychometric,
+    fit_rescorla_wagner,
     fit_single_alternative_matching,
     kaplan_meier,
+    predict_concurrent_chains_choice,
+    schneider_two_state,
+    simulate_rescorla_wagner,
+    simulate_td_zero,
 )
 from session_analyzer.visualizer.cumulative_record import render_cumulative_record  # noqa: E402
 from session_analyzer.visualizer.themes import get_theme  # noqa: E402
@@ -528,6 +552,868 @@ def fig_survival() -> None:
 
 
 # ---------------------------------------------------------------------------
+# 17. Time-allocation matching
+# ---------------------------------------------------------------------------
+
+
+def fig_time_matching() -> None:
+    rng = np.random.default_rng(20)
+    log_r = np.linspace(-1.0, 1.0, 6)
+    log_t = 0.79 * log_r + rng.normal(0, 0.04, 6) + 0.05
+    fig, ax = _new_fig()
+    xs = np.linspace(-1.2, 1.2, 50)
+    params = estimate_time_matching_parameters(
+        (10**log_t).tolist(), (10**log_r).tolist()
+    )
+    ax.plot(xs, params.sensitivity * xs + params.bias, color="black",
+            linewidth=1.0, label=f"a={params.sensitivity:.2f}")
+    ax.plot(log_r, log_t, "o", color="black", markersize=4, markerfacecolor="white")
+    ax.plot(xs, xs, color="black", linewidth=0.5, linestyle=":", label="strict")
+    ax.set_xlabel("log(R1 / R2)")
+    ax.set_ylabel("log(T1 / T2)")
+    ax.legend(loc="upper left", frameon=False, fontsize=7)
+    _save(fig, "time_matching")
+
+
+# ---------------------------------------------------------------------------
+# 18. Concurrent-chains prediction
+# ---------------------------------------------------------------------------
+
+
+def fig_concurrent_chains() -> None:
+    pred = predict_concurrent_chains_choice(
+        left_amount=1.0, left_delay=2.0,
+        right_amount=1.0, right_delay=10.0,
+        left_responses=78, right_responses=22, k=1.0,
+    )
+    fig, ax = _new_fig(height_ratio=0.9)
+    pos = np.arange(2)
+    ax.bar(pos - 0.18, [pred.observed_proportion_left, 1 - pred.observed_proportion_left],
+           width=0.35, color="#333333", edgecolor="black", label="observed")
+    ax.bar(pos + 0.18, [pred.predicted_proportion_left, 1 - pred.predicted_proportion_left],
+           width=0.35, color="#aaaaaa", edgecolor="black", label="Mazur k=1")
+    ax.set_xticks(pos)
+    ax.set_xticklabels(["Left (D=2)", "Right (D=10)"])
+    ax.set_ylim(0, 1.0)
+    ax.set_ylabel("Proportion")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "concurrent_chains")
+
+
+# ---------------------------------------------------------------------------
+# 19. Tracking index (sign- vs goal-tracker distribution)
+# ---------------------------------------------------------------------------
+
+
+def fig_tracking_index() -> None:
+    rng = np.random.default_rng(21)
+    indices = []
+    # Mixture of sign-trackers, intermediates, goal-trackers
+    for _ in range(40):
+        p_cs = float(np.clip(rng.beta(8, 2), 0.01, 0.99))
+        p_food = 1.0 - p_cs + rng.normal(0, 0.05)
+        p_food = float(np.clip(p_food, 0.0, 1.0))
+        contacts_cs = int(40 * p_cs + rng.integers(0, 5))
+        contacts_food = int(40 * p_food + rng.integers(0, 5))
+        lat_cs = max(0.5, 8.0 * (1 - p_cs))
+        lat_food = max(0.5, 8.0 * (1 - p_food))
+        ti = compute_tracking_index(
+            contacts_cs=contacts_cs, contacts_food=contacts_food,
+            latency_cs=lat_cs, latency_food=lat_food,
+            probability_cs=p_cs, probability_food=p_food,
+            cs_duration=8.0,
+        )
+        indices.append(ti.index)
+    indices = np.array(indices)
+    fig, ax = _new_fig()
+    ax.hist(indices, bins=15, color="#777777", edgecolor="black")
+    ax.axvline(0.5, color="black", linestyle="--", linewidth=1.0, label="ST cutoff")
+    ax.axvline(-0.5, color="black", linestyle=":", linewidth=1.0, label="GT cutoff")
+    ax.set_xlabel("PCA tracking index")
+    ax.set_ylabel("# subjects")
+    ax.set_xlim(-1.05, 1.05)
+    ax.legend(loc="upper left", frameon=False, fontsize=7)
+    _save(fig, "tracking_index")
+
+
+# ---------------------------------------------------------------------------
+# 20. Resurgence (3-phase rate)
+# ---------------------------------------------------------------------------
+
+
+def fig_resurgence() -> None:
+    fig, ax = _new_fig()
+    bins = np.arange(15)
+    rng = np.random.default_rng(22)
+    target = np.concatenate([
+        np.full(5, 40.0) + rng.normal(0, 3, 5),  # phase 1
+        np.linspace(35, 3, 5) + rng.normal(0, 1, 5),  # phase 2 suppression
+        np.array([15, 12, 9, 6, 4]) + rng.normal(0, 1, 5),  # phase 3 resurgence
+    ])
+    alt = np.concatenate([
+        np.zeros(5),
+        np.linspace(5, 38, 5),
+        np.array([30, 22, 15, 10, 7]),
+    ])
+    ax.plot(bins, target, "o-", color="black", markersize=4,
+            markerfacecolor="white", linewidth=1.0, label="target")
+    ax.plot(bins, alt, "s--", color="#777777", markersize=4,
+            markerfacecolor="white", linewidth=1.0, label="alternative")
+    for x in (4.5, 9.5):
+        ax.axvline(x, color="black", linestyle=":", linewidth=0.75)
+    for x, txt in [(2, "Phase 1"), (7, "Phase 2"), (12, "Phase 3")]:
+        ax.text(x, 45, txt, ha="center", fontsize=7)
+    ax.set_xlabel("Session bin")
+    ax.set_ylabel("Rate (per min)")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "resurgence")
+
+
+# ---------------------------------------------------------------------------
+# 21. Renewal (3-phase bar comparison)
+# ---------------------------------------------------------------------------
+
+
+def fig_renewal() -> None:
+    fig, ax = _new_fig(height_ratio=0.9)
+    rates = [40.0, 4.0, 26.0]
+    labels = ["A train", "B extinction", "A test\n(renewed)"]
+    bars = ax.bar(np.arange(3), rates, color=["#333333", "#bbbbbb", "#777777"],
+                  edgecolor="black")
+    for b, r in zip(bars, rates):
+        ax.text(b.get_x() + b.get_width() / 2, r + 1, f"{r:.1f}",
+                ha="center", va="bottom", fontsize=7)
+    ax.set_xticks(np.arange(3))
+    ax.set_xticklabels(labels)
+    ax.set_ylabel("Response rate (per min)")
+    _save(fig, "renewal")
+
+
+# ---------------------------------------------------------------------------
+# 22. Observing response (S+ vs S- production rates)
+# ---------------------------------------------------------------------------
+
+
+def fig_observing() -> None:
+    fig, ax = _new_fig(height_ratio=0.9)
+    rates = [12.0, 8.0, 4.0]
+    labels = ["Total observe", "S+ production", "S- production"]
+    ax.bar(np.arange(3), rates, color=["#333333", "#777777", "#bbbbbb"],
+           edgecolor="black")
+    for i, r in enumerate(rates):
+        ax.text(i, r + 0.3, f"{r:.1f}", ha="center", va="bottom", fontsize=7)
+    ax.set_xticks(np.arange(3))
+    ax.set_xticklabels(labels, fontsize=8)
+    ax.set_ylabel("Rate (per min)")
+    _save(fig, "observing")
+
+
+# ---------------------------------------------------------------------------
+# 23. Exponential gradient (Shepard)
+# ---------------------------------------------------------------------------
+
+
+def fig_exponential_gradient() -> None:
+    rng = np.random.default_rng(23)
+    r0_true, lam_true = 50.0, 80.0
+    distances = np.array([0, 30, 60, 120, 200, 320])
+    responses = np.clip(
+        r0_true * np.exp(-distances / lam_true) + rng.normal(0, 1.0, len(distances)),
+        0.0, None,
+    )
+    params = fit_exponential_gradient(distances.tolist(), responses.tolist())
+    fig, ax = _new_fig()
+    dfit = np.linspace(0, 350, 200)
+    rfit = params.peak_response * np.exp(-dfit / params.length_scale)
+    ax.plot(dfit, rfit, color="black", linewidth=1.0, label=f"λ={params.length_scale:.0f}")
+    ax.plot(distances, responses, "o", markersize=4, markerfacecolor="white", color="black")
+    ax.set_xlabel("Distance from S+ (Hz)")
+    ax.set_ylabel("Responses per minute")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "exponential_gradient")
+
+
+# ---------------------------------------------------------------------------
+# 24. Discrimination ratio (S+ vs S- bars)
+# ---------------------------------------------------------------------------
+
+
+def fig_discrimination_ratio() -> None:
+    s_plus, s_minus = 170, 30
+    dr = s_plus / (s_plus + s_minus)
+    fig, ax = _new_fig(height_ratio=0.9)
+    ax.bar(np.arange(2), [s_plus, s_minus], color=["#333333", "#aaaaaa"], edgecolor="black")
+    for i, c in enumerate([s_plus, s_minus]):
+        ax.text(i, c + 4, f"n={c}", ha="center", va="bottom", fontsize=7)
+    ax.set_xticks(np.arange(2))
+    ax.set_xticklabels(["S+", "S−"])
+    ax.set_ylabel("Responses")
+    ax.text(0.95, 0.95, f"DR = {dr:.2f}", transform=ax.transAxes, ha="right", va="top",
+            fontsize=9, fontweight="bold")
+    _save(fig, "discrimination_ratio")
+
+
+# ---------------------------------------------------------------------------
+# 25. Peak shift gradient
+# ---------------------------------------------------------------------------
+
+
+def fig_peak_shift() -> None:
+    s_plus, s_minus = 550.0, 540.0
+    rng = np.random.default_rng(24)
+    stims = np.array([520, 530, 540, 550, 560, 570, 580])
+    # Empirical peak shifted to ~560 (away from S-)
+    peak_emp = 560.0
+    rs = 50.0 * np.exp(-((stims - peak_emp) ** 2) / (2 * 12.0**2)) + rng.normal(0, 1.0, len(stims))
+    result = detect_peak_shift(
+        stimulus_values=stims.tolist(), response_rates=rs.tolist(),
+        s_plus=s_plus, s_minus=s_minus,
+    )
+    fig, ax = _new_fig()
+    xs = np.linspace(515, 585, 200)
+    ys = result.fitted_peak_response * np.exp(-((xs - result.fitted_peak_value) ** 2) / (2 * result.fitted_sigma**2))
+    ax.plot(xs, ys, color="black", linewidth=1.0)
+    ax.plot(stims, rs, "o", markersize=4, markerfacecolor="white", color="black")
+    ax.axvline(s_plus, color="black", linestyle="--", linewidth=1.0, label=f"S+ = {s_plus:.0f}")
+    ax.axvline(s_minus, color="black", linestyle=":", linewidth=1.0, label=f"S- = {s_minus:.0f}")
+    ax.axvline(result.fitted_peak_value, color="black", linestyle="-.", linewidth=1.0,
+               label=f"peak = {result.fitted_peak_value:.0f}")
+    ax.set_xlabel("Stimulus dimension")
+    ax.set_ylabel("Responses per minute")
+    ax.legend(loc="upper right", frameon=False, fontsize=6)
+    _save(fig, "peak_shift")
+
+
+# ---------------------------------------------------------------------------
+# 26. ROC curve (signal detection)
+# ---------------------------------------------------------------------------
+
+
+def fig_signal_detection_roc() -> None:
+    # (false_alarm_rate, hit_rate) operating points sweeping criterion.
+    operating_points = [
+        (0.01, 0.05),
+        (0.10, 0.30),
+        (0.30, 0.60),
+        (0.55, 0.85),
+        (0.90, 0.99),
+    ]
+    roc = compute_roc(operating_points)
+    fig, ax = _new_fig()
+    ax.plot([0, 1], [0, 1], "k:", linewidth=0.75)
+    ax.plot(roc.fa_rates, roc.hit_rates, "o-", color="black", markersize=4,
+            markerfacecolor="white", linewidth=1.0)
+    ax.set_xlabel("False-alarm rate")
+    ax.set_ylabel("Hit rate")
+    ax.text(0.95, 0.05, f"AUC = {roc.auc:.2f}", transform=ax.transAxes,
+            ha="right", va="bottom", fontsize=8)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    _save(fig, "signal_detection_roc")
+
+
+# ---------------------------------------------------------------------------
+# 27. Within-session dynamics (inverted-U)
+# ---------------------------------------------------------------------------
+
+
+def fig_within_session() -> None:
+    rng = np.random.default_rng(25)
+    bins = np.arange(8)
+    rates = np.array([0.5, 1.4, 2.1, 2.4, 2.0, 1.5, 1.0, 0.7]) + rng.normal(0, 0.08, 8)
+    fig, ax = _new_fig()
+    ax.plot(bins + 0.5, rates, "o-", color="black", markersize=4,
+            markerfacecolor="white", linewidth=1.0)
+    peak = int(np.argmax(rates))
+    ax.axvline(peak + 0.5, color="black", linestyle="--", linewidth=1.0,
+               label=f"peak bin={peak}")
+    ax.set_xlabel("Session bin (8-bin division)")
+    ax.set_ylabel("Response rate (per min)")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "within_session")
+
+
+# ---------------------------------------------------------------------------
+# 28. Unit-price elasticity (log-log line)
+# ---------------------------------------------------------------------------
+
+
+def fig_unit_price() -> None:
+    rng = np.random.default_rng(26)
+    log_p = np.linspace(0, 2.5, 8)
+    elasticity_true = -1.18
+    log_q = elasticity_true * log_p + 4.0 + rng.normal(0, 0.08, 8)
+    fig, ax = _new_fig()
+    xs = np.linspace(-0.2, 2.7, 50)
+    ax.plot(xs, elasticity_true * xs + 4.0, color="black", linewidth=1.0,
+            label=f"α={elasticity_true:.2f}")
+    ax.plot(log_p, log_q, "o", markersize=4, markerfacecolor="white", color="black")
+    ax.set_xlabel("log unit price")
+    ax.set_ylabel("log consumption Q")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "unit_price")
+
+
+# ---------------------------------------------------------------------------
+# 29. Indifference point (adjusting trajectory)
+# ---------------------------------------------------------------------------
+
+
+def fig_indifference() -> None:
+    rng = np.random.default_rng(27)
+    target = 50.0
+    trial = []
+    cur = 100.0
+    for t in range(28):
+        cur = cur + (target - cur) * 0.4 + rng.normal(0, 0.7)
+        trial.append(cur)
+    point = estimate_indifference_point(adjusting_amounts=trial, stable_window=6)
+    fig, ax = _new_fig()
+    ax.plot(np.arange(len(trial)), trial, "o-", color="black", markersize=3,
+            markerfacecolor="white", linewidth=1.0)
+    ax.axhline(point.indifference_value, color="black", linestyle="--",
+               linewidth=1.0, label=f"indifference = {point.indifference_value:.1f}")
+    ax.axvspan(len(trial) - 6, len(trial) - 1, color="black", alpha=0.08, label="stability window")
+    ax.set_xlabel("Adjusting trial")
+    ax.set_ylabel("Adjusting amount")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "indifference_point")
+
+
+# ---------------------------------------------------------------------------
+# 30. Lag-N variability
+# ---------------------------------------------------------------------------
+
+
+def fig_lag_variability() -> None:
+    rng = np.random.default_rng(28)
+    sequences = [tuple(rng.integers(0, 2, size=4).tolist()) for _ in range(120)]
+    metrics = compute_u_value(sequences, alphabet_size=2, sequence_length=4)
+    # Pass rate by lag
+    from collections import deque
+    lags = list(range(1, 9))
+    pass_rates = []
+    for L in lags:
+        passes = 0
+        recent: deque = deque(maxlen=L)
+        for seq in sequences:
+            ok = all(seq != r for r in recent) if recent else True
+            if ok:
+                passes += 1
+            recent.append(seq)
+        pass_rates.append(passes / len(sequences))
+    fig, ax = _new_fig()
+    ax.plot(lags, pass_rates, "o-", color="black", markersize=4,
+            markerfacecolor="white", linewidth=1.0)
+    ax.text(0.95, 0.95, f"U = {metrics.u_value:.2f}", transform=ax.transAxes,
+            ha="right", va="top", fontsize=8)
+    ax.set_xlabel("Lag N")
+    ax.set_ylabel("Pass rate")
+    ax.set_ylim(0, 1.05)
+    _save(fig, "lag_variability")
+
+
+# ---------------------------------------------------------------------------
+# 31. Log-survivor curve with bilinear knot
+# ---------------------------------------------------------------------------
+
+
+def fig_log_survivor() -> None:
+    rng = np.random.default_rng(29)
+    short = rng.lognormal(np.log(0.3), 0.4, size=400)
+    long = rng.lognormal(np.log(8.0), 0.6, size=80)
+    irts = np.sort(np.concatenate([short, long]))
+    curve = compute_log_survivor(irts.tolist())
+    fit = fit_bilinear_log_survivor(irts.tolist())
+    fig, ax = _new_fig()
+    ax.plot(curve.times, curve.log_survival, color="black", linewidth=1.0)
+    if fit is not None:
+        ts = np.array(curve.times)
+        knot = fit.knot_time_sec
+        left_mask = ts <= knot
+        right_mask = ts >= knot
+        ax.plot(ts[left_mask], fit.intercept_fast + fit.slope_fast * ts[left_mask],
+                color="black", linestyle="--", linewidth=1.0, label="fast")
+        ax.plot(ts[right_mask], fit.intercept_slow + fit.slope_slow * ts[right_mask],
+                color="black", linestyle=":", linewidth=1.0, label="slow")
+        ax.axvline(knot, color="black", linewidth=0.5, linestyle="-.")
+    ax.set_xlabel("IRT (s)")
+    ax.set_ylabel("log S(t)")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "log_survivor")
+
+
+# ---------------------------------------------------------------------------
+# 32. Rescorla-Wagner trace
+# ---------------------------------------------------------------------------
+
+
+def fig_rescorla_wagner() -> None:
+    us = [True] * 20 + [False] * 20 + [True] * 20
+    trace = simulate_rescorla_wagner(us, alpha_beta=0.25, lambda_=0.8)
+    fit = fit_rescorla_wagner(trace, us)
+    fig, ax = _new_fig()
+    trials = np.arange(1, len(us) + 1)
+    ax.plot(trials, trace, "o-", color="black", markersize=3,
+            markerfacecolor="white", linewidth=1.0, label="V_t")
+    for x in (20.5, 40.5):
+        ax.axvline(x, color="black", linestyle=":", linewidth=0.75)
+    ax.text(10, 0.85, "acquire", ha="center", fontsize=7)
+    ax.text(30, 0.85, "extinction", ha="center", fontsize=7)
+    ax.text(50, 0.85, "reacquire", ha="center", fontsize=7)
+    ax.set_xlabel("Trial")
+    ax.set_ylabel("Associative strength V")
+    ax.text(0.02, 0.98,
+            f"α·β={fit.alpha_beta:.2f}, λ={fit.lambda_:.2f}",
+            transform=ax.transAxes, ha="left", va="top", fontsize=7)
+    _save(fig, "rescorla_wagner")
+
+
+# ---------------------------------------------------------------------------
+# 33. TD(0) value backup
+# ---------------------------------------------------------------------------
+
+
+def fig_td_learning() -> None:
+    states = [0, 1, 2]
+    rewards = [0.0, 1.0]
+    last = None
+    history = []
+    for _ in range(60):
+        last = simulate_td_zero(
+            states, rewards, alpha=0.3, gamma=0.9, n_states=3,
+            terminal_state=2, initial_values=last.values if last else None,
+        )
+        history.append(last.values)
+    history = np.array(history)
+    fig, ax = _new_fig()
+    ep = np.arange(1, history.shape[0] + 1)
+    ax.plot(ep, history[:, 0], color="black", linewidth=1.0, label="V(s0)")
+    ax.plot(ep, history[:, 1], color="black", linestyle="--", linewidth=1.0, label="V(s1)")
+    ax.axhline(0.9, color="black", linestyle=":", linewidth=0.5)
+    ax.axhline(1.0, color="black", linestyle=":", linewidth=0.5)
+    ax.set_xlabel("Episode")
+    ax.set_ylabel("Value estimate")
+    ax.legend(loc="lower right", frameon=False, fontsize=7)
+    _save(fig, "td_learning")
+
+
+# ---------------------------------------------------------------------------
+# 34. Scalar timing (response distributions over criteria)
+# ---------------------------------------------------------------------------
+
+
+def fig_scalar_timing() -> None:
+    rng = np.random.default_rng(30)
+    fig, ax = _new_fig()
+    cv = 0.25
+    for criterion, color in [(15.0, "#bbbbbb"), (30.0, "#777777"), (60.0, "#222222")]:
+        sd = cv * criterion
+        samples = rng.normal(criterion, sd, size=500).clip(min=1e-3)
+        # Normalised response density
+        bins = np.linspace(0, 100, 60)
+        h, e = np.histogram(samples, bins=bins, density=True)
+        ax.plot(0.5 * (e[:-1] + e[1:]) / criterion, h * criterion, color=color, linewidth=1.0,
+                label=f"FI {criterion:.0f}s")
+    ax.set_xlabel("Time / criterion")
+    ax.set_ylabel("Normalised density")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "scalar_timing")
+
+
+# ---------------------------------------------------------------------------
+# 35. Killeen MPR (B vs R)
+# ---------------------------------------------------------------------------
+
+
+def fig_killeen_law() -> None:
+    rng = np.random.default_rng(31)
+    k_true, a_true, delta_true = 2.0, 0.5, 0.02
+    rs = np.array([0.2, 0.5, 1.0, 3.0, 10.0, 30.0, 100.0])
+    bs = (k_true * a_true * rs) / (a_true * rs * delta_true + 1.0)
+    bs = bs * rng.normal(1.0, 0.04, len(bs))
+    params = fit_killeen_law(rs.tolist(), bs.tolist(), delta=delta_true)
+    fig, ax = _new_fig()
+    rfit = np.logspace(np.log10(0.1), np.log10(200), 200)
+    bfit = (params.k * params.a * rfit) / (params.a * rfit * params.delta + 1.0)
+    ax.semilogx(rfit, bfit, color="black", linewidth=1.0,
+                label=f"k={params.k:.2f}, a={params.a:.2f}")
+    ax.semilogx(rs, bs, "o", markersize=4, markerfacecolor="white", color="black")
+    ax.axhline(params.k / params.delta, color="black", linestyle=":", linewidth=0.75,
+               label=f"k/δ={params.k / params.delta:.0f}")
+    ax.set_xlabel("Reinforcement rate R")
+    ax.set_ylabel("Response rate B")
+    ax.legend(loc="lower right", frameon=False, fontsize=7)
+    _save(fig, "killeen_law")
+
+
+# ---------------------------------------------------------------------------
+# 36. Stay-switch (changeover bouts)
+# ---------------------------------------------------------------------------
+
+
+def fig_stay_switch() -> None:
+    rng = np.random.default_rng(32)
+    sides = []
+    times = []
+    t = 0.0
+    side = "L"
+    for _ in range(100):
+        # Stay bout 3-8 responses
+        bout_len = int(rng.integers(3, 8))
+        for _ in range(bout_len):
+            t += rng.exponential(0.5)
+            sides.append(side)
+            times.append(t)
+        side = "R" if side == "L" else "L"
+    metrics = analyze_stay_switch(sides, times)
+    fig, ax = _new_fig()
+    cum = np.arange(1, len(sides) + 1)
+    sides_arr = np.array(sides)
+    ax.step(times, cum, where="post", color="black", linewidth=0.6)
+    for i, s in enumerate(sides):
+        if i > 0 and sides[i] != sides[i - 1]:
+            ax.axvline(times[i], color="black", linewidth=0.4, linestyle=":")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Cumulative responses (both sides)")
+    if metrics is not None:
+        ax.text(0.02, 0.98,
+                f"changeovers = {metrics.n_changeovers}\nmean stay = {metrics.mean_stay_responses:.1f}",
+                transform=ax.transAxes, ha="left", va="top", fontsize=7)
+    _save(fig, "stay_switch")
+
+
+# ---------------------------------------------------------------------------
+# 37. Extinction burst
+# ---------------------------------------------------------------------------
+
+
+def fig_extinction_burst() -> None:
+    baseline_rate_per_s = 0.5
+    burst_rate = 1.0
+    fig, ax = _new_fig()
+    ts = np.arange(0, 360, 5)
+    rates = np.where(
+        ts < 120, baseline_rate_per_s,
+        np.where(ts < 180, burst_rate, baseline_rate_per_s * np.exp(-(ts - 180) / 60))
+    )
+    ax.plot(ts, rates * 60.0, color="black", linewidth=1.0)
+    ax.axvline(120, color="black", linestyle="--", linewidth=1.0, label="extinction onset")
+    ax.axvspan(120, 180, color="black", alpha=0.08, label="burst window")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Response rate (per min)")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "extinction_burst")
+
+
+# ---------------------------------------------------------------------------
+# 38. Schneider two-state segmentation
+# ---------------------------------------------------------------------------
+
+
+def fig_schneider() -> None:
+    rng = np.random.default_rng(33)
+    # FI 60 s. Pause then run.
+    pause = 25.0
+    response_times = np.sort(np.concatenate([
+        np.array([]),
+        np.linspace(pause + 1, 58, 32) + rng.normal(0, 0.4, 32),
+    ])).tolist()
+    result = schneider_two_state(response_times,
+                                 interval_start=0.0, interval_end=60.0)
+    fig, ax = _new_fig()
+    cum = np.arange(1, len(response_times) + 1)
+    ax.step(response_times, cum, where="post", color="black", linewidth=1.0)
+    if result is not None:
+        ax.axvline(result.break_time, color="black", linestyle="--", linewidth=1.0,
+                   label=f"break = {result.break_time:.1f}s")
+        ax.text(0.02, 0.98,
+                f"low = {result.low_rate:.2f} r/s\nhigh = {result.high_rate:.2f} r/s",
+                transform=ax.transAxes, ha="left", va="top", fontsize=7)
+    ax.set_xlabel("Time in interval (s)")
+    ax.set_ylabel("Cumulative responses")
+    ax.legend(loc="lower right", frameon=False, fontsize=7)
+    _save(fig, "schneider_segment")
+
+
+# ---------------------------------------------------------------------------
+# 39. Psychometric function
+# ---------------------------------------------------------------------------
+
+
+def fig_psychometric() -> None:
+    rng = np.random.default_rng(34)
+    mu_true, sigma_true = 0.0, 1.5
+    stimuli = np.linspace(-5, 5, 11)
+    p_true = 1 / (1 + np.exp(-(stimuli - mu_true) / sigma_true))
+    n_total = np.full(len(stimuli), 50)
+    n_correct = rng.binomial(n_total, p_true)
+    fit = fit_psychometric(stimuli.tolist(), n_correct.tolist(), n_total.tolist(), link="logit")
+    fig, ax = _new_fig()
+    xs = np.linspace(-6, 6, 200)
+    ys = 1 / (1 + np.exp(-(xs - fit.mu) / fit.sigma))
+    ax.plot(xs, ys, color="black", linewidth=1.0, label=f"μ={fit.mu:.2f}, σ={fit.sigma:.2f}")
+    ax.plot(stimuli, n_correct / n_total, "o", markersize=4, markerfacecolor="white",
+            color="black")
+    ax.axhline(0.5, color="black", linestyle=":", linewidth=0.5)
+    ax.axvline(fit.mu, color="black", linestyle="--", linewidth=0.75)
+    ax.set_xlabel("Stimulus magnitude")
+    ax.set_ylabel("P(yes)")
+    ax.legend(loc="lower right", frameon=False, fontsize=7)
+    _save(fig, "psychometric")
+
+
+# ---------------------------------------------------------------------------
+# 40. EZ-DDM (Pc / RT visualization)
+# ---------------------------------------------------------------------------
+
+
+def fig_ddm() -> None:
+    fig, ax = _new_fig()
+    # Sweep drift; show how Pc and Ter shift
+    a = 0.12
+    ter = 0.30
+    s = 0.1
+    drifts = np.linspace(0.05, 0.40, 30)
+    pcs = []
+    mrts = []
+    for v in drifts:
+        y = np.exp(-v * a / s**2)
+        pc = 1.0 / (1.0 + y)
+        mdt = (a / (2 * v)) * (1 - y) / (1 + y)
+        pcs.append(pc)
+        mrts.append(mdt + ter)
+    ax2 = ax.twinx()
+    ax.plot(drifts, pcs, color="black", linewidth=1.0, label="P(correct)")
+    ax2.plot(drifts, mrts, color="#777777", linestyle="--", linewidth=1.0, label="mean RT")
+    ax.set_xlabel("Drift rate v")
+    ax.set_ylabel("P(correct)", color="black")
+    ax2.set_ylabel("Mean RT (s)", color="#444444")
+    ax.set_ylim(0.5, 1.0)
+    # Recover one point
+    pc_obs = 0.84
+    mrt_obs = 0.55
+    vrt_obs = 0.04
+    fit = fit_ez_diffusion(proportion_correct=pc_obs,
+                           mean_rt_correct=mrt_obs, var_rt_correct=vrt_obs)
+    ax.text(0.02, 0.95,
+            f"recovered: v={fit.v:.2f}, a={fit.a:.2f}\nTer={fit.ter:.2f}",
+            transform=ax.transAxes, ha="left", va="top", fontsize=7)
+    _save(fig, "ez_diffusion")
+
+
+# ---------------------------------------------------------------------------
+# 41. IRT autocorrelation
+# ---------------------------------------------------------------------------
+
+
+def fig_irt_autocorrelation() -> None:
+    rng = np.random.default_rng(35)
+    n = 400
+    eps = rng.standard_normal(n)
+    # AR(1) phi=0.6
+    irts = [1.0]
+    for e in eps[1:]:
+        irts.append(0.6 * irts[-1] + e)
+    irts = np.array(irts) + 5.0
+    acf = compute_irt_autocorrelation(irts.tolist(), max_lag=20)
+    fig, ax = _new_fig()
+    ax.bar(acf.lags, acf.values, color="#555555", edgecolor="black", width=0.7)
+    ax.axhline(0, color="black", linewidth=0.5)
+    ax.set_xlabel("Lag")
+    ax.set_ylabel("Autocorrelation ρ(k)")
+    _save(fig, "irt_autocorrelation")
+
+
+# ---------------------------------------------------------------------------
+# 42. IRT periodogram
+# ---------------------------------------------------------------------------
+
+
+def fig_irt_spectrum() -> None:
+    fs = 100.0
+    n = 512
+    t = np.arange(n) / fs
+    rng = np.random.default_rng(36)
+    series = np.sin(2 * np.pi * 5.0 * t) + 0.3 * rng.standard_normal(n)
+    spec = compute_irt_spectrum(series.tolist(), sampling_rate=fs)
+    fig, ax = _new_fig()
+    ax.semilogy(spec.frequencies, spec.power, color="black", linewidth=1.0)
+    ax.axvline(spec.peak_frequency, color="black", linestyle="--", linewidth=1.0,
+               label=f"peak={spec.peak_frequency:.2f} Hz")
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Power")
+    ax.legend(loc="upper right", frameon=False, fontsize=7)
+    _save(fig, "irt_spectrum")
+
+
+# ---------------------------------------------------------------------------
+# 43. N-gram entropy / Markov order
+# ---------------------------------------------------------------------------
+
+
+def fig_ngram_entropy() -> None:
+    rng = np.random.default_rng(37)
+    seq = []
+    state = "L"
+    for _ in range(2000):
+        if state == "L":
+            state = "L" if rng.random() < 0.85 else "R"
+        else:
+            state = "R" if rng.random() < 0.85 else "L"
+        seq.append(state)
+    orders = list(range(1, 5))
+    entropies = [compute_block_entropy(seq, order=n).entropy_bits for n in orders]
+    fig, ax = _new_fig()
+    ax.plot(orders, entropies, "o-", color="black", markersize=4,
+            markerfacecolor="white", linewidth=1.0)
+    ax.set_xlabel("Block length n")
+    ax.set_ylabel("H_n (bits)")
+    ax.set_xticks(orders)
+    _save(fig, "ngram_entropy")
+
+
+# ---------------------------------------------------------------------------
+# 44. Cross-elasticity matrix (heatmap)
+# ---------------------------------------------------------------------------
+
+
+def fig_cross_elasticity_matrix() -> None:
+    rng = np.random.default_rng(38)
+    prices = {
+        "A": [1.0, 2.0, 4.0, 8.0, 16.0],
+        "B": [1.0, 2.0, 4.0, 8.0, 16.0],
+        "C": [4.0, 4.0, 4.0, 4.0, 4.0],
+    }
+    cons = {
+        "A": [100 / (p ** 0.5) for p in prices["A"]],
+        "B": [80 * pa for pa in prices["A"]],   # substitute for A (positive cross)
+        "C": [50 / (pc ** 0.7) * (1 + 0.3 * pa) for pa, pc in zip(prices["A"], prices["C"], strict=False)],
+    }
+    matrix = compute_cross_elasticity_matrix(cons, prices)
+    arr = np.array(matrix.matrix)
+    fig, ax = _new_fig(height_ratio=1.0)
+    im = ax.imshow(arr, cmap="Greys", aspect="auto")
+    for i in range(arr.shape[0]):
+        for j in range(arr.shape[1]):
+            ax.text(j, i, f"{arr[i, j]:.2f}", ha="center", va="center",
+                    fontsize=7,
+                    color="white" if abs(arr[i, j]) > 0.5 else "black")
+    ax.set_xticks(range(len(matrix.goods)))
+    ax.set_xticklabels([f"P({g})" for g in matrix.goods])
+    ax.set_yticks(range(len(matrix.goods)))
+    ax.set_yticklabels([f"Q({g})" for g in matrix.goods])
+    fig.colorbar(im, ax=ax, fraction=0.04)
+    _save(fig, "cross_elasticity_matrix")
+
+
+# ---------------------------------------------------------------------------
+# 45. Hierarchical GML (subjects vs group)
+# ---------------------------------------------------------------------------
+
+
+def fig_hierarchical_gml() -> None:
+    rng = np.random.default_rng(39)
+    mu_a, mu_b, tau_a, tau_b, sigma = 0.85, 0.0, 0.10, 0.08, 0.05
+    x_grid = np.linspace(np.log(0.1), np.log(10.0), 8)
+    xs_dict = {}
+    ys_dict = {}
+    fig, ax = _new_fig()
+    xs_plot = np.linspace(-2.5, 2.5, 50)
+    for s in range(8):
+        a_i = rng.normal(mu_a, tau_a)
+        b_i = rng.normal(mu_b, tau_b)
+        y = a_i * x_grid + b_i + rng.normal(0, sigma, x_grid.size)
+        xs_dict[f"S{s}"] = x_grid.tolist()
+        ys_dict[f"S{s}"] = y.tolist()
+        ax.plot(x_grid, y, "o-", color="#aaaaaa", markersize=3,
+                markerfacecolor="white", linewidth=0.6)
+    fit = fit_hierarchical_gml(ys_dict, xs_dict)
+    ax.plot(xs_plot, fit.mu_sensitivity * xs_plot + fit.mu_bias,
+            color="black", linewidth=1.5,
+            label=f"group: a={fit.mu_sensitivity:.2f}±{fit.sd_sensitivity:.2f}")
+    lo, hi = fit.sensitivity_ci
+    ax.text(0.02, 0.98, f"95% CI a: [{lo:.2f}, {hi:.2f}]",
+            transform=ax.transAxes, ha="left", va="top", fontsize=7)
+    ax.set_xlabel("log(R1/R2)")
+    ax.set_ylabel("log(B1/B2)")
+    ax.legend(loc="lower right", frameon=False, fontsize=7)
+    _save(fig, "hierarchical_gml")
+
+
+# ---------------------------------------------------------------------------
+# 46. HMM segmentation
+# ---------------------------------------------------------------------------
+
+
+def fig_hmm() -> None:
+    rng = np.random.default_rng(40)
+    obs = np.concatenate([
+        rng.normal(1.0, 0.4, 80),
+        rng.normal(5.0, 0.4, 80),
+        rng.normal(1.0, 0.4, 80),
+    ]).tolist()
+    fit = fit_gaussian_hmm(obs, n_states=2)
+    fig, ax = _new_fig()
+    t = np.arange(len(obs))
+    ax.plot(t, obs, color="#888888", linewidth=0.6)
+    # Color shaded by inferred state
+    state_seq = np.array(fit.state_sequence)
+    for s in fit.segments:
+        color = "#dddddd" if s.state == 0 else "#888888"
+        ax.axvspan(s.start_index, s.end_index, color=color, alpha=0.3)
+    for m in fit.means:
+        ax.axhline(m, color="black", linestyle=":", linewidth=0.7)
+    ax.set_xlabel("Sample index")
+    ax.set_ylabel("Observation")
+    ax.text(0.02, 0.98,
+            f"means: {', '.join(f'{m:.2f}' for m in fit.means)}",
+            transform=ax.transAxes, ha="left", va="top", fontsize=7)
+    _save(fig, "hmm_segment")
+
+
+# ---------------------------------------------------------------------------
+# 47. IRT-coded cumulative record (visualizer demo)
+# ---------------------------------------------------------------------------
+
+
+def fig_irt_coded_cumulative() -> None:
+    rng = np.random.default_rng(41)
+    times = []
+    t = 0.0
+    while t < 200:
+        # DRL 5: most IRTs > 5 (long), some short bursts
+        irt = rng.choice([2.0, 6.0], p=[0.3, 0.7])
+        t += irt + rng.normal(0, 0.3)
+        times.append(t)
+    threshold = 5.0
+    cum_t = []
+    cum_y = []
+    short_x, short_y = [], []
+    long_x, long_y = [], []
+    last = None
+    for i, rt in enumerate(times):
+        cum_t.append(rt)
+        cum_y.append(i + 1)
+        if last is not None:
+            if rt - last >= threshold:
+                long_x.append(rt)
+                long_y.append(i + 1)
+            else:
+                short_x.append(rt)
+                short_y.append(i + 1)
+        last = rt
+    fig, ax = _new_fig()
+    ax.step(cum_t, cum_y, where="post", color="black", linewidth=0.6, alpha=0.5)
+    ax.scatter(short_x, short_y, marker="o", color="#aaaaaa", s=12, label="IRT < 5s")
+    ax.scatter(long_x, long_y, marker="o", color="black", s=12, label="IRT ≥ 5s")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Cumulative responses")
+    ax.legend(loc="lower right", frameon=False, fontsize=7)
+    _save(fig, "irt_coded_cumulative_record")
+
+
+# ---------------------------------------------------------------------------
 # Driver
 # ---------------------------------------------------------------------------
 
@@ -549,6 +1435,38 @@ FIGURES = {
     "behavioral_momentum": fig_momentum,
     "variability_u": fig_variability,
     "survival": fig_survival,
+    # Newly added (this update)
+    "time_matching": fig_time_matching,
+    "concurrent_chains": fig_concurrent_chains,
+    "tracking_index": fig_tracking_index,
+    "resurgence": fig_resurgence,
+    "renewal": fig_renewal,
+    "observing": fig_observing,
+    "exponential_gradient": fig_exponential_gradient,
+    "discrimination_ratio": fig_discrimination_ratio,
+    "peak_shift": fig_peak_shift,
+    "signal_detection_roc": fig_signal_detection_roc,
+    "within_session": fig_within_session,
+    "unit_price": fig_unit_price,
+    "indifference_point": fig_indifference,
+    "lag_variability": fig_lag_variability,
+    "log_survivor": fig_log_survivor,
+    "rescorla_wagner": fig_rescorla_wagner,
+    "td_learning": fig_td_learning,
+    "scalar_timing": fig_scalar_timing,
+    "killeen_law": fig_killeen_law,
+    "stay_switch": fig_stay_switch,
+    "extinction_burst": fig_extinction_burst,
+    "schneider_segment": fig_schneider,
+    "psychometric": fig_psychometric,
+    "ez_diffusion": fig_ddm,
+    "irt_autocorrelation": fig_irt_autocorrelation,
+    "irt_spectrum": fig_irt_spectrum,
+    "ngram_entropy": fig_ngram_entropy,
+    "cross_elasticity_matrix": fig_cross_elasticity_matrix,
+    "hierarchical_gml": fig_hierarchical_gml,
+    "hmm_segment": fig_hmm,
+    "irt_coded_cumulative_record": fig_irt_coded_cumulative,
 }
 
 

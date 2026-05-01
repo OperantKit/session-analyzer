@@ -35,6 +35,20 @@ OKL v1 セッションログ（通常は `session-recorder` が生成）を読�
 - Adjusting 無差異点 (Mazur, 1987)
 - Unit-price と cross-price 弾力性 (Hursh, 1980; Hursh & Roma, 2013)
 - 観察反応と条件性強化子の強度 (Wyckoff, 1952; Dinsmoor, 1983)
+- Rescorla-Wagner 連合強度シミュレーション・フィッティング (Rescorla & Wagner, 1972)
+- 表形式 TD(0) 強化学習トレース (Sutton, 1988; Schultz, Dayan, & Montague, 1997)
+- スカラー時間要約とスカラー特性検定 (Gibbon, 1977)
+- Killeen の定量的効果の法則 / MPR (Killeen, 1994)
+- 並立スケジュールの stay-switch 分解と COD 遵守率 (Stubbs & Pliskoff, 1969)
+- 消去バースト検出 (Lerman & Iwata, 1995)
+- Schneider の 2 状態 break-and-run セグメンテーション (Schneider, 1969)
+- 心理測定関数フィッティング（logit / probit; Wichmann & Hill, 2001）
+- EZ 拡散モデルパラメータ復元 (Wagenmakers, van der Maas, & Grasman, 2007)
+- IRT 自己相関とピリオドグラム・スペクトル
+- N-gram ブロック / 条件付き entropy と Markov 次数推定 (Hopson, Burt, & Hopson, 2002)
+- 多財クロス価格弾力性行列
+- 階層経験ベイズ Generalized Matching Law フィット (Gelman & Hill, 2007)
+- ガウス Hidden Markov Model セグメンテーション (Rabiner, 1989)
 
 ## インストール
 

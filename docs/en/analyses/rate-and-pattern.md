@@ -47,6 +47,8 @@ Morse, 1957).
 - **Output** — `LogSurvivorBilinearFit(knot_time_sec=0.62, slope_fast=-3.1, slope_slow=-0.18, intercept_fast=-0.04, intercept_slow=-1.2, sse=0.07, n_irts=400)`
 - **Reference** — Shull, R. L. (1991). Mathematical description of operant behavior. In I. H. Iversen & K. A. Lattal (Eds.), *Experimental analysis of behavior* (Vol. 2, pp. 243-282). Elsevier.
 
+![Bilinear log-survivor with knot](../../assets/figures/log_survivor.png)
+
 ### `run_length` — `RunMetrics`
 
 - **Theme** — FR schedules produce "pause-then-run" cycles: a post-reinforcement pause, then a rapid burst to completion. Decomposing these lets you see whether an intervention slows the pause, the run, or both.
@@ -62,3 +64,43 @@ Morse, 1957).
 - **Reference** — Standard descriptor — see e.g. Blough, D. S. (1956). *JEAB*, 3(1), 3-13. <https://doi.org/10.1901/jeab.1960.3-3>
 
 ![Latency histogram with median marker](../../assets/figures/latency.png)
+
+### IRT-coded cumulative record — `plot_irt_coded_cumulative_record`
+
+- **Theme** — Cumulative response trace where each response point is colour-coded by its preceding IRT relative to a threshold (e.g., the DRL criterion). Short IRTs (failures) and long IRTs (passes) are visible at a glance.
+- **Module** — `session_analyzer.visualizer.cumulative_diff.plot_irt_coded_cumulative_record`
+- **Reference** — Standard DRL/DRO visualization convention (Sidman, 1956; Reynolds, 1968).
+
+![Two-tone scatter on a wrapped cumulative trace, IRT < 5 s vs IRT ≥ 5 s](../../assets/figures/irt_coded_cumulative_record.png)
+
+### Schneider two-state segmentation — `SchneiderTwoStateResult`
+
+- **Theme** — Schneider (1969) modelled FI cumulative records as two piecewise-linear segments — pause then run. Given response times within an inter-reinforcement interval, the function locates the optimal break time `t*` that maximises `high_rate − low_rate`, subject to a minimum number of responses per segment.
+- **Output** — `SchneiderTwoStateResult(break_time=25.6, pause_duration=25.6, run_duration=34.4, low_rate=0.04, high_rate=0.93, slope_difference=0.89, n_low=2, n_high=30)`
+- **Reference** — Schneider, B. A. (1969). A two-state analysis of fixed-interval responding in the pigeon. *JEAB*, 12(5), 677-687. <https://doi.org/10.1901/jeab.1969.12-677>
+
+![Cumulative record split at the maximum-slope-jump break time](../../assets/figures/schneider_segment.png)
+
+### IRT autocorrelation — `IRTAutocorrelation`
+
+- **Theme** — Biased autocorrelation of the IRT series, `ρ(k) = E[(x_t − μ)(x_{t+k} − μ)] / σ²`. Positive `ρ(1)` reveals lingering effects of the previous IRT (e.g., bouts); negative `ρ(1)` signals alternation. Longer-lag structure picks up periodicity.
+- **Output** — `IRTAutocorrelation(lags=(0, 1, 2, ..., 20), values=(1.0, 0.58, 0.32, ..., 0.02), n=400)`
+- **Reference** — Wei, W. W. S. (2006). *Time series analysis* (2nd ed.). Pearson.
+
+![ACF of an AR(1)-like IRT series with positive lag-1](../../assets/figures/irt_autocorrelation.png)
+
+### IRT spectrum — `IRTSpectrum`
+
+- **Theme** — One-sided periodogram of the mean-centred IRT series. Schedule-induced rhythms (e.g., timing or alternation) appear as peaks at characteristic frequencies.
+- **Output** — `IRTSpectrum(frequencies=(0.0, 0.2, 0.4, ..., 50.0), power=(0.001, 0.002, ..., 0.05, ...), peak_frequency=5.00, n=512, sampling_rate=100.0)`
+- **Reference** — Wei, W. W. S. (2006). *Time series analysis* (2nd ed.). Pearson.
+
+![Periodogram of a 5 Hz sinusoid + noise, peak annotated](../../assets/figures/irt_spectrum.png)
+
+### Gaussian HMM segmentation — `GaussianHMMFit`
+
+- **Theme** — Generalises Schneider's two-state model to a `K`-state Gaussian HMM trained by Baum-Welch and decoded by Viterbi. Suitable for non-stationary regime detection beyond fixed pause/run schedules.
+- **Output** — `GaussianHMMFit(pi=(...), transition_matrix=((...),(...)), means=(1.0, 5.0), sigmas=(0.4, 0.4), log_likelihood=-220.0, state_sequence=(0, 0, ..., 1, 1, ..., 0), segments=(...), n=240, n_iterations=18, converged=True)`
+- **Reference** — Rabiner, L. R. (1989). A tutorial on hidden Markov models. *Proceedings of the IEEE*, 77(2), 257-286. <https://doi.org/10.1109/5.18626>
+
+![Observation series with state-shaded Viterbi segmentation](../../assets/figures/hmm_segment.png)

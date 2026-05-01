@@ -45,6 +45,8 @@
 - **出力** — `LogSurvivorBilinearFit(knot_time_sec=0.62, slope_fast=-3.1, slope_slow=-0.18, intercept_fast=-0.04, intercept_slow=-1.2, sse=0.07, n_irts=400)`
 - **引用** — Shull, R. L. (1991). Mathematical description of operant behavior. In I. H. Iversen & K. A. Lattal (Eds.), *Experimental analysis of behavior* (Vol. 2, pp. 243-282). Elsevier.
 
+![knot 付き bilinear log-survivor](../../assets/figures/log_survivor.png)
+
 ### `run_length` — `RunMetrics`
 
 - **テーマ** — FR スケジュールは「pause-then-run」サイクルを作る。PRP の後に完了までの高速バースト。この分解により、介入が pause / run / 両方のどこを遅らせているかが見える。
@@ -60,3 +62,43 @@
 - **引用** — 標準的記述子。例: Blough, D. S. (1956). *JEAB*, 3(1), 3-13. <https://doi.org/10.1901/jeab.1960.3-3>
 
 ![潜時ヒストグラム + 中央値マーカ](../../assets/figures/latency.png)
+
+### IRT 色分け累積記録 — `plot_irt_coded_cumulative_record`
+
+- **テーマ** — 累積応答トレースの各点を、直前の IRT が閾値（例: DRL 基準）以上か未満かで色分けする。失敗（短 IRT）と成功（長 IRT）が一目瞭然。
+- **モジュール** — `session_analyzer.visualizer.cumulative_diff.plot_irt_coded_cumulative_record`
+- **引用** — DRL/DRO 標準的可視化（Sidman, 1956; Reynolds, 1968）。
+
+![wrap した累積トレース上に IRT < 5s と IRT ≥ 5s の二色 scatter](../../assets/figures/irt_coded_cumulative_record.png)
+
+### Schneider の 2 状態セグメンテーション — `SchneiderTwoStateResult`
+
+- **テーマ** — Schneider (1969) は FI 累積記録を 2 つの区分線形セグメント（pause then run）でモデル化した。inter-reinforcement 区間内の応答時刻から、`high_rate − low_rate` を最大化する最適 break time `t*` を、各セグメント最小応答数の制約下で決定する。
+- **出力** — `SchneiderTwoStateResult(break_time=25.6, pause_duration=25.6, run_duration=34.4, low_rate=0.04, high_rate=0.93, slope_difference=0.89, n_low=2, n_high=30)`
+- **引用** — Schneider, B. A. (1969). A two-state analysis of fixed-interval responding in the pigeon. *JEAB*, 12(5), 677-687. <https://doi.org/10.1901/jeab.1969.12-677>
+
+![傾き差最大の break time で分割した累積記録](../../assets/figures/schneider_segment.png)
+
+### IRT 自己相関 — `IRTAutocorrelation`
+
+- **テーマ** — IRT 系列の biased 自己相関 `ρ(k) = E[(x_t − μ)(x_{t+k} − μ)] / σ²`。正の `ρ(1)` は前 IRT の影響残存（バウト等）、負の `ρ(1)` は交替を示す。長ラグ構造で周期性も検出できる。
+- **出力** — `IRTAutocorrelation(lags=(0, 1, 2, ..., 20), values=(1.0, 0.58, 0.32, ..., 0.02), n=400)`
+- **引用** — Wei, W. W. S. (2006). *Time series analysis* (2nd ed.). Pearson.
+
+![AR(1) 様 IRT 系列の ACF（lag-1 が正）](../../assets/figures/irt_autocorrelation.png)
+
+### IRT スペクトル — `IRTSpectrum`
+
+- **テーマ** — 平均中心化した IRT 系列の片側ピリオドグラム。schedule-induced rhythms（タイミング・交替等）が特徴的周波数のピークとして現れる。
+- **出力** — `IRTSpectrum(frequencies=(0.0, 0.2, 0.4, ..., 50.0), power=(0.001, 0.002, ..., 0.05, ...), peak_frequency=5.00, n=512, sampling_rate=100.0)`
+- **引用** — Wei, W. W. S. (2006). *Time series analysis* (2nd ed.). Pearson.
+
+![5 Hz サイン波 + ノイズのピリオドグラム、ピーク注釈付き](../../assets/figures/irt_spectrum.png)
+
+### Gaussian HMM セグメンテーション — `GaussianHMMFit`
+
+- **テーマ** — Schneider の 2 状態モデルを `K` 状態 Gaussian HMM（Baum-Welch で訓練、Viterbi で復号）に一般化。固定 pause/run スケジュール以外の non-stationary 状態区分検出に適する。
+- **出力** — `GaussianHMMFit(pi=(...), transition_matrix=((...),(...)), means=(1.0, 5.0), sigmas=(0.4, 0.4), log_likelihood=-220.0, state_sequence=(0, 0, ..., 1, 1, ..., 0), segments=(...), n=240, n_iterations=18, converged=True)`
+- **引用** — Rabiner, L. R. (1989). A tutorial on hidden Markov models. *Proceedings of the IEEE*, 77(2), 257-286. <https://doi.org/10.1109/5.18626>
+
+![Viterbi で状態シェードした観測系列](../../assets/figures/hmm_segment.png)

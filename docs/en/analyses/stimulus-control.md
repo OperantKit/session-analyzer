@@ -23,11 +23,15 @@ signal-detection sensitivity / bias.
 - **Output** — `ExponentialGradientParameters(peak_response=48.3, length_scale=175.0, r_squared=0.97, n=9)`
 - **Reference** — Shepard, R. N. (1987). Toward a universal law of generalization for psychological science. *Science*, 237(4820), 1317-1323. <https://doi.org/10.1126/science.3629243>
 
+![Exponential generalization gradient](../../assets/figures/exponential_gradient.png)
+
 ### Discrimination ratio — `DiscriminationRatio`
 
 - **Theme** — In an S+/S- discrimination, the simplest summary is the proportion of responding emitted during S+: `DR = R(S+) / [R(S+) + R(S-)]`. Equivalently, the *suppression ratio* (Annau & Kamin, 1961) is `R(S-) / [R(S+) + R(S-)]`. `DR ≥ 0.75` is the conventional heuristic for "discriminated."
 - **Output** — `DiscriminationRatio(discrimination_ratio=0.85, suppression_ratio=0.15, s_plus_count=170, s_minus_count=30, is_discriminated=True)`
 - **Reference** — Annau, Z., & Kamin, L. J. (1961). The conditioned emotional response as a function of intensity of the US. *J. Comp. Physiol. Psychol.*, 54(4), 428-432. <https://doi.org/10.1037/h0042199>
+
+![S+ vs S- response counts with discrimination ratio](../../assets/figures/discrimination_ratio.png)
 
 ### Peak shift — `PeakShiftResult`
 
@@ -36,6 +40,8 @@ signal-detection sensitivity / bias.
 - **Output** — `PeakShiftResult(empirical_peak_value=560.0, fitted_peak_value=559.7, fitted_sigma=12.4, fitted_peak_response=49.8, s_plus=550.0, s_minus=540.0, shift_magnitude=9.7, shift_direction="away_from_s_minus", r_squared=0.99, n=8)`
 - **Reference** — Hanson, H. M. (1959). Effects of discrimination training on stimulus generalization. *J. Exp. Psychol.*, 58(5), 321-334. <https://doi.org/10.1037/h0042606>
 
+![Free-peak Gaussian fit shifted away from S- relative to S+](../../assets/figures/peak_shift.png)
+
 ### Signal detection — `SignalDetectionMetrics` / `ROCCurve`
 
 - **Theme** — When a yes/no detection task confounds sensitivity with response bias, signal detection theory (Green & Swets, 1966) decomposes performance into `d'` (sensitivity) and `c` / `β` (bias). Non-parametric `A'` and `B''` give bias-resistant alternatives. `compute_roc` constructs the empirical ROC curve and trapezoidal AUC from a series of operating points. The Hautus (1995) log-linear correction is always applied to handle ceiling/floor cells.
@@ -43,3 +49,14 @@ signal-detection sensitivity / bias.
 - **Output (sdt)** — `SignalDetectionMetrics(hit_rate=0.84, false_alarm_rate=0.16, d_prime=2.0, criterion=0.0, beta=1.0, a_prime=0.92, b_double_prime=0.0, n_signal_trials=100, n_noise_trials=100)`
 - **Output (roc)** — `ROCCurve(fa_rates=[0.0, 0.01, 0.10, 0.30, 0.55, 0.90, 1.0], hit_rates=[0.0, 0.05, 0.30, 0.60, 0.85, 0.99, 1.0], auc=0.85)`
 - **References** — Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley. — Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behav. Res. Methods Instrum. Comput.*, 27(1), 46-51. <https://doi.org/10.3758/BF03203619>
+
+![Empirical ROC curve sweeping criterion with chance line and AUC annotation](../../assets/figures/signal_detection_roc.png)
+
+### Psychometric function — `PsychometricFit`
+
+- **Theme** — Choice probability as a function of stimulus magnitude. The fitter supports either logit (`P = γ + (1 − γ − λ) / (1 + exp(-(x − μ) / σ))`) or probit (cumulative-Gaussian) link, with optional joint estimation of the lapse rate `λ`. For 2AFC designs set `gamma = 0.5` to fix the lower asymptote at chance.
+- **Equation** — `P(yes | x) = γ + (1 − γ − λ) · F((x − μ) / σ)` with `F = logistic` or `Φ`
+- **Output** — `PsychometricFit(link="logit", mu=0.0, sigma=1.5, gamma=0.0, lapse=0.0, log_likelihood=-235.6, n=11)`
+- **Reference** — Wichmann, F. A., & Hill, N. J. (2001). The psychometric function: I. Fitting, sampling, and goodness of fit. *Perception & Psychophysics*, 63(8), 1293-1313. <https://doi.org/10.3758/BF03194544>
+
+![Logistic psychometric fit with threshold marker](../../assets/figures/psychometric.png)

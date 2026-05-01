@@ -32,11 +32,21 @@ indifference between two options sits.
 - **Output** — `UnitPriceElasticity(elasticity=-1.18, intercept=4.05, r_squared=0.99, n=8, is_elastic=True, is_inelastic=False)`
 - **Reference** — Hursh, S. R. (1980). Economic concepts for the analysis of behavior. *JEAB*, 34(2), 219-238. <https://doi.org/10.1901/jeab.1980.34-219>
 
+![Log-log unit-price elasticity](../../assets/figures/unit_price.png)
+
 ### Cross-price elasticity — `CrossPriceElasticity`
 
 - **Theme** — Slope of `log Q_A` on `log P_B` — how the consumption of reinforcer A depends on the price of reinforcer B. Positive → substitutes; negative → complements; near zero → independent (Hursh & Roma, 2013).
 - **Output** — `CrossPriceElasticity(elasticity=0.62, intercept=2.31, r_squared=0.96, n=6, relationship="substitutes")`
 - **Reference** — Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical public policy. *JEAB*, 99(1), 98-124. <https://doi.org/10.1002/jeab.7>
+
+### Multi-good cross-elasticity matrix — `CrossElasticityMatrix`
+
+- **Theme** — Generalises the single-pair `CrossPriceElasticity` to a full ``K × K`` matrix `ε_{ij} = d log Q_i / d log P_j`. Off-diagonal entries reveal substitution (positive) or complementarity (negative); diagonals are own-price elasticities. `compute_cross_elasticity_matrix` performs OLS on log-log per cell, returning NaN for cells with fewer than two valid pairs.
+- **Output** — `CrossElasticityMatrix(goods=("A", "B", "C"), matrix=((-0.5, 1.0, 0.0), (1.0, -0.5, 0.0), (0.3, 0.0, -0.7)), n_conditions=5)`
+- **Reference** — Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical public policy. *JEAB*, 99(1), 98-124. <https://doi.org/10.1002/jeab.7>
+
+![Multi-good cross-elasticity heatmap](../../assets/figures/cross_elasticity_matrix.png)
 
 ### Delay discounting — `HyperbolicDiscountingParameters` / `HyperboloidDiscountingParameters`
 
@@ -53,3 +63,5 @@ indifference between two options sits.
 - **Theme** — In an *adjusting-amount* (or *adjusting-delay*) procedure (Mazur, 1987), the dimension being titrated is incremented or decremented as a function of the subject's choice between an immediate and a delayed reinforcer. The procedure converges on the value at which the subject is indifferent. `IndifferencePoint` returns the mean over a trailing stable window plus a stability flag.
 - **Output** — `IndifferencePoint(indifference_value=49.83, range_in_window=1.5, stable=True, stable_window=6, n_trials=24)`
 - **Reference** — Mazur, J. E. (1987). An adjusting procedure for studying delayed reinforcement. In *Quantitative analyses of behavior, Vol. 5* (pp. 55-73). Lawrence Erlbaum.
+
+![Adjusting trajectory converging on the indifference value](../../assets/figures/indifference_point.png)

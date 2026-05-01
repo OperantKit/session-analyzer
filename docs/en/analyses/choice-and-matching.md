@@ -32,6 +32,8 @@ simultaneously-available alternatives.
 - **Output** — `TimeMatchingParameters(sensitivity=0.79, bias=0.05, r_squared=0.95, n=6)`
 - **Reference** — Baum, W. M., & Rachlin, H. C. (1969). Choice as time allocation. *JEAB*, 12(6), 861-874. <https://doi.org/10.1901/jeab.1969.12-861>
 
+![Time-allocation matching log-log fit](../../assets/figures/time_matching.png)
+
 ### `choice_allocation` — `ChoiceAllocation` / `ExclusiveChoiceResult`
 
 - **Theme** — Raw per-operandum response proportions. Useful as the baseline view before fitting a matching-law equation; also surfaces "exclusive choice" when allocation collapses onto one alternative (a common failure mode of undertraining or saturated preference).
@@ -46,3 +48,30 @@ simultaneously-available alternatives.
 - **Equation** — `V = A / (1 + k · D)`; predicted `P(left) = V_L / (V_L + V_R)`
 - **Output** — `ConcurrentChainsPrediction(v_left=0.12, v_right=0.07, predicted_proportion_left=0.63, observed_proportion_left=0.58, deviation=-0.05, k=0.05)`
 - **Reference** — Mazur, J. E. (2001). Hyperbolic value addition and general models of animal choice. *Psychological Review*, 108(1), 96-112. <https://doi.org/10.1037/0033-295X.108.1.96>
+
+![Observed vs Mazur-predicted initial-link allocation](../../assets/figures/concurrent_chains.png)
+
+### Stay-switch & COD — `StaySwitchMetrics` / `CODComplianceResult`
+
+- **Theme** — Concurrent-schedule changeover behavior. `analyze_stay_switch` decomposes a side-tagged response sequence into stay bouts and reports changeover counts, mean stay length, and changeover rate per minute. `check_cod_compliance` reports the fraction of reinforcers preceded by a respect of the programmed COD window.
+- **Output** — `StaySwitchMetrics(n_changeovers=24, n_stays=25, mean_stay_responses=4.0, mean_stay_duration_sec=1.5, changeover_rate_per_min=12.4, ...)` and `CODComplianceResult(cod_sec=2.0, n_reinforcers=18, n_compliant=14, compliance_rate=0.78)`
+- **Reference** — Stubbs, D. A., & Pliskoff, S. S. (1969). Concurrent responding with fixed relative rate of reinforcement. *JEAB*, 12(6), 887-895. <https://doi.org/10.1901/jeab.1969.12-887>
+
+![Stay-bout cumulative record across alternations](../../assets/figures/stay_switch.png)
+
+### Hierarchical GML — `HierarchicalGMLFit`
+
+- **Theme** — Empirical-Bayes random-effects fit of the GML across multiple subjects. Each subject has its own `(a_i, b_i)` drawn from `(N(μ_a, τ_a²), N(μ_b, τ_b²))`. Marginalising the subject-level Gaussians analytically gives a closed-form profile log-likelihood for the hyperparameters, optimised by Nelder-Mead. Wald-style 95 % CIs on the group means are reported.
+- **Output** — `HierarchicalGMLFit(mu_sensitivity=0.85, sd_sensitivity=0.10, mu_bias=0.02, sd_bias=0.06, sigma_obs=0.05, sensitivity_ci=(0.78, 0.92), bias_ci=(-0.02, 0.06), n_subjects=8, n_observations=64, log_likelihood=...)`
+- **Reference** — Gelman, A., & Hill, J. (2007). *Data analysis using regression and multilevel/hierarchical models*. Cambridge University Press.
+
+![Per-subject lines and group-level fit overlay](../../assets/figures/hierarchical_gml.png)
+
+### Killeen MPR — `KilleenLawParameters`
+
+- **Theme** — Killeen (1994) extends Herrnstein's hyperbola with a *coupling* parameter `δ` (response unit time): `B = (k a R) / (a R δ + 1)`. Asymptotic rate at `R → ∞` equals `k / δ`. Because `(a, k, δ)` are not separately identifiable from `(R, B)` data alone, `δ` must be supplied (typically the minimum observed IRT).
+- **Equation** — `B = (k · a · R) / (a · R · δ + 1)`
+- **Output** — `KilleenLawParameters(k=2.0, a=0.5, delta=0.02, r_squared=0.99, n=7)`
+- **Reference** — Killeen, P. R. (1994). Mathematical principles of reinforcement. *Behavioral and Brain Sciences*, 17(1), 105-135. <https://doi.org/10.1017/S0140525X00033628>
+
+![Killeen MPR semilog fit with k/δ asymptote](../../assets/figures/killeen_law.png)

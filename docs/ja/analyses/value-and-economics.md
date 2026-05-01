@@ -31,11 +31,21 @@
 - **出力** — `UnitPriceElasticity(elasticity=-1.18, intercept=4.05, r_squared=0.99, n=8, is_elastic=True, is_inelastic=False)`
 - **引用** — Hursh, S. R. (1980). Economic concepts for the analysis of behavior. *JEAB*, 34(2), 219-238. <https://doi.org/10.1901/jeab.1980.34-219>
 
+![log-log unit-price 弾力性](../../assets/figures/unit_price.png)
+
 ### Cross-price 弾力性 — `CrossPriceElasticity`
 
 - **テーマ** — `log Q_A` を `log P_B` に対して線形回帰した傾き — 強化子 A の消費が強化子 B の価格にどう依存するか。正なら代替財、負なら補完財、ほぼ 0 なら独立（Hursh & Roma, 2013）。
 - **出力** — `CrossPriceElasticity(elasticity=0.62, intercept=2.31, r_squared=0.96, n=6, relationship="substitutes")`
 - **引用** — Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical public policy. *JEAB*, 99(1), 98-124. <https://doi.org/10.1002/jeab.7>
+
+### 多財 cross-elasticity 行列 — `CrossElasticityMatrix`
+
+- **テーマ** — 単一ペアの `CrossPriceElasticity` を ``K × K`` 行列 `ε_{ij} = d log Q_i / d log P_j` に一般化。非対角は代替（正）/ 補完（負）を、対角は own-price 弾力性を表す。`compute_cross_elasticity_matrix` は各セルで log-log OLS を行い、有効ペアが 2 未満のセルは NaN を返す。
+- **出力** — `CrossElasticityMatrix(goods=("A", "B", "C"), matrix=((-0.5, 1.0, 0.0), (1.0, -0.5, 0.0), (0.3, 0.0, -0.7)), n_conditions=5)`
+- **引用** — Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical public policy. *JEAB*, 99(1), 98-124. <https://doi.org/10.1002/jeab.7>
+
+![多財クロス弾力性ヒートマップ](../../assets/figures/cross_elasticity_matrix.png)
 
 ### 遅延割引 — `HyperbolicDiscountingParameters` / `HyperboloidDiscountingParameters`
 
@@ -52,3 +62,5 @@
 - **テーマ** — *adjusting-amount*（または *adjusting-delay*）手続き（Mazur, 1987）では、titration 対象の次元が被験体の即時 / 遅延選好に応じて増減する。被験体が無差異になる値に収束する。`IndifferencePoint` は trailing 安定窓の平均と安定フラグを返す。
 - **出力** — `IndifferencePoint(indifference_value=49.83, range_in_window=1.5, stable=True, stable_window=6, n_trials=24)`
 - **引用** — Mazur, J. E. (1987). An adjusting procedure for studying delayed reinforcement. In *Quantitative analyses of behavior, Vol. 5* (pp. 55-73). Lawrence Erlbaum.
+
+![無差異値に収束する adjusting 軌道](../../assets/figures/indifference_point.png)

@@ -35,6 +35,20 @@ Reads OKL v1 session logs (typically produced by `session-recorder`) and produce
 - Adjusting indifference point (Mazur, 1987)
 - Unit-price and cross-price elasticity (Hursh, 1980; Hursh & Roma, 2013)
 - Observing response and conditioned-reinforcement strength (Wyckoff, 1952; Dinsmoor, 1983)
+- Rescorla-Wagner associative-strength simulation and fitting (Rescorla & Wagner, 1972)
+- Tabular TD(0) reinforcement-learning trace (Sutton, 1988; Schultz, Dayan, & Montague, 1997)
+- Scalar-timing summary and scalar-property test (Gibbon, 1977)
+- Killeen quantitative law of effect / MPR (Killeen, 1994)
+- Stay-switch decomposition and COD compliance for concurrent schedules (Stubbs & Pliskoff, 1969)
+- Extinction-burst detection (Lerman & Iwata, 1995)
+- Schneider two-state break-and-run segmentation (Schneider, 1969)
+- Psychometric-function fitting (logit / probit; Wichmann & Hill, 2001)
+- EZ-diffusion model parameter recovery (Wagenmakers, van der Maas, & Grasman, 2007)
+- IRT autocorrelation and periodogram spectrum
+- N-gram block / conditional entropy and Markov-order estimation (Hopson, Burt, & Hopson, 2002)
+- Multi-good cross-elasticity matrix
+- Hierarchical empirical-Bayes Generalized Matching Law fit (Gelman & Hill, 2007)
+- Gaussian Hidden Markov Model segmentation (Rabiner, 1989)
 
 ## Install
 
