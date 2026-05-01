@@ -1,0 +1,82 @@
+"""Tests for Schneider (1969) two-state break-and-run segmentation."""
+
+from __future__ import annotations
+
+import pytest
+
+from session_analyzer.analytics.schneider_segment import (
+    SchneiderTwoStateResult,
+    schneider_two_state,
+)
+
+
+@pytest.mark.unit
+def test_recovers_break_time_for_clear_two_state_pattern() -> None:
+    # FI 60 s. Pause: 0-30 s (no responses). Run: 30-60 s, response every 1 s.
+    response_times = [30.0 + i for i in range(30)]
+    result = schneider_two_state(
+        response_times, interval_start=0.0, interval_end=60.0
+    )
+    assert isinstance(result, SchneiderTwoStateResult)
+    # Break should land at ~30 s (the first response is at t=30).
+    assert result.break_time == pytest.approx(31.0, abs=2.0)
+    assert result.high_rate > result.low_rate
+    assert result.n_low + result.n_high == len(response_times)
+
+
+@pytest.mark.unit
+def test_returns_none_when_fewer_than_2_per_segment() -> None:
+    # Only 3 responses with default min=2 -> need >=4 -> None.
+    result = schneider_two_state(
+        [10.0, 20.0, 30.0], interval_start=0.0, interval_end=60.0
+    )
+    assert result is None
+
+
+@pytest.mark.unit
+def test_break_difference_is_non_negative_when_data_warrants() -> None:
+    # Constant-rate responding produces a flat slope; difference may be 0.
+    result = schneider_two_state(
+        [10.0 * i for i in range(1, 7)],
+        interval_start=0.0,
+        interval_end=60.0,
+    )
+    assert result is not None
+    assert result.slope_difference >= 0.0
+
+
+@pytest.mark.unit
+def test_raises_on_invalid_interval_bounds() -> None:
+    with pytest.raises(ValueError, match="interval_end"):
+        schneider_two_state([1.0], interval_start=10.0, interval_end=10.0)
+
+
+@pytest.mark.unit
+def test_raises_on_unsorted_responses() -> None:
+    with pytest.raises(ValueError, match="sorted"):
+        schneider_two_state(
+            [5.0, 1.0, 3.0], interval_start=0.0, interval_end=10.0
+        )
+
+
+@pytest.mark.unit
+def test_raises_on_responses_outside_interval() -> None:
+    with pytest.raises(ValueError, match="within"):
+        schneider_two_state(
+            [-1.0, 5.0], interval_start=0.0, interval_end=10.0
+        )
+    with pytest.raises(ValueError, match="within"):
+        schneider_two_state(
+            [5.0, 11.0], interval_start=0.0, interval_end=10.0
+        )
+
+
+@pytest.mark.unit
+def test_raises_on_invalid_min_responses() -> None:
+    with pytest.raises(ValueError, match="min_responses_per_segment"):
+        schneider_two_state(
+            [1.0, 2.0],
+            interval_start=0.0,
+            interval_end=10.0,
+            min_responses_per_segment=0,
+        )
