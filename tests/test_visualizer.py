@@ -10,7 +10,7 @@ import pytest
 from session_analyzer.visualizer.cumulative_record import plot_cumulative_record
 
 
-from tests.conftest import write_osl_log as _write_osl
+from tests.conftest import write_okl_log as _write_osl
 
 
 @pytest.mark.unit

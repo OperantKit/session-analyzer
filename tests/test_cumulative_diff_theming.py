@@ -12,12 +12,12 @@ from session_analyzer.visualizer.cumulative_diff import (
 )
 
 
-from tests.conftest import write_osl_log
+from tests.conftest import write_okl_log
 
 
 def _simple_log(tmp_path: Path) -> Path:
     log = tmp_path / "drl.txt"
-    write_osl_log(
+    write_okl_log(
         log,
         [
             {"timestamp": 0.0, "type": "session_start"},

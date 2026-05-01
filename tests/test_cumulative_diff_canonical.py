@@ -23,7 +23,7 @@ from session_analyzer.visualizer.cumulative_record import (  # noqa: E402
 )
 
 
-from tests.conftest import write_osl_log as _osl  # noqa: E402
+from tests.conftest import write_okl_log as _osl  # noqa: E402
 
 
 @pytest.mark.unit

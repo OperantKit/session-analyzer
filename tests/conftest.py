@@ -3,7 +3,7 @@
 Forces the matplotlib ``Agg`` backend so visualizer tests run in
 headless environments (CI, ssh sessions without DISPLAY).
 
-Also exposes :func:`write_osl_log`, a helper for tests that need to
+Also exposes :func:`write_okl_log`, a helper for tests that need to
 construct OKL v1 fixtures with arbitrary event dicts (including types
 not in the canonical codebook). Pre-OKL tests used to write raw JSONL
 directly; the helper lets them stay readable while satisfying the
@@ -30,7 +30,7 @@ from session_recorder.format import (
 matplotlib.use("Agg")
 
 
-def write_osl_log(
+def write_okl_log(
     path: Path,
     events: list[dict[str, Any]],
     *,

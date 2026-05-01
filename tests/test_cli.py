@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from session_analyzer.cli import main
-from tests.conftest import write_osl_log as _write_log
+from tests.conftest import write_okl_log as _write_log
 
 
 @pytest.mark.unit

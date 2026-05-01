@@ -15,7 +15,7 @@ from session_analyzer.visualizer.cumulative_record import (
 from session_analyzer.visualizer.themes import get_theme
 
 
-from tests.conftest import write_osl_log as _write_osl
+from tests.conftest import write_okl_log as _write_osl
 
 
 def _simple_log(tmp_path: Path) -> Path:
