@@ -92,12 +92,21 @@ from .log_survivor import (
     compute_log_survivor,
     fit_bilinear_log_survivor,
 )
+from .laws_of_covariance import (
+    LawsOfCovariancePrediction,
+    predict_resurgence_laws_of_covariance,
+)
 from .matching import (
     MatchingParameters,
     SingleAlternativeMatchingParameters,
     estimate_matching_parameters,
     estimate_single_observation_gml,
     fit_single_alternative_matching,
+)
+from .matching_induction import (
+    MatchingInductionParameters,
+    fit_matching_with_induction,
+    predict_log_ratio_with_induction,
 )
 from .momentum import MomentumParameters, estimate_resistance_to_change
 from .observing import (
@@ -216,6 +225,8 @@ __all__ = [
     "SingleAlternativeMatchingParameters",
     "StaySwitchMetrics",
     "StepType",
+    "LawsOfCovariancePrediction",
+    "MatchingInductionParameters",
     "SurvivalCurve",
     "TDLearningTrace",
     "TimeMatchingParameters",
@@ -284,12 +295,15 @@ __all__ = [
     "fit_hyperbolic_discounting",
     "fit_hyperboloid_discounting",
     "fit_killeen_law",
+    "fit_matching_with_induction",
     "fit_psychometric",
     "fit_rescorla_wagner",
     "fit_single_alternative_matching",
     "fit_unit_price_elasticity",
     "kaplan_meier",
     "predict_concurrent_chains_choice",
+    "predict_log_ratio_with_induction",
+    "predict_resurgence_laws_of_covariance",
     "schneider_two_state",
     "simulate_rescorla_wagner",
     "simulate_td_zero",
