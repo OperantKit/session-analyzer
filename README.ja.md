@@ -52,6 +52,12 @@ OKL v1 セッションログ（通常は `session-recorder` が生成）を読�
 
 ## インストール
 
+```bash
+pip install session-analyzer
+```
+
+開発用:
+
 ```
 mise install                                # Python 3.11
 mise exec -- python -m venv .venv

@@ -52,6 +52,12 @@ Reads OKL v1 session logs (typically produced by `session-recorder`) and produce
 
 ## Install
 
+```bash
+pip install session-analyzer
+```
+
+For development:
+
 ```
 mise install                                # Python 3.11
 mise exec -- python -m venv .venv
