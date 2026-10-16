@@ -65,6 +65,60 @@ mise exec -- python -m venv .venv
 .venv/bin/pytest
 ```
 
+## 30-second example
+
+Write a short FR 5 session with [session-recorder](https://github.com/OperantKit/session-recorder), read it back, measure post-reinforcement pauses, draw the cumulative record, and fit the generalized matching law:
+
+```python
+import math
+from pathlib import Path
+
+from experiment_core import ReinforcerStartEvent, ResponseEvent
+from session_recorder import OklSink, iter_records
+from session_analyzer import plot_cumulative_record
+from session_analyzer.analytics import analyze_prps, compute_prps, estimate_matching_parameters
+
+# A short FR 5 log: a pause, a run of five responses 0.5 s apart, a reinforcer.
+sink = OklSink("fr5.okl")
+sink.write_header(session_name="fr5", clock_type="VirtualClock", session_start=0.0)
+t, n = 0.0, 0
+for pause in (4.0, 6.0, 8.0):
+    t += pause
+    for k in range(5):
+        t += 0.5 if k else 0.0
+        n += 1
+        sink.emit(ResponseEvent(id=n, timestamp=t))
+    sink.emit(ReinforcerStartEvent(id=n // 5, timestamp=t))
+
+records = list(iter_records("fr5.okl"))
+responses = [r.timestamp for r in records if r.type == "response"]
+reinforcers = [r.timestamp for r in records if r.type == "reinforcer_start"]
+print(compute_prps(reinforcers, responses))  # [6.0, 8.0]  post-reinforcement pauses
+print(analyze_prps(compute_prps(reinforcers, responses)).mean)  # 7.0
+
+plot_cumulative_record(Path("fr5.okl"), Path("fr5.png"))  # cumulative record with reinforcer pips
+
+# Generalized matching law over four concurrent VI VI conditions
+# (illustrative ratios generated with a = 0.8, log b = 0.1):
+r_ratios = [0.25, 0.5, 2.0, 4.0]
+b_ratios = [math.exp(0.8 * math.log(r) + 0.1) for r in r_ratios]
+fit = estimate_matching_parameters(b_ratios, r_ratios)
+print(round(fit.sensitivity, 3), round(fit.bias, 3), round(fit.r_squared, 3))  # 0.8 0.1 1.0
+```
+
+`fr5.png` is a cumulative record (step pen, reinforcer pips) read from the OKL v1 file. In a real study the log comes from a session run with [session-runner](https://github.com/OperantKit/session-runner) or [operantkit-cli](https://github.com/OperantKit/operantkit-cli), and the matching ratios come from several such logs. The same analyses are available from the command line (see CLI below).
+
+## Why not a 50-line hand-written analysis script?
+
+Short scripts usually get a few things subtly wrong; this package fixes them in one tested place:
+
+- **Published models with their equations and citations.** 43 analyses listed above (44 analysis modules), from the generalized matching law (Baum, 1974) and Herrnstein's hyperbola to demand curves, delay discounting, peak-procedure MLE, signal detection, and Rescorla-Wagner fits. Every analysis module except the latency summary cites its source in the module docstring.
+- **Input checks that fail loudly.** For example, `compute_prps` raises on unsorted times and `estimate_matching_parameters` raises on mismatched lengths or fewer than two positive ratio pairs instead of returning a fit of nothing.
+- **Reads the session log directly.** Parsing of OKL v1 is delegated to session-recorder (`iter_records`), so analyses see the same events that were recorded, including the phase markers that the renewal analysis uses.
+- **Cumulative records drawn the conventional way.** A stepping pen with reset, reinforcer pips at a fixed angle, and an event pen, plus an IRT-coded variant for DRL / DRO.
+- **Design-aware suggestions.** `session_analyzer.suggester` maps a contingency-dsl AST to the analyses worth computing for that design (for example, matching for `Conc(VI, VI)`).
+- **Tested.** 488 tests (`pytest`), plus the examples in this README.
+
 ## Analysis catalog
 
 For an at-a-glance reference of every analysis — theme, equation,
@@ -242,15 +296,12 @@ collapsed.
 - **heavy** — defer to this package's non-linear fits (demand curve
   non-linear least squares, EM bout decomposition, bootstrap CIs).
 
-## Local dependency notes
+## Dependencies
 
-This package is distributed as a standalone analyzer. It does not declare
-`session-recorder` or `contingency-py` as install-time dependencies — both are
-sister packages in the same monorepo and are intended to be installed
-side-by-side in a development environment when end-to-end pipelines are
-exercised. The runtime contract with `session-recorder` is the OKL v1
-log schema (see "Log format" below); coupling is kept at the data layer
-rather than the import layer.
+`session-analyzer` depends on `session-recorder` (`pip install session-analyzer`
+installs it), which owns the OKL v1 parser. It does not depend on
+`contingency-py` or `session-runner`; the coupling to the session side is the
+OKL v1 log schema (see "Log format" below).
 
 ## Log format
 

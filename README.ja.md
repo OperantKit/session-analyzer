@@ -65,6 +65,60 @@ mise exec -- python -m venv .venv
 .venv/bin/pytest
 ```
 
+## 30 秒で動く例
+
+[session-recorder](https://github.com/OperantKit/session-recorder) で短い FR 5 のセッションを書き、読み戻し、強化後休止を測り、累積記録を描き、一般化対応法則を当てはめる:
+
+```python
+import math
+from pathlib import Path
+
+from experiment_core import ReinforcerStartEvent, ResponseEvent
+from session_recorder import OklSink, iter_records
+from session_analyzer import plot_cumulative_record
+from session_analyzer.analytics import analyze_prps, compute_prps, estimate_matching_parameters
+
+# 短い FR 5 の記録: 休止、0.5 秒間隔の 5 反応、強化子。
+sink = OklSink("fr5.okl")
+sink.write_header(session_name="fr5", clock_type="VirtualClock", session_start=0.0)
+t, n = 0.0, 0
+for pause in (4.0, 6.0, 8.0):
+    t += pause
+    for k in range(5):
+        t += 0.5 if k else 0.0
+        n += 1
+        sink.emit(ResponseEvent(id=n, timestamp=t))
+    sink.emit(ReinforcerStartEvent(id=n // 5, timestamp=t))
+
+records = list(iter_records("fr5.okl"))
+responses = [r.timestamp for r in records if r.type == "response"]
+reinforcers = [r.timestamp for r in records if r.type == "reinforcer_start"]
+print(compute_prps(reinforcers, responses))  # [6.0, 8.0]  強化後休止
+print(analyze_prps(compute_prps(reinforcers, responses)).mean)  # 7.0
+
+plot_cumulative_record(Path("fr5.okl"), Path("fr5.png"))  # 強化子の印つきの累積記録
+
+# 並立 VI VI の 4 条件に一般化対応法則を当てはめる
+# （a = 0.8、log b = 0.1 から作った説明用の比）:
+r_ratios = [0.25, 0.5, 2.0, 4.0]
+b_ratios = [math.exp(0.8 * math.log(r) + 0.1) for r in r_ratios]
+fit = estimate_matching_parameters(b_ratios, r_ratios)
+print(round(fit.sensitivity, 3), round(fit.bias, 3), round(fit.r_squared, 3))  # 0.8 0.1 1.0
+```
+
+`fr5.png` は OKL v1 ファイルから読んだ累積記録（階段状のペンと強化子の印）である。実際の研究では、記録は [session-runner](https://github.com/OperantKit/session-runner) や [operantkit-cli](https://github.com/OperantKit/operantkit-cli) で動かしたセッションから得られ、対応法則の比は複数の記録から得る。同じ分析はコマンドラインからも使える（下記 CLI）。
+
+## 自作の 50 行の分析スクリプトでは足りない理由
+
+短いスクリプトは細部を誤りやすい。本パッケージはそれらを 1 か所でテストして固めている:
+
+- **公刊されたモデルを式と出典つきで.** 上に挙げた 43 の分析（分析モジュール 44 個）。一般化対応法則 (Baum, 1974) や Herrnstein の双曲線から、需要曲線・遅延割引・ピーク法の最尤推定・信号検出・Rescorla-Wagner の当てはめまで。レイテンシの要約を除くすべての分析モジュールは、モジュールの docstring に出典を書いている。
+- **入力の検査で明示的に失敗する.** 例えば `compute_prps` は時刻が昇順でなければ例外を出し、`estimate_matching_parameters` は長さの不一致や正の比の組が 2 つ未満のとき、空の当てはめを返さず例外を出す。
+- **セッション記録をそのまま読む.** OKL v1 の解析は session-recorder（`iter_records`）に任せるので、分析は記録されたのと同じイベントを見る。復活 (renewal) の分析が使うフェーズの区切りも含む。
+- **慣習どおりの累積記録.** リセットつきの階段状のペン、一定角度の強化子の印、イベントペン。DRL / DRO 向けに IRT で色分けした版もある。
+- **実験計画に応じた提案.** `session_analyzer.suggester` は contingency-dsl の AST から、その計画で計算する価値のある分析を返す（例: `Conc(VI, VI)` なら対応法則）。
+- **テスト済み.** 488 件のテスト（`pytest`）と、この README の例。
+
 ## 分析カタログ
 
 各分析のテーマ・式・出力例・正典引用の一覧は
@@ -236,14 +290,12 @@ const { suggestions }: SuggestResponse = await fetch(`${VIZ}/suggest`, {
 - **heavy** — 本パッケージの非線形フィット群に委譲（需要曲線の非線形
   最小二乗、EM によるバウト分解、ブートストラップ CI 等）。
 
-## ローカル依存関係に関する注記
+## 依存関係
 
-本パッケージはスタンドアロンなアナライザとして配布される。`session-recorder`
-や `contingency-py` をインストール時依存として宣言しない — どちらも同じ
-monorepo 内の姉妹パッケージであり、end-to-end パイプラインを検証する際には
-開発環境で並列にインストールされることが想定されている。`session-recorder`
-とのランタイム契約は OKL v1 ログのスキーマ（後述の「ログフォーマット」を
-参照）であり、結合は import 層ではなくデータ層で保たれている。
+`session-analyzer` は `session-recorder` に依存する（`pip install session-analyzer`
+で一緒に入る）。OKL v1 の解析器は session-recorder が持つ。`contingency-py`
+や `session-runner` には依存しない。セッション側との結合は OKL v1 ログの
+スキーマ（後述の「ログフォーマット」）である。
 
 ## ログフォーマット
 

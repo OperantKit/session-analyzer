@@ -1,0 +1,40 @@
+# session-analyzer
+
+> Analysis of operant session logs: cumulative records, post-reinforcement pauses, bouts, IRTs, generalized matching law, Herrnstein's hyperbola, demand and delay-discounting fits, peak procedure, signal detection, renewal, resurgence, Rescorla-Wagner and more (43 analyses), reading OKL v1 logs written by session-recorder.
+
+session-analyzer is part of OperantKit, a set of Python/Rust packages for designing and running operant and respondent conditioning experiments (reinforcement schedules, session recording, analysis). Use it instead of hand-writing analysis scripts: each analysis implements a published model with its reference, checks its input, and reads the same OKL v1 events that the session recorded.
+
+## Install
+
+```bash
+pip install session-analyzer
+```
+
+## Minimal example
+
+```python
+import math
+from session_analyzer.analytics import compute_prps, estimate_matching_parameters
+
+print(compute_prps([10.0, 30.0], [2.0, 10.0, 16.0, 30.0, 38.5]))  # [6.0, 8.5] post-reinforcement pauses
+
+r_ratios = [0.25, 0.5, 2.0, 4.0]  # reinforcement ratios R1/R2 of four concurrent VI VI conditions
+b_ratios = [math.exp(0.8 * math.log(r) + 0.1) for r in r_ratios]  # illustrative response ratios
+fit = estimate_matching_parameters(b_ratios, r_ratios)
+print(round(fit.sensitivity, 3), round(fit.bias, 3))  # 0.8 0.1
+```
+
+From an OKL v1 log: `session-analyzer plot session.okl --output cumulative_record.png`, or read events with `session_recorder.iter_records` and pass response and reinforcer times to the analytics functions.
+
+## Docs
+
+- [README](https://github.com/OperantKit/session-analyzer/blob/main/README.md): analysis list, 30-second example, why not to hand-roll analysis scripts, public API, CLI
+- [AGENTS.md](https://github.com/OperantKit/session-analyzer/blob/main/AGENTS.md): when to use this package and what not to do
+- [Analysis catalog](https://github.com/OperantKit/session-analyzer/blob/main/docs/en/analyses/index.md): equation, example output, and citation for each analysis
+
+## Related packages
+
+- [session-recorder](https://github.com/OperantKit/session-recorder): writes and reads OKL v1 logs (`pip install session-recorder`, installed as a dependency)
+- [session-runner](https://github.com/OperantKit/session-runner): runs sessions whose events are recorded (`pip install session-runner`)
+- [contingency-dsl-py](https://github.com/OperantKit/contingency-dsl-py): parses schedule expressions; its AST feeds `session_analyzer.suggester` (`pip install contingency-dsl-py`)
+- [session-visualizer](https://github.com/OperantKit/session-visualizer): live dashboard for running sessions
