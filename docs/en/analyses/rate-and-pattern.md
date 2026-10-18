@@ -75,11 +75,11 @@ Morse, 1957).
 
 ### Schneider two-state segmentation — `SchneiderTwoStateResult`
 
-- **Theme** — Schneider (1969) modelled FI cumulative records as two piecewise-linear segments — pause then run. Given response times within an inter-reinforcement interval, the function locates the optimal break time `t*` that maximises `high_rate − low_rate`, subject to a minimum number of responses per segment.
-- **Output** — `SchneiderTwoStateResult(break_time=25.6, pause_duration=25.6, run_duration=34.4, low_rate=0.04, high_rate=0.93, slope_difference=0.89, n_low=2, n_high=30)`
+- **Theme** — Schneider (1969) modelled FI cumulative records as two states — pause then run. Following his numerical procedure, the cumulative record of one inter-reinforcement interval is fitted by least squares with a line through the origin up to the breakpoint and a second line joined to it at the breakpoint; the breakpoint is moved along a grid of the interval and the one with the smallest sum of squared deviations is kept. Both fitted rates are kept non-negative, and state 1 may hold no responses.
+- **Output** — `SchneiderTwoStateResult(break_time=25.5, pause_duration=25.5, run_duration=34.5, low_rate=0.02, high_rate=0.97, slope_difference=0.95, n_low=0, n_high=32)`
 - **Reference** — Schneider, B. A. (1969). A two-state analysis of fixed-interval responding in the pigeon. *JEAB*, 12(5), 677-687. <https://doi.org/10.1901/jeab.1969.12-677>
 
-![Cumulative record split at the maximum-slope-jump break time](../../assets/figures/schneider_segment.png)
+![Cumulative record split at the least-squares breakpoint](../../assets/figures/schneider_segment.png)
 
 ### IRT autocorrelation — `IRTAutocorrelation`
 
