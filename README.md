@@ -13,7 +13,7 @@ Reads OKL v1 session logs (typically produced by `session-recorder`) and produce
 - Single-alternative hyperbola fits (Herrnstein, 1970)
 - Choice allocation analysis for concurrent schedules
 - Response latency summaries
-- Progressive-ratio breakpoint detection (Richardson & Roberts, 1996)
+- Progressive-ratio breakpoint detection (Richardson & Roberts, 1996). The breakpoint is the last completed ratio; some MED-PC programmes store the ratio in progress in their breakpoint variable, which is one step higher. `extract_step_ratios(..., timeout_sec=...)` skips responses during a post-reinforcement timeout.
 - Delay-discounting fits (Mazur, 1987; Rachlin, 2006)
 - Exponential demand-curve fits with P_max / O_max (Hursh & Silberberg, 2008)
 - Resistance-to-change / behavioral momentum estimation (Nevin, 1992)

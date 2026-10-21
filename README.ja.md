@@ -13,7 +13,7 @@ OKL v1 セッションログ（通常は `session-recorder` が生成）を読�
 - 単一選択双曲フィット (Herrnstein, 1970)
 - 並立スケジュールにおける選択配分分析
 - 反応潜時の要約統計量
-- Progressive Ratio ブレイクポイント検出 (Richardson & Roberts, 1996)
+- Progressive Ratio ブレイクポイント検出 (Richardson & Roberts, 1996)。ブレイクポイントは最後に完了した比率。MED-PC のプログラムによっては進行中の比率をブレイクポイント変数に入れるので、その値とは 1 段ずれる。`extract_step_ratios(..., timeout_sec=...)` は強化後タイムアウト中の反応を数えない。
 - 遅延割引モデルのフィット (Mazur, 1987; Rachlin, 2006)
 - 指数型需要曲線フィットと P_max / O_max (Hursh & Silberberg, 2008)
 - 行動慣性・変化への抵抗の推定 (Nevin, 1992)

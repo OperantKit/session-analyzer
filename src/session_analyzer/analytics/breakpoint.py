@@ -84,6 +84,10 @@ def detect_breakpoint(
 ) -> BreakpointResult:
     """Detect the breakpoint from a sequence of ratio completions.
 
+    The breakpoint reported here is the last *completed* ratio. Some
+    MED-PC programmes store the ratio in progress (not yet completed) in
+    their breakpoint variable, so their value is one step above this one.
+
     Parameters
     ----------
     completions : sequence of (int, float)

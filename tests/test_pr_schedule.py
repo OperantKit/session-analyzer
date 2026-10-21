@@ -46,6 +46,82 @@ def test_extract_step_ratios_no_responses() -> None:
     assert extract_step_ratios([], [1.0, 2.0]) == [0, 0]
 
 
+def _pr_with_timeout_presses(
+    requirements: list[int], *, stray_delay: float = 0.5
+) -> tuple[list[float], list[float]]:
+    """Synthesize a PR session with one stray press shortly after each reinforcer.
+
+    Each step's ``n`` counted presses are spaced 1 s apart and the
+    reinforcer coincides with the last one. After every reinforcer, one
+    extra press occurs ``stray_delay`` s later (inside a post-reinforcement
+    timeout, so the programme does not count it toward the next ratio).
+    """
+    responses: list[float] = []
+    reinforcers: list[float] = []
+    t = 0.0
+    for n in requirements:
+        if reinforcers:
+            responses.append(reinforcers[-1] + stray_delay)
+            t = reinforcers[-1] + 10.0
+        for _ in range(n):
+            t += 1.0
+            responses.append(t)
+        reinforcers.append(t)
+    return responses, reinforcers
+
+
+@pytest.mark.unit
+def test_extract_step_ratios_default_counts_timeout_presses() -> None:
+    responses, reinforcers = _pr_with_timeout_presses([1, 4, 7, 10, 13])
+    steps = extract_step_ratios(responses, reinforcers)
+    assert steps == [1, 5, 8, 11, 14]
+    assert classify_pr_schedule(steps).step_type == "unknown"
+
+
+@pytest.mark.unit
+def test_extract_step_ratios_timeout_excludes_post_reinforcer_presses() -> None:
+    responses, reinforcers = _pr_with_timeout_presses([1, 4, 7, 10, 13])
+    steps = extract_step_ratios(responses, reinforcers, timeout_sec=5.0)
+    assert steps == [1, 4, 7, 10, 13]
+    result = classify_pr_schedule(steps)
+    assert result.step_type == "linear"
+    assert result.current_requirement == 16
+
+
+@pytest.mark.unit
+def test_extract_step_ratios_timeout_keeps_press_at_reinforcer_time() -> None:
+    # The press that coincides with the reinforcer still completes that step.
+    responses = [1.0, 2.0, 3.0, 10.0]
+    assert extract_step_ratios(responses, [2.0, 10.0], timeout_sec=5.0) == [2, 1]
+
+
+@pytest.mark.unit
+def test_extract_step_ratios_timeout_boundary_is_open() -> None:
+    # A press exactly timeout_sec after the reinforcer counts again.
+    assert extract_step_ratios([1.0, 6.0, 7.0], [1.0, 7.0], timeout_sec=5.0) == [
+        1,
+        2,
+    ]
+
+
+@pytest.mark.unit
+def test_extract_step_ratios_reinforcer_inside_previous_timeout() -> None:
+    # Second reinforcer falls inside the first timeout: zero counted
+    # responses, and later steps are not double-counted.
+    responses = [1.0, 2.0, 3.0, 8.0, 9.0]
+    assert extract_step_ratios(responses, [1.0, 3.0, 9.0], timeout_sec=5.0) == [
+        1,
+        0,
+        2,
+    ]
+
+
+@pytest.mark.unit
+def test_extract_step_ratios_negative_timeout_rejected() -> None:
+    with pytest.raises(ValueError, match="timeout_sec"):
+        extract_step_ratios([1.0], [1.0], timeout_sec=-1.0)
+
+
 # ---------------------------------------------------------------------------
 # classify_pr_schedule
 # ---------------------------------------------------------------------------

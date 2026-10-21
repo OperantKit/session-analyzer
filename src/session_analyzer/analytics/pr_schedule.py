@@ -38,7 +38,7 @@ Ferrario, C. R., Gorny, G., Crombag, H. S., Li, Y., Kolb, B., &
 from __future__ import annotations
 
 import math
-from bisect import bisect_right
+from bisect import bisect_left, bisect_right
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
@@ -160,6 +160,8 @@ def _next_requirement(
 def extract_step_ratios(
     response_times: Sequence[float],
     reinforcement_times: Sequence[float],
+    *,
+    timeout_sec: float = 0.0,
 ) -> list[int]:
     """Extract the response requirement completed at each reinforcement.
 
@@ -175,13 +177,27 @@ def extract_step_ratios(
         Response timestamps (seconds), sorted ascending.
     reinforcement_times : sequence of float
         Reinforcement-delivery timestamps (seconds), sorted ascending.
+    timeout_sec : float, optional
+        Post-reinforcement timeout. Responses with
+        ``rf < t < rf + timeout_sec`` after a reinforcer at ``rf`` are not
+        counted toward the next ratio (many PR programmes ignore
+        responses during the reinforcer delivery / timeout). A response at
+        exactly ``rf`` still completes the step that ``rf`` reinforces.
+        Default ``0.0`` counts every response.
 
     Returns
     -------
     list of int
         One entry per reinforcer; the value is the response count that
         completed that step.
+
+    Raises
+    ------
+    ValueError
+        If ``timeout_sec`` is negative.
     """
+    if timeout_sec < 0.0:
+        raise ValueError(f"timeout_sec must be >= 0, got {timeout_sec}")
     if not reinforcement_times:
         return []
     ratios: list[int] = []
@@ -191,8 +207,12 @@ def extract_step_ratios(
         # the response stream is sorted ascending. (A response emitted
         # at exactly rf_time is treated as completing this step.)
         idx = bisect_right(response_times, rf_time)
-        ratios.append(idx - prev_idx)
-        prev_idx = idx
+        ratios.append(max(0, idx - prev_idx))
+        prev_idx = max(prev_idx, idx)
+        if timeout_sec > 0.0:
+            # Skip responses strictly inside (rf_time, rf_time + timeout_sec).
+            skip_to = bisect_left(response_times, rf_time + timeout_sec)
+            prev_idx = max(prev_idx, skip_to)
     return ratios
 
 
