@@ -10,7 +10,7 @@ provides two analyses:
 - :func:`compute_quarter_life` — Herrnstein & Morse (1957) quarter-life
   index: the proportion of the inter-reinforcement interval elapsed
   before 25% of the interval's responses have occurred. Values near
-  0.5 indicate uniform responding; values above 0.5 indicate an
+  0.25 indicate uniform responding; values well above 0.25 indicate an
   acceleration ("scallop") pattern typical of FI schedules.
 
 References
@@ -128,8 +128,9 @@ def compute_quarter_life(
 
     For each inter-reinforcement interval, the quarter-life is the
     fraction of the interval elapsed by the time ``quantile`` (default
-    0.25) of that interval's responses have occurred. Values near 0.5
-    indicate uniform responding; values > 0.5 indicate an FI-style
+    0.25) of that interval's responses have occurred. Values near
+    ``quantile`` (about 0.25 by default) indicate uniform responding;
+    values well above it indicate an FI-style
     scallop (acceleration toward reinforcement). Intervals with fewer
     than two responses are skipped.
 
