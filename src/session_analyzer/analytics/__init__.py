@@ -155,6 +155,14 @@ from .single_case import (
     tau_u,
     tau_u_table,
 )
+from .visual_analysis import (
+    PhaseContrast,
+    PhaseDescriptives,
+    VisualAnalysis,
+    contrast_phases,
+    describe_phases,
+    visual_analysis,
+)
 from .stimulus_control import (
     DiscriminationRatio,
     PeakShiftResult,
@@ -248,6 +256,12 @@ __all__ = [
     "tau",
     "tau_u",
     "tau_u_table",
+    "PhaseContrast",
+    "PhaseDescriptives",
+    "VisualAnalysis",
+    "contrast_phases",
+    "describe_phases",
+    "visual_analysis",
     "StepType",
     "LawsOfCovariancePrediction",
     "MatchingInductionParameters",

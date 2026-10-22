@@ -117,7 +117,7 @@ print(round(fit.sensitivity, 3), round(fit.bias, 3), round(fit.r_squared, 3))  #
 - **セッション記録をそのまま読む.** OKL v1 の解析は session-recorder（`iter_records`）に任せるので、分析は記録されたのと同じイベントを見る。復活 (renewal) の分析が使うフェーズの区切りも含む。
 - **慣習どおりの累積記録.** リセットつきの階段状のペン、一定角度の強化子の印、イベントペン。DRL / DRO 向けに IRT で色分けした版もある。
 - **実験計画に応じた提案.** `session_analyzer.suggester` は contingency-dsl の AST から、その計画で計算する価値のある分析を返す（例: `Conc(VI, VI)` なら対応法則）。
-- **テスト済み.** 488 件のテスト（`pytest`）と、この README の例。
+- **テスト済み.** 560 件のテスト（`pytest`）と、この README の例。
 
 ## 分析カタログ
 
@@ -169,6 +169,9 @@ from session_analyzer.analytics import (
     ObservingMetrics, ConditionedReinforcementStrength,
     compute_u_value, VariabilityMetrics,
     analyze_lag_variability, compute_lag_pass_rate, LagVariabilityMetrics,
+    SingleCaseSeries, nonoverlap, NonOverlapResult, nap, pnd, tau, tau_u, tau_u_table,
+    visual_analysis, describe_phases, contrast_phases,
+    VisualAnalysis, PhaseDescriptives, PhaseContrast,
 )
 ```
 
@@ -181,10 +184,58 @@ session-analyzer latency path/to/session.txt --reference-type reinforcer_start
 session-analyzer breakpoint path/to/session.txt --pause-threshold 300
 session-analyzer discounting delays_values.csv --amount 100 --model hyperbolic
 session-analyzer demand prices_consumption.csv --k 3.0
+session-analyzer single-case cases.csv --plot cases.png
 ```
 
 分析サブコマンドは JSON を標準出力に出力する。CSV 入力は `discounting`
 が `delay,value`、`demand` が `price,consumption` のカラムを要求する。
+`single-case` は `phase,value`（行はセッション順）と、任意で `case`（ケースごとに
+1 系列）を要求する。オプションは `--improvement increase|decrease`、
+`--by run|label`、`--a` / `--b`（NAP・PND・Tau-U で比べる相のラベルをカンマ区切りで）、
+`--method`（Tau-U の分母）、`--plot`、`--theme`。定義できない値（1 セッションしか
+ない相の傾きなど）は `null` になる。比べられないケース（多層ベースラインでまだ
+ベースラインにいる段など）は `"nonoverlap": null` と `"error"` の文を返し、ほかの
+ケースはそのまま出す。NAP・PND・Tau-U は `--a` と `--b`（既定は最初の 2 つのラベル）を
+比べるので、条件交替で条件が 3 つ以上あるときは組ごとに実行する。
+
+## 単一事例デザイン（反転・多層ベースライン・条件交替）
+
+セッションごとに 1 つの値と、その相のラベルを与える。`visual_analysis` は、
+相ごとに目視判定の材料 — 水準（平均・中央値）、傾向（最小二乗の傾きと切片。
+scan の `trend()` と同じく、セッション番号は各相の最初を 0 とする）、変動
+（傾向線のまわりの SD・SD・範囲）— を返し、隣り合う相の組ごとに、水準と傾向の
+変化、即時性（後の相の最初の 3 点の平均から前の相の最後の 3 点の平均を引いた値）、
+重なり（後の相の点のうち前の相の範囲に入る割合）を、NAP・PND と並べて返す。
+定義は What Works Clearinghouse の単一事例デザイン基準（Kratochwill et al., 2010）
+に従う。`nonoverlap` は NAP・PND・Tau・Tau-U（公表されている 3 通りの分母）を返す。
+
+```python
+from session_analyzer.analytics import SingleCaseSeries, nonoverlap, visual_analysis
+from session_analyzer.visualizer import render_single_case_plot
+
+case = SingleCaseSeries(
+    values=(54, 53, 56, 58, 52, 61, 62, 71, 66, 64, 78, 70, 74, 82, 77),
+    phases=("A",) * 5 + ("B",) * 10,
+    name="Case 1",
+)
+va = visual_analysis(case)
+print([(p.label, round(p.mean, 1), round(p.slope, 2)) for p in va.phases])
+print(round(va.contrasts[0].immediacy, 2), va.contrasts[0].overlap)
+print(round(nonoverlap(case).nap, 3))
+render_single_case_plot(case, "case1.png")
+```
+
+相は同じラベルの連続した並びで区切るので、`A, A, B, B, A, A, B, B` と付けた反転
+デザインは 4 相・3 組の比較になる。条件交替では `by="label"` を渡す（条件ごとに
+まとめ、比較は出さない）。複数の系列を渡すと、セッションの軸をそろえた段に
+積んで描く（多層ベースライン）:
+
+![相の区切り線・水準（点線）・傾向（破線）を引いた多層ベースラインの図](docs/assets/figures/single_case.png)
+
+図は [`docs/examples/single_case_multiple_baseline.csv`](docs/examples/single_case_multiple_baseline.csv)
+（合成データ）から描いた。比較は系列の `improvement` の向きで数えるので、反転
+デザインの撤去の比較（B から A）では NAP・PND が低く出るのが想定どおり。いずれも目視判定の補助であり、効果が示されたかの
+判断は分析者に残す。
 
 ## DSL 駆動の分析提案（`operantkit-frontend` 連携用）
 
@@ -333,3 +384,6 @@ const { suggestions }: SuggestResponse = await fetch(`${VIZ}/suggest`, {
 - Schlinger, H. D., Derenne, A., & Baron, A. (2008). What 50 years of research tell us about pausing under ratio schedules of reinforcement. *The Behavior Analyst*, 31(1), 39-60. https://doi.org/10.1007/BF03392160
 - Shepard, R. N. (1987). Toward a universal law of generalization for psychological science. *Science*, 237(4820), 1317-1323. https://doi.org/10.1126/science.3629243
 - Shull, R. L., Gaynor, S. T., & Grimes, J. A. (2001). Response rate viewed as engagement bouts: effects of relative reinforcement and schedule type. *Journal of the Experimental Analysis of Behavior*, 75(3), 247-274. https://doi.org/10.1901/jeab.2001.75-247
+- Kratochwill, T. R., Hitchcock, J. H., Horner, R. H., Levin, J. R., Odom, S. L., Rindskopf, D. M., & Shadish, W. R. (2010). *Single-case designs technical documentation*. What Works Clearinghouse. https://ies.ed.gov/ncee/wwc/Docs/ReferenceResources/wwc_scd.pdf
+- Parker, R. I., & Vannest, K. J. (2009). An improved effect size for single-case research: Nonoverlap of all pairs. *Behavior Therapy*, 40(4), 357-367. https://doi.org/10.1016/j.beth.2008.10.006
+- Parker, R. I., Vannest, K. J., Davis, J. L., & Sauber, S. B. (2011). Combining nonoverlap and trend for single-case research: Tau-U. *Behavior Therapy*, 42(2), 284-299. https://doi.org/10.1016/j.beth.2010.08.006

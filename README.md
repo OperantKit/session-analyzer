@@ -117,7 +117,7 @@ Short scripts usually get a few things subtly wrong; this package fixes them in 
 - **Reads the session log directly.** Parsing of OKL v1 is delegated to session-recorder (`iter_records`), so analyses see the same events that were recorded, including the phase markers that the renewal analysis uses.
 - **Cumulative records drawn the conventional way.** A stepping pen with reset, reinforcer pips at a fixed angle, and an event pen, plus an IRT-coded variant for DRL / DRO.
 - **Design-aware suggestions.** `session_analyzer.suggester` maps a contingency-dsl AST to the analyses worth computing for that design (for example, matching for `Conc(VI, VI)`).
-- **Tested.** 488 tests (`pytest`), plus the examples in this README.
+- **Tested.** 560 tests (`pytest`), plus the examples in this README.
 
 ## Analysis catalog
 
@@ -169,6 +169,9 @@ from session_analyzer.analytics import (
     ObservingMetrics, ConditionedReinforcementStrength,
     compute_u_value, VariabilityMetrics,
     analyze_lag_variability, compute_lag_pass_rate, LagVariabilityMetrics,
+    SingleCaseSeries, nonoverlap, NonOverlapResult, nap, pnd, tau, tau_u, tau_u_table,
+    visual_analysis, describe_phases, contrast_phases,
+    VisualAnalysis, PhaseDescriptives, PhaseContrast,
 )
 ```
 
@@ -181,11 +184,64 @@ session-analyzer latency path/to/session.txt --reference-type reinforcer_start
 session-analyzer breakpoint path/to/session.txt --pause-threshold 300
 session-analyzer discounting delays_values.csv --amount 100 --model hyperbolic
 session-analyzer demand prices_consumption.csv --k 3.0
+session-analyzer single-case cases.csv --plot cases.png
 ```
 
 All analytic subcommands emit JSON to stdout. CSV inputs for
 ``discounting`` require columns ``delay,value``; ``demand`` requires
-``price,consumption``.
+``price,consumption``; ``single-case`` requires ``phase,value`` (rows in
+session order) and optionally ``case`` (one series per case). Its options:
+``--improvement increase|decrease``, ``--by run|label``, ``--a`` / ``--b``
+(comma-separated phase labels for NAP / PND / Tau-U), ``--method`` (Tau-U
+denominator), ``--plot`` and ``--theme``. Undefined values (for example the
+slope of a one-session phase) are ``null``. A case whose phases cannot be
+compared (for example a multiple-baseline tier still in baseline) gets
+``"nonoverlap": null`` and an ``"error"`` message; the other cases are still
+reported. NAP / PND / Tau-U compare ``--a`` with ``--b`` (by default the first
+two labels), so with three or more alternating conditions run once per pair.
+
+## Single-case designs (reversal, multiple baseline, alternating treatments)
+
+One value per session, each labelled with its phase. `visual_analysis`
+returns, for each phase, the quantities visual inspection rests on —
+level (mean, median), trend (least-squares slope and intercept; session
+numbers start at 0 in each phase, as in scan `trend()`) and variability
+(SD about the trend line, SD, range) — and, for each pair of adjacent
+phases, the change in level and trend, immediacy (first three points of
+the later phase minus last three of the earlier one) and overlap
+(proportion of the later phase inside the earlier phase's range), with
+NAP and PND alongside. The definitions follow the What Works
+Clearinghouse single-case design standards (Kratochwill et al., 2010).
+`nonoverlap` adds NAP, PND, Tau and Tau-U (three published denominators).
+
+```python
+from session_analyzer.analytics import SingleCaseSeries, nonoverlap, visual_analysis
+from session_analyzer.visualizer import render_single_case_plot
+
+case = SingleCaseSeries(
+    values=(54, 53, 56, 58, 52, 61, 62, 71, 66, 64, 78, 70, 74, 82, 77),
+    phases=("A",) * 5 + ("B",) * 10,
+    name="Case 1",
+)
+va = visual_analysis(case)
+print([(p.label, round(p.mean, 1), round(p.slope, 2)) for p in va.phases])
+print(round(va.contrasts[0].immediacy, 2), va.contrasts[0].overlap)
+print(round(nonoverlap(case).nap, 3))
+render_single_case_plot(case, "case1.png")
+```
+
+Phases are contiguous runs, so a reversal labelled `A, A, B, B, A, A, B, B`
+yields four phases and three contrasts. For alternating treatments pass
+`by="label"` (each condition pooled, no contrasts). Several series are
+stacked as panels sharing the session axis (multiple baseline):
+
+![Multiple-baseline graph with phase-change lines, level (dotted) and trend (dashed) lines](docs/assets/figures/single_case.png)
+
+The figure is drawn from [`docs/examples/single_case_multiple_baseline.csv`](docs/examples/single_case_multiple_baseline.csv)
+(synthetic data). Contrasts use the series' `improvement` direction, so in
+a reversal the withdrawal contrast (B to A) is expected to show low NAP /
+PND. These are aids to visual inspection; deciding whether
+an effect was demonstrated is left to the analyst.
 
 ## DSL-driven analysis suggestions (for `operantkit-frontend`)
 
@@ -356,3 +412,6 @@ Unknown types are ignored.
 - Schlinger, H. D., Derenne, A., & Baron, A. (2008). What 50 years of research tell us about pausing under ratio schedules of reinforcement. *The Behavior Analyst*, 31(1), 39-60. https://doi.org/10.1007/BF03392160
 - Shepard, R. N. (1987). Toward a universal law of generalization for psychological science. *Science*, 237(4820), 1317-1323. https://doi.org/10.1126/science.3629243
 - Shull, R. L., Gaynor, S. T., & Grimes, J. A. (2001). Response rate viewed as engagement bouts: effects of relative reinforcement and schedule type. *Journal of the Experimental Analysis of Behavior*, 75(3), 247-274. https://doi.org/10.1901/jeab.2001.75-247
+- Kratochwill, T. R., Hitchcock, J. H., Horner, R. H., Levin, J. R., Odom, S. L., Rindskopf, D. M., & Shadish, W. R. (2010). *Single-case designs technical documentation*. What Works Clearinghouse. https://ies.ed.gov/ncee/wwc/Docs/ReferenceResources/wwc_scd.pdf
+- Parker, R. I., & Vannest, K. J. (2009). An improved effect size for single-case research: Nonoverlap of all pairs. *Behavior Therapy*, 40(4), 357-367. https://doi.org/10.1016/j.beth.2008.10.006
+- Parker, R. I., Vannest, K. J., Davis, J. L., & Sauber, S. B. (2011). Combining nonoverlap and trend for single-case research: Tau-U. *Behavior Therapy*, 42(2), 284-299. https://doi.org/10.1016/j.beth.2010.08.006

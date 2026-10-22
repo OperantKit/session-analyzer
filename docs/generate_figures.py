@@ -1418,6 +1418,33 @@ def fig_irt_coded_cumulative() -> None:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Single-case design: phase-change lines, level and trend
+# ---------------------------------------------------------------------------
+
+
+def fig_single_case() -> None:
+    import csv
+
+    from session_analyzer.analytics.single_case import SingleCaseSeries
+    from session_analyzer.visualizer.single_case import render_single_case_plot
+
+    rows: dict[str, tuple[list[float], list[str]]] = {}
+    with open(Path(__file__).parent / "examples" / "single_case_multiple_baseline.csv") as f:
+        for row in csv.DictReader(f):
+            values, phases = rows.setdefault(row["case"], ([], []))
+            values.append(float(row["value"]))
+            phases.append(row["phase"])
+    cases = [
+        SingleCaseSeries(values=tuple(v), phases=tuple(p), name=name)
+        for name, (v, p) in rows.items()
+    ]
+    render_single_case_plot(
+        cases, OUT / "single_case.png", theme=THEME, fmt="png", ylabel="Responses / min"
+    )
+    print("  wrote single_case.png")
+
+
 FIGURES = {
     "cumulative_record": fig_cumulative_record,
     "post_reinforcement_pause": fig_prp,
@@ -1467,6 +1494,7 @@ FIGURES = {
     "hierarchical_gml": fig_hierarchical_gml,
     "hmm_segment": fig_hmm,
     "irt_coded_cumulative_record": fig_irt_coded_cumulative,
+    "single_case": fig_single_case,
 }
 
 

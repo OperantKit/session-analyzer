@@ -165,3 +165,131 @@ def test_demand_subcommand_fits_from_csv(
 def test_unknown_subcommand_rejected() -> None:
     with pytest.raises(SystemExit):
         main(["bogus"])
+
+
+def _write_single_case_csv(path: Path, rows: list[tuple[str, str, float]]) -> None:
+    lines = ["case,phase,value"] + [f"{c},{p},{v}" for c, p, v in rows]
+    path.write_text("\n".join(lines) + "\n")
+
+
+@pytest.mark.integration
+def test_single_case_subcommand_reports_each_case(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # scan ``exampleAB`` case "Johanna" and Parker et al. (2011) Figure 2.
+    johanna = [54, 53, 56, 58, 52, 61, 62, 71, 66, 64, 78, 70, 74, 82, 77, 86, 68, 80, 86, 87]
+    rows = [("Johanna", "A" if i < 5 else "B", v) for i, v in enumerate(johanna)]
+    parker = [2, 3, 5, 3, 4, 5, 5, 7, 6]
+    rows += [("Parker", "A" if i < 4 else "B", v) for i, v in enumerate(parker)]
+    csv_path = tmp_path / "cases.csv"
+    _write_single_case_csv(csv_path, rows)
+    figure = tmp_path / "cases.png"
+
+    rc = main(["single-case", str(csv_path), "--plot", str(figure)])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert [c["name"] for c in out["cases"]] == ["Johanna", "Parker"]
+    johanna_out, parker_out = out["cases"]
+    phase_a, phase_b = johanna_out["visual_analysis"]["phases"]
+    assert phase_a["slope"] == pytest.approx(0.100, abs=5e-4)
+    assert phase_b["intercept"] == pytest.approx(62.758, abs=5e-4)
+    (contrast,) = parker_out["visual_analysis"]["contrasts"]
+    assert contrast["overlap"] == pytest.approx(0.6)
+    assert parker_out["nonoverlap"]["nap"] == pytest.approx(0.9)
+    assert figure.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+@pytest.mark.integration
+def test_single_case_subcommand_without_case_column_and_nan_as_null(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    csv_path = tmp_path / "one.csv"
+    csv_path.write_text("phase,value\nA,1\nB,2\nB,3\n")
+
+    rc = main(["single-case", str(csv_path), "--improvement", "decrease"])
+    assert rc == 0
+    raw = capsys.readouterr().out
+    assert "NaN" not in raw  # strict JSON
+    (case,) = json.loads(raw)["cases"]
+    assert case["name"] is None
+    assert case["visual_analysis"]["improvement"] == "decrease"
+    assert case["visual_analysis"]["phases"][0]["sd"] is None
+
+
+@pytest.mark.integration
+def test_single_case_subcommand_alternating_treatments(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    csv_path = tmp_path / "atd.csv"
+    csv_path.write_text("phase,value\nA,1\nB,4\nA,2\nB,6\nA,3\nB,8\n")
+
+    rc = main(["single-case", str(csv_path), "--by", "label"])
+    assert rc == 0
+    (case,) = json.loads(capsys.readouterr().out)["cases"]
+    assert case["visual_analysis"]["contrasts"] == []
+    assert case["nonoverlap"]["nap"] == 1.0
+    assert case["nonoverlap"]["tau_u"] is None
+
+
+@pytest.mark.integration
+def test_single_case_subcommand_selects_phases(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    csv_path = tmp_path / "abab.csv"
+    csv_path.write_text("phase,value\nA1,1\nA1,2\nB1,5\nB1,6\nA2,2\nA2,1\nB2,7\nB2,6\n")
+
+    rc = main(["single-case", str(csv_path), "--a", "A1,A2", "--b", "B1,B2"])
+    assert rc == 0
+    (case,) = json.loads(capsys.readouterr().out)["cases"]
+    assert case["nonoverlap"]["a_labels"] == ["A1", "A2"]
+    assert case["nonoverlap"]["n_b"] == 4
+    assert len(case["visual_analysis"]["contrasts"]) == 3
+
+
+@pytest.mark.unit
+def test_single_case_subcommand_rejects_missing_columns(tmp_path: Path) -> None:
+    csv_path = tmp_path / "bad.csv"
+    csv_path.write_text("condition,score\nA,1\n")
+    with pytest.raises(SystemExit, match="phase"):
+        main(["single-case", str(csv_path)])
+
+
+@pytest.mark.integration
+def test_single_case_subcommand_keeps_other_cases_when_one_cannot_be_compared(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Multiple baseline: case Y has not entered intervention yet.
+    csv_path = tmp_path / "mb.csv"
+    csv_path.write_text("case,phase,value\nX,A,1\nX,A,2\nX,B,5\nY,A,1\nY,A,2\n")
+
+    rc = main(["single-case", str(csv_path)])
+    assert rc == 0
+    x, y = json.loads(capsys.readouterr().out)["cases"]
+    assert x["nonoverlap"]["nap"] == 1.0 and x["error"] is None
+    assert y["nonoverlap"] is None
+    assert "two phase labels" in y["error"]
+    assert y["visual_analysis"]["phases"][0]["n"] == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "body", ["phase,value\nA,1\nB,\n", "phase,value\nA,1\nB,nan\n", "phase,value\nA,1\nB\n"]
+)
+def test_single_case_subcommand_reports_bad_rows(tmp_path: Path, body: str) -> None:
+    csv_path = tmp_path / "bad.csv"
+    csv_path.write_text(body)
+    with pytest.raises(SystemExit, match="line 3"):
+        main(["single-case", str(csv_path)])
+
+
+@pytest.mark.integration
+def test_single_case_subcommand_reads_utf8_bom_and_strips_spaces(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    csv_path = tmp_path / "excel.csv"
+    csv_path.write_bytes("﻿phase, value\n A ,1\nB,2\n".encode())
+
+    rc = main(["single-case", str(csv_path), "--a", "A"])
+    assert rc == 0
+    (case,) = json.loads(capsys.readouterr().out)["cases"]
+    assert [p["label"] for p in case["visual_analysis"]["phases"]] == ["A", "B"]
