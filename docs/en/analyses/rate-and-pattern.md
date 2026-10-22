@@ -26,10 +26,12 @@ within a session and *how* they are clustered locally.
 
 ![PRP distribution with mean line](../../assets/figures/post_reinforcement_pause.png)
 
-Related: `compute_quarter_life(responses, deadline)` returns the time
-at which the subject has emitted 25 % of the final response count
-within a bin — a scale-free index of FI scalloping (Herrnstein &
-Morse, 1957).
+Related: `compute_quarter_life(reinforcement_times, response_times)`
+returns, for each inter-reinforcement interval, the fraction of the
+interval elapsed when 25 % of that interval's responses have occurred
+— a scale-free index of FI scalloping (Herrnstein & Morse, 1957).
+Uniform responding gives about 0.25; values well above 0.25 indicate a
+scallop.
 
 ### `irt_distribution` — bout decomposition via `BoutMetrics`
 

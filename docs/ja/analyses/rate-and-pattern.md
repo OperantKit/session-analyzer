@@ -26,8 +26,10 @@
 
 ![PRP 分布と平均線](../../assets/figures/post_reinforcement_pause.png)
 
-関連: `compute_quarter_life(responses, deadline)` は bin 内で最終応答数の
-25% に達した時刻を返す（Herrnstein & Morse, 1957 の FI scalloping 指標）。
+関連: `compute_quarter_life(reinforcement_times, response_times)` は、強化間間隔ごとに、
+その間隔内の反応数の 25% に達した時点で間隔の何割が経過していたかを返す
+（Herrnstein & Morse, 1957 の FI scalloping 指標）。一様な反応では約 0.25、
+0.25 より十分大きい値がスキャロップを示す。
 
 ### `irt_distribution` — `BoutMetrics` によるバウト分解
 
