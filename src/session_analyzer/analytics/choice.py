@@ -222,7 +222,12 @@ def classify_choice_mode(
     if exclusive.is_exclusive:
         return ChoiceMode.EXCLUSIVE
 
-    spread = max(allocation.proportions) - min(allocation.proportions)
+    # From counts, so that a spread of exactly the tolerance (55 / 45 with
+    # 0.10) is not pushed above it by 0.55 - 0.45 in floating point.
+    if allocation.total > 0:
+        spread = (max(allocation.counts) - min(allocation.counts)) / allocation.total
+    else:
+        spread = max(allocation.proportions) - min(allocation.proportions)
     if spread <= matching_tolerance:
         return ChoiceMode.MATCHING
 

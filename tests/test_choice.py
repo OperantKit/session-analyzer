@@ -112,3 +112,36 @@ class TestClassifyChoiceMode:
         assert ChoiceMode.EXCLUSIVE.value == "exclusive"
         assert ChoiceMode.MATCHING.value == "matching"
         assert ChoiceMode.INTERMEDIATE.value == "intermediate"
+
+
+# ---------------------------------------------------------------------------
+# Hand computations and threshold boundaries
+# ---------------------------------------------------------------------------
+#
+# No published value: Herrnstein (1961) and Herrnstein & Loveland (1975)
+# define relative response rate B1 / (B1 + B2); the 0.95 exclusive-choice
+# threshold and the 0.10 matching spread are this module's conventions
+# (module docstring). The checks are hand computations at the boundaries,
+# which the docstrings define as inclusive (">=", "<=").
+
+
+@pytest.mark.unit
+def test_allocation_matches_hand_computation_for_three_operanda() -> None:
+    alloc = compute_choice_allocation([30, 50, 20])
+    assert alloc.proportions == pytest.approx((0.3, 0.5, 0.2), rel=1e-12)
+    assert alloc.total == 100
+
+
+@pytest.mark.unit
+def test_exclusive_threshold_is_inclusive_at_exactly_095() -> None:
+    result = detect_exclusive_choice(compute_choice_allocation([95, 5]))
+    assert result.is_exclusive
+    assert result.dominant_operandum == 0
+
+
+@pytest.mark.unit
+def test_matching_tolerance_is_inclusive_at_exactly_010() -> None:
+    """55 / 45 has a spread of exactly 10 points; ``<=`` must classify it as
+    matching even though 0.55 - 0.45 in floating point exceeds 0.1."""
+    assert classify_choice_mode(compute_choice_allocation([55, 45])) is ChoiceMode.MATCHING
+    assert classify_choice_mode(compute_choice_allocation([56, 44])) is ChoiceMode.INTERMEDIATE

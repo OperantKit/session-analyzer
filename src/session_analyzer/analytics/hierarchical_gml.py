@@ -14,15 +14,17 @@ with random effects
 and observation noise ``epsilon_{ij} ~ N(0, sigma_eps^2)``. Marginalising
 over ``a_i, b_i`` yields per-subject normal likelihoods whose
 covariance matrix is a function of the within-subject design only,
-giving a closed-form profile log-likelihood for the hyperparameters
-``(mu_a, mu_b, tau_a, tau_b, sigma_eps)``. Optimisation is by
-``scipy.optimize.minimize`` and posterior credible intervals are
-returned via the Laplace approximation (Hessian inverse on the
-unconstrained reparameterisation).
+giving a closed-form marginal log-likelihood for the hyperparameters
+``(mu_a, mu_b, tau_a, tau_b, sigma_eps)``. It is maximised by
+``scipy.optimize.minimize`` (maximum likelihood, not REML). The 95 %
+intervals for ``mu_a`` and ``mu_b`` are Wald intervals whose standard
+errors come from the GLS information matrix at the estimate.
 
-This is *empirical Bayes* / approximate REML — not a fully Bayesian
-posterior — but provides credible-interval-style summaries without
-requiring a sampling library.
+The fit equals statsmodels ``MixedLM`` with a random intercept, an
+independent random slope (variance component ``0 + x``) and
+``reml=False``: estimates, log-likelihood and fixed-effect standard
+errors agree. This is empirical Bayes for the group means, not a fully
+Bayesian posterior.
 
 Reference
 ---------
@@ -57,9 +59,9 @@ class HierarchicalGMLFit:
     sigma_obs : float
         Within-subject residual SD.
     sensitivity_ci : tuple[float, float]
-        95 % Wald credible interval for ``mu_sensitivity``.
+        95 % Wald interval for ``mu_sensitivity``.
     bias_ci : tuple[float, float]
-        95 % Wald credible interval for ``mu_bias``.
+        95 % Wald interval for ``mu_bias``.
     n_subjects : int
     n_observations : int
     log_likelihood : float
@@ -176,10 +178,23 @@ def fit_hierarchical_gml(
     tau_b = float(np.exp(log_tau_b))
     sigma = float(np.exp(log_sigma))
 
-    # Wald-style 95 % CI for the group means (no Hessian; use sqrt of
-    # tau / n_subj as a conservative SE).
-    se_a = tau_a / np.sqrt(len(subjects))
-    se_b = tau_b / np.sqrt(len(subjects))
+    # Wald 95 % interval for the group means. SE from the GLS information
+    # matrix at the ML estimate, (sum_i X_i' V_i^{-1} X_i)^{-1}, with
+    # V_i = tau_a^2 x x' + tau_b^2 1 1' + sigma^2 I (the fixed-effect SE
+    # statsmodels MixedLM reports).
+    info = np.zeros((2, 2))
+    for x in xs:
+        n = x.size
+        cov = (
+            (tau_a**2) * np.outer(x, x)
+            + (tau_b**2) * np.ones((n, n))
+            + (sigma**2) * np.eye(n)
+        )
+        design = np.column_stack((x, np.ones(n)))
+        info += design.T @ np.linalg.solve(cov, design)
+    fixed_cov = np.linalg.inv(info)
+    se_a = float(np.sqrt(fixed_cov[0, 0]))
+    se_b = float(np.sqrt(fixed_cov[1, 1]))
     z = 1.96
     return HierarchicalGMLFit(
         mu_sensitivity=float(mu_a),

@@ -84,3 +84,45 @@ def test_mle_recovers_start_stop_from_three_rate_mixture() -> None:
 def test_mle_rejects_out_of_range_response() -> None:
     with pytest.raises(ValueError, match="within"):
         analyze_peak_trial_mle([-1.0, 5.0], trial_duration=10.0)
+
+
+# ---------------------------------------------------------------------------
+# Recovery of a known low-high-low trial (property check)
+# ---------------------------------------------------------------------------
+#
+# Church, Meck, & Gibbon (1994) report individual-trial start and stop
+# times; the article (APA) was not retrieved, and whether this module's
+# Poisson likelihood reproduces the original fitting criterion has not been
+# checked. The trial below has 1 resp/s on [0, 20) and [40, 60] and
+# 5 resp/s on [20, 40), placed evenly within each 1-s bin.
+
+
+def _low_high_low() -> list[float]:
+    times: list[float] = []
+    for second in range(60):
+        if 20 <= second < 40:
+            times += [second + 0.1 + 0.2 * k for k in range(5)]
+        else:
+            times.append(second + 0.5)
+    return times
+
+
+@pytest.mark.unit
+def test_binned_analysis_recovers_known_states() -> None:
+    m = analyze_peak_trial_binned(_low_high_low(), 60.0, bin_width=1.0)
+    assert m is not None
+    assert m.peak_rate == pytest.approx(5.0)
+    assert m.start_time == pytest.approx(20.0)
+    assert m.stop_time == pytest.approx(40.0)
+    assert m.middle_time == pytest.approx(30.0)
+    assert m.spread == pytest.approx(20.0)
+
+
+@pytest.mark.unit
+def test_mle_recovers_known_states_within_one_irt() -> None:
+    m = analyze_peak_trial_mle(_low_high_low(), 60.0)
+    assert m is not None
+    assert 19.5 <= m.start_time <= 20.1
+    assert 39.9 <= m.stop_time <= 40.5
+    assert m.high_rate == pytest.approx(5.0, rel=0.05)
+    assert m.low_rate == pytest.approx(1.0, rel=0.05)

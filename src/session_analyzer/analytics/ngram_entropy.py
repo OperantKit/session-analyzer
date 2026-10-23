@@ -14,10 +14,10 @@ sequence frequencies), conditional and order-N entropies expose the
 
 References
 ----------
-Hopson, J. W., Burt, D. B., & Hopson, J. M. (2002). RGCalc: A program
-    for calculating randomization indices. *Behavior Research
-    Methods, Instruments, & Computers*, *34*(1), 127-128.
-    https://doi.org/10.3758/BF03195461
+Towse, J. N., & Neil, D. (1998). Analyzing human random generation
+    behavior: A review of methods used and a computer program for
+    describing performance. *Behavior Research Methods, Instruments,
+    & Computers*, *30*(4), 583-591. https://doi.org/10.3758/BF03209475
 
 Cover, T. M., & Thomas, J. A. (2006). *Elements of information
     theory* (2nd ed.). Wiley.

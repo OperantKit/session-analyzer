@@ -29,6 +29,6 @@
 - **テーマ** — U-value を超えて系列依存性を分解する。`compute_block_entropy(n)` は長さ `n` 部分列の Shannon エントロピー。`compute_conditional_entropy(n)` は `h_n = H_{n+1} - H_n`（直前 `n` 文脈下の次記号の不確実性）。`estimate_markov_order` はエントロピーレート平坦化を Markov 次数の発見的推定として返す。
 - **式** — `H_n = -Σ p(s_n) · log₂ p(s_n)`; `h_n = H_{n+1} − H_n`
 - **出力** — `BlockEntropy(order=2, entropy_bits=1.94, n_blocks=199, n_unique_blocks=4)`、`MarkovOrderEstimate(estimated_order=1, h_rates=(1.0, 0.61, 0.59, 0.59, 0.59), tolerance=0.05, converged=True)`
-- **引用** — Hopson, J. W., Burt, D. B., & Hopson, J. M. (2002). RGCalc. *Behav. Res. Methods Instrum. Comput.*, 34(1), 127-128. <https://doi.org/10.3758/BF03195461> / Cover, T. M., & Thomas, J. A. (2006). *Elements of information theory* (2nd ed.). Wiley.
+- **引用** — Towse, J. N., & Neil, D. (1998). Analyzing human random generation behavior: A review of methods used and a computer program for describing performance. *Behav. Res. Methods Instrum. Comput.*, 30(4), 583-591. <https://doi.org/10.3758/BF03209475> / Cover, T. M., & Thomas, J. A. (2006). *Elements of information theory* (2nd ed.). Wiley.
 
 ![次数 n に対するブロックエントロピー成長](../../assets/figures/ngram_entropy.png)

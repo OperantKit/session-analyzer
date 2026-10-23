@@ -14,7 +14,9 @@ Two complementary analyses are provided:
 - :func:`analyze_peak_trial_mle` — three-state maximum-likelihood
   analysis (Church, Meck, & Gibbon, 1994) that estimates start (s1)
   and stop (s2) times under the assumption of low-high-low Poisson
-  response rates.
+  response rates. The likelihood is this module's formulation of the
+  low-high-low model; it has not been checked against the fitting
+  criterion in the original article.
 
 References
 ----------

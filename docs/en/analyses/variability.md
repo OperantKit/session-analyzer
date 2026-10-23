@@ -30,6 +30,6 @@ how that distribution responds to a Lag-N reinforcement requirement.
 - **Theme** — Decomposes sequence dependency beyond the U-value. `compute_block_entropy(n)` is the Shannon entropy of length-`n` substrings. `compute_conditional_entropy(n)` returns `h_n = H_{n+1} - H_n`. `estimate_markov_order` uses the entropy-rate plateau as a heuristic Markov-order estimate.
 - **Equations** — `H_n = -Σ p(s_n) · log₂ p(s_n)`; `h_n = H_{n+1} − H_n`
 - **Output** — `BlockEntropy(order=2, entropy_bits=1.94, n_blocks=199, n_unique_blocks=4)`; `MarkovOrderEstimate(estimated_order=1, h_rates=(1.0, 0.61, 0.59, 0.59, 0.59), tolerance=0.05, converged=True)`
-- **References** — Hopson, J. W., Burt, D. B., & Hopson, J. M. (2002). RGCalc. *Behav. Res. Methods Instrum. Comput.*, 34(1), 127-128. <https://doi.org/10.3758/BF03195461> — Cover, T. M., & Thomas, J. A. (2006). *Elements of information theory* (2nd ed.). Wiley.
+- **References** — Towse, J. N., & Neil, D. (1998). Analyzing human random generation behavior: A review of methods used and a computer program for describing performance. *Behav. Res. Methods Instrum. Comput.*, 30(4), 583-591. <https://doi.org/10.3758/BF03209475> — Cover, T. M., & Thomas, J. A. (2006). *Elements of information theory* (2nd ed.). Wiley.
 
 ![Block entropy growth across order n](../../assets/figures/ngram_entropy.png)

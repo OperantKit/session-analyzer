@@ -109,3 +109,34 @@ def test_single_alternative_raises_on_length_mismatch() -> None:
 def test_single_alternative_raises_on_insufficient_data() -> None:
     with pytest.raises(ValueError, match="at least 2"):
         fit_single_alternative_matching([1.0, -1.0], [10.0, 20.0])
+
+
+# ---------------------------------------------------------------------------
+# Recovery of a known m and agreement with least squares
+# ---------------------------------------------------------------------------
+#
+# Nevin (1992) reports relative resistance in figures; the body (scanned PMC
+# PDF, PMC1323232) was not retrieved. The checks recover m from rates built
+# with log10(Bx / Bo) = -x / m, and compare the through-origin slope with
+# numpy.linalg.lstsq on noisy rates.
+
+
+@pytest.mark.unit
+def test_recovers_known_mass_exactly() -> None:
+    xs = [1.0, 2.0, 3.0, 5.0]
+    rates = [60.0 * 10.0 ** (-x / 4.0) for x in xs]
+    p = estimate_resistance_to_change(60.0, rates, xs)
+    assert p.m == pytest.approx(4.0, rel=1e-12)
+    assert p.r_squared == pytest.approx(1.0, abs=1e-12)
+
+
+@pytest.mark.unit
+def test_slope_matches_numpy_lstsq_through_origin() -> None:
+    import numpy as np
+
+    xs = [1.0, 2.0, 3.0, 4.0]
+    rates = [45.0, 33.0, 30.0, 18.0]
+    y = np.log10(np.array(rates) / 60.0)
+    slope = float(np.linalg.lstsq(np.array(xs)[:, None], y, rcond=None)[0][0])
+    fit = estimate_resistance_to_change(60.0, rates, xs)
+    assert fit.m == pytest.approx(-1.0 / slope, rel=1e-12)

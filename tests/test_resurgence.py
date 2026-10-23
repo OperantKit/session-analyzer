@@ -110,3 +110,45 @@ def test_resurgence_default_windows() -> None:
     assert metrics.baseline_target_rate == pytest.approx(40.0)
     # Default test_window=1 -> first session only
     assert metrics.test_target_rate == pytest.approx(20.0)
+
+
+# ---------------------------------------------------------------------------
+# Hand computation
+# ---------------------------------------------------------------------------
+#
+# The module is descriptive (Epstein, 1985); Shahan & Sweeney (2011) model
+# predictions are out of scope, so there is no published value to match.
+
+
+@pytest.mark.unit
+def test_metrics_match_hand_computation_with_windows() -> None:
+    m = analyze_resurgence(
+        target_rates_phase1=[40.0, 50.0, 60.0],
+        target_rates_phase2=[20.0, 10.0, 5.0, 3.0],
+        target_rates_phase3=[12.0, 8.0, 4.0],
+        alt_rates_phase2=[5.0, 20.0, 30.0, 32.0],
+        alt_rates_phase3=[10.0, 4.0, 1.0],
+        baseline_window=2,
+        test_window=2,
+    )
+    assert m.baseline_target_rate == 55.0  # mean(50, 60)
+    assert m.suppression_target_rate == 4.0  # mean(5, 3)
+    assert m.test_target_rate == 10.0  # mean(12, 8)
+    assert m.resurgence_magnitude == 6.0
+    assert m.resurgence_ratio == round(10.0 / 55.0, 4)
+    assert m.alt_baseline_rate == 31.0
+    assert m.alt_test_rate == 7.0
+    assert m.resurged
+
+
+@pytest.mark.unit
+def test_resurged_threshold_is_inclusive() -> None:
+    m = analyze_resurgence(
+        target_rates_phase1=[50.0],
+        target_rates_phase2=[2.0],
+        target_rates_phase3=[5.0],
+        alt_rates_phase2=[30.0],
+        alt_rates_phase3=[1.0],
+    )
+    assert m.resurgence_ratio == 0.1
+    assert m.resurged

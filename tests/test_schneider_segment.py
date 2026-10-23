@@ -139,3 +139,30 @@ def test_raises_on_invalid_min_responses() -> None:
             interval_end=10.0,
             min_responses_per_segment=0,
         )
+
+
+# ---------------------------------------------------------------------------
+# Recovery of a known two-line cumulative record (property check)
+# ---------------------------------------------------------------------------
+#
+# Published values: Schneider (1969) reports breakpoints for FI 16-512 s,
+# on average about two-thirds of the interval (abstract), but the per-FI
+# table is only in the scanned PMC PDF (PMC1338670), which was not
+# retrieved. Instead the cumulative record below lies exactly on two lines
+# (0.1 resp/s up to 30 s, then 2 resp/s), so the least-squares breakpoint is
+# 30 s with zero residual and is unique on the 0.5-s grid.
+
+
+@pytest.mark.unit
+def test_recovers_known_breakpoint_and_rates_from_exact_two_line_record() -> None:
+    low = [10.0, 20.0, 30.0]  # count k at t = k / 0.1
+    high = [30.0 + j / 2.0 for j in range(1, 101)]  # count 3 + j at 30 + j / 2
+    result = schneider_two_state(
+        low + high, interval_start=0.0, interval_end=100.0, grid=200
+    )
+    assert result is not None
+    assert result.break_time == pytest.approx(30.0, abs=1e-9)
+    assert result.low_rate == pytest.approx(0.1, rel=1e-9)
+    assert result.high_rate == pytest.approx(2.0, rel=1e-9)
+    assert result.n_low == 3
+    assert result.n_high == 100

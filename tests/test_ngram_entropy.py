@@ -95,3 +95,37 @@ def test_estimate_markov_order_rejects_invalid_args() -> None:
         estimate_markov_order(seq, max_order=0)
     with pytest.raises(ValueError, match="tolerance"):
         estimate_markov_order(seq, max_order=2, tolerance=0.0)
+
+
+# ---------------------------------------------------------------------------
+# Closed-form values
+# ---------------------------------------------------------------------------
+#
+# No published table. A binary de Bruijn sequence B(2, 4) contains every
+# length-4 block exactly once cyclically, so the linear sequence
+# cycle + cycle[: n - 1] holds every length-n block equally often and
+# H_n = n bits exactly (Cover & Thomas, 2006, entropy of a uniform
+# distribution). Block entropy also equals scipy.stats.entropy of the
+# block counts.
+
+_DE_BRUIJN_2_4 = "0000100110101111"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("n", [1, 2, 3, 4])
+def test_block_entropy_of_de_bruijn_sequence_is_n_bits(n: int) -> None:
+    symbols = list(_DE_BRUIJN_2_4 + _DE_BRUIJN_2_4[: n - 1])
+    result = compute_block_entropy(symbols, order=n)
+    assert result.entropy_bits == pytest.approx(float(n), rel=1e-12)
+
+
+@pytest.mark.unit
+def test_block_entropy_matches_scipy() -> None:
+    from collections import Counter
+
+    from scipy.stats import entropy
+
+    symbols = list("AABACABBCAACBABCCABA")
+    counts = Counter(tuple(symbols[i : i + 2]) for i in range(len(symbols) - 1))
+    result = compute_block_entropy(symbols, order=2)
+    assert result.entropy_bits == pytest.approx(entropy(list(counts.values()), base=2), rel=1e-12)

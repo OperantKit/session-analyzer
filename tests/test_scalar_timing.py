@@ -65,3 +65,35 @@ def assess_scalar_property_fails_when_cv_varies_strongly() -> None:
 def assess_scalar_property_raises_if_too_few_criteria() -> None:
     with pytest.raises(ValueError, match="at least 2 criteria"):
         assess_scalar_property({5.0: [4.5, 5.5]})
+
+
+# ---------------------------------------------------------------------------
+# Hand computation and the scalar property
+# ---------------------------------------------------------------------------
+#
+# Gibbon (1977) predicts a constant CV; CV values themselves depend on the
+# experiment, so there is no published value. Samples that are exact
+# multiples of one another have identical CVs (cv_of_cvs = 0); samples with
+# a constant SD have CVs that fall with the mean.
+
+
+@pytest.mark.unit
+def test_cv_matches_hand_computation() -> None:
+    r = analyze_scalar_timing([8.0, 10.0, 12.0])
+    assert r is not None
+    assert r.mean == pytest.approx(10.0)
+    assert r.std == pytest.approx((8.0 / 3.0) ** 0.5, rel=1e-12)
+    assert r.coefficient_of_variation == pytest.approx((8.0 / 3.0) ** 0.5 / 10.0, rel=1e-12)
+
+
+@pytest.mark.unit
+def test_scaled_samples_are_scalar_and_constant_sd_is_not() -> None:
+    base = [8.0, 10.0, 12.0]
+    scaled = assess_scalar_property(
+        {10.0: base, 30.0: [3 * x for x in base], 60.0: [6 * x for x in base]}
+    )
+    assert scaled.cv_of_cvs == pytest.approx(0.0, abs=1e-12)
+    assert scaled.is_scalar
+    constant_sd = assess_scalar_property({10.0: [8.0, 10.0, 12.0], 40.0: [38.0, 40.0, 42.0]})
+    assert constant_sd.cvs[1] == pytest.approx(constant_sd.cvs[0] / 4.0, rel=1e-12)
+    assert not constant_sd.is_scalar

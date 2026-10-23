@@ -20,7 +20,7 @@ References
 ----------
 Epstein, R. (1985). Extinction-induced resurgence: Preliminary
 investigations and possible applications. *The Psychological Record*,
-35(2), 143-153. https://doi.org/10.1007/BF03394920
+35(2), 143-153. https://doi.org/10.1007/BF03394918
 
 Shahan, T. A., & Sweeney, M. M. (2011). A model of resurgence based on
 behavioral momentum theory. *Journal of the Experimental Analysis of

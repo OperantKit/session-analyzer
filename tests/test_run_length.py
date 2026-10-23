@@ -53,3 +53,28 @@ def test_raises_on_unsorted_inputs() -> None:
         analyze_fr_runs([3.0, 1.0], [0.0, 5.0])
     with pytest.raises(ValueError, match="sorted"):
         analyze_fr_runs([1.0, 2.0], [5.0, 0.0])
+
+
+# ---------------------------------------------------------------------------
+# Hand computation
+# ---------------------------------------------------------------------------
+#
+# Schlinger, Derenne, & Baron (2008) review pause and run measures; the
+# module's decomposition is a definition, so the check is by hand. The
+# response that completes the ratio (t = 10) shares its time with the
+# reinforcer and belongs to the run that ends there.
+
+
+@pytest.mark.unit
+def test_runs_match_hand_computation() -> None:
+    m = analyze_fr_runs(
+        [2.0, 3.0, 4.0, 10.0, 13.0, 15.0, 17.0, 19.0, 25.0],
+        [0.0, 10.0, 25.0],
+    )
+    assert m is not None
+    assert m.n_runs == 2
+    assert m.mean_run_length == pytest.approx(4.5)  # (4 + 5) / 2
+    assert m.mean_pause_duration == pytest.approx(2.5)  # (2 + 3) / 2
+    assert m.mean_run_duration == pytest.approx(10.0)  # (8 + 12) / 2
+    assert m.mean_run_rate == pytest.approx(9.0 / 20.0)
+    assert m.pause_to_run_ratio == pytest.approx(0.25)

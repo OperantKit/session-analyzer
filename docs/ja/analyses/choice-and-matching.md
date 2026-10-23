@@ -61,7 +61,7 @@
 
 ### 階層 GML — `HierarchicalGMLFit`
 
-- **テーマ** — 複数被験体の GML を経験ベイズ random-effects で同時推定。各被験体の `(a_i, b_i)` を `N(μ_a, τ_a²) × N(μ_b, τ_b²)` から引く階層モデルを仮定し、被験体内 Gaussian を解析的に積分消去して得たプロファイル尤度を Nelder-Mead で最大化。グループ平均には Wald 95% CI を併記。
+- **テーマ** — 複数被験体の GML を経験ベイズ random-effects で同時推定。各被験体の `(a_i, b_i)` を `N(μ_a, τ_a²) × N(μ_b, τ_b²)` から引く階層モデルを仮定し、被験体内 Gaussian を解析的に積分消去して得た周辺尤度を Nelder-Mead で最大化（最尤法。REML ではない）。グループ平均の Wald 95% CI は推定値での GLS の標準誤差から出す。推定値・対数尤度・標準誤差は statsmodels の `MixedLM`（ランダム切片と独立なランダム傾き、`reml=False`）と一致する。
 - **出力** — `HierarchicalGMLFit(mu_sensitivity=0.85, sd_sensitivity=0.10, mu_bias=0.02, sd_bias=0.06, sigma_obs=0.05, sensitivity_ci=(0.78, 0.92), bias_ci=(-0.02, 0.06), n_subjects=8, n_observations=64, log_likelihood=...)`
 - **引用** — Gelman, A., & Hill, J. (2007). *Data analysis using regression and multilevel/hierarchical models*. Cambridge University Press.
 

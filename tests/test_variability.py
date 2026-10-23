@@ -80,3 +80,38 @@ def test_entropy_equals_log_of_unique_when_uniform() -> None:
     result = compute_u_value(sequences, alphabet_size=4, sequence_length=1)
     assert result.entropy_bits == pytest.approx(math.log2(4))
     assert result.u_value == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# Closed-form values
+# ---------------------------------------------------------------------------
+#
+# Page & Neuringer (1985) report U values in figures; the article (APA) was
+# not retrieved. The checks use closed forms of U = H / log2(A^L): every
+# possible sequence once gives U = 1, one sequence gives 0, a uniform
+# distribution over 4 of the 8 sequences gives H = 2 bits and U = 2/3.
+
+
+_ALL_LEN3 = ["AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB"]
+
+
+@pytest.mark.unit
+def test_u_value_closed_forms() -> None:
+    every = compute_u_value(_ALL_LEN3, alphabet_size=2, sequence_length=3)
+    assert every.u_value == pytest.approx(1.0)
+    single = compute_u_value(["ABA"] * 10, alphabet_size=2, sequence_length=3)
+    assert single.u_value == 0.0
+    half = compute_u_value(_ALL_LEN3[:4] * 3, alphabet_size=2, sequence_length=3)
+    assert half.entropy_bits == pytest.approx(2.0, rel=1e-12)
+    assert half.u_value == pytest.approx(2.0 / 3.0, rel=1e-12)
+
+
+@pytest.mark.unit
+def test_entropy_matches_scipy_for_unequal_counts() -> None:
+    from scipy.stats import entropy
+
+    counts = [5, 3, 1, 1]
+    seqs = [s for s, c in zip(_ALL_LEN3, counts, strict=False) for _ in range(c)]
+    m = compute_u_value(seqs, alphabet_size=2, sequence_length=3)
+    assert m.entropy_bits == pytest.approx(entropy(counts, base=2), rel=1e-12)
+    assert m.u_value == pytest.approx(entropy(counts, base=2) / 3.0, rel=1e-12)

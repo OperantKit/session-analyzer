@@ -89,3 +89,44 @@ def test_bilinear_fit_recovers_breakpoint() -> None:
 @pytest.mark.unit
 def test_bilinear_fit_returns_none_when_too_few() -> None:
     assert fit_bilinear_log_survivor([0.1, 0.2]) is None
+
+
+# ---------------------------------------------------------------------------
+# Closed-form values
+# ---------------------------------------------------------------------------
+#
+# Shull (1991): a Poisson process gives a straight log-survivor line whose
+# slope is minus the rate. With IRTs placed at the exponential quantiles
+# t_i = c - ln(S_i) / r, S_i = (n - i) / n, the curve is exactly
+# ln S = -r (t - c). Two such pieces joined at a knot give an exact
+# broken line, whose knot and slopes the fit must recover with SSE 0.
+
+
+def _exponential_quantiles(n: int, rate: float, shift: float) -> list[float]:
+    return [shift - np.log((n - i) / n) / rate for i in range(n)]
+
+
+@pytest.mark.unit
+def test_poisson_log_survivor_is_a_line_with_slope_minus_rate() -> None:
+    curve = compute_log_survivor(_exponential_quantiles(50, 2.0, 0.1))
+    assert curve is not None
+    slope, intercept = np.polyfit(curve.times, curve.log_survival, 1)
+    assert slope == pytest.approx(-2.0, rel=1e-9)
+    assert intercept == pytest.approx(0.2, rel=1e-9)
+
+
+@pytest.mark.unit
+def test_bilinear_fit_recovers_exact_broken_line() -> None:
+    n, k, r_fast, r_slow, shift = 60, 40, 5.0, 0.5, 0.05
+    log_s = [np.log((n - i) / n) for i in range(n)]
+    t_knot = shift - log_s[k] / r_fast
+    irts = [
+        shift - log_s[i] / r_fast if i <= k else t_knot + (log_s[k] - log_s[i]) / r_slow
+        for i in range(n)
+    ]
+    fit = fit_bilinear_log_survivor(irts)
+    assert fit is not None
+    assert fit.knot_time_sec == pytest.approx(t_knot, abs=1e-6)
+    assert fit.slope_fast == pytest.approx(-r_fast, abs=1e-6)
+    assert fit.slope_slow == pytest.approx(-r_slow, abs=1e-6)
+    assert fit.sse == pytest.approx(0.0, abs=1e-6)

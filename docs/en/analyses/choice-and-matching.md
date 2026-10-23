@@ -61,7 +61,7 @@ simultaneously-available alternatives.
 
 ### Hierarchical GML — `HierarchicalGMLFit`
 
-- **Theme** — Empirical-Bayes random-effects fit of the GML across multiple subjects. Each subject has its own `(a_i, b_i)` drawn from `(N(μ_a, τ_a²), N(μ_b, τ_b²))`. Marginalising the subject-level Gaussians analytically gives a closed-form profile log-likelihood for the hyperparameters, optimised by Nelder-Mead. Wald-style 95 % CIs on the group means are reported.
+- **Theme** — Empirical-Bayes random-effects fit of the GML across multiple subjects. Each subject has its own `(a_i, b_i)` drawn from `(N(μ_a, τ_a²), N(μ_b, τ_b²))`. Marginalising the subject-level Gaussians analytically gives a closed-form marginal log-likelihood for the hyperparameters, maximised by Nelder-Mead (maximum likelihood, not REML). Wald 95 % CIs on the group means use the GLS standard error at the estimate. Estimates, log-likelihood and standard errors agree with statsmodels `MixedLM` (random intercept plus an independent random slope, `reml=False`).
 - **Output** — `HierarchicalGMLFit(mu_sensitivity=0.85, sd_sensitivity=0.10, mu_bias=0.02, sd_bias=0.06, sigma_obs=0.05, sensitivity_ci=(0.78, 0.92), bias_ci=(-0.02, 0.06), n_subjects=8, n_observations=64, log_likelihood=...)`
 - **Reference** — Gelman, A., & Hill, J. (2007). *Data analysis using regression and multilevel/hierarchical models*. Cambridge University Press.
 
