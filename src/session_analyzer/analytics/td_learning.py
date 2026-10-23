@@ -79,7 +79,9 @@ def simulate_td_zero(
         Initial value estimates. Defaults to zeros.
     terminal_state : int, optional
         State id treated as terminal: ``V(terminal) = 0`` and is not
-        updated. Defaults to none.
+        updated. A transition out of the terminal state (episodes
+        concatenated in one trajectory) starts a new episode and records
+        a TD error of 0. Defaults to none.
 
     Returns
     -------
@@ -118,6 +120,11 @@ def simulate_td_zero(
     for t, r in enumerate(rewards):
         s = states[t]
         s_next = states[t + 1]
+        if terminal_state is not None and s == terminal_state:
+            # Leaving the terminal state starts a new episode: no TD
+            # error and no update, so V(terminal) stays as given.
+            errors.append(0.0)
+            continue
         v_next = 0.0 if s_next == terminal_state else values[s_next]
         delta = r + gamma * v_next - values[s]
         errors.append(delta)

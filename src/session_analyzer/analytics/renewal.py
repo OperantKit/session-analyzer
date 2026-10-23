@@ -131,8 +131,12 @@ def analyze_renewal(
     phases : list of PhaseSummary
         Exactly three phases in chronological order.
     threshold : float
-        Fraction of baseline that the test rate must exceed for
-        ``renewed`` to be ``True`` (default 0.10).
+        Fraction of the training rate that the test rate must reach
+        (``>=``), together with a test rate above the extinction rate,
+        for ``renewed`` to be ``True`` (default 0.10, this module's
+        choice). ``renewal_magnitude`` uses the mean rate of the whole
+        extinction phase; pass only the final extinction block to use a
+        terminal rate.
     """
     if len(phases) != 3:
         raise ValueError(
@@ -157,7 +161,15 @@ def analyze_renewal(
     ext_rate = extinct.rate
     test_rate = test.rate
     magnitude = test_rate - ext_rate
-    ratio = test_rate / train_rate if train_rate > 0.0 else 0.0
+    # One division from counts and durations, so that a ratio reported as
+    # exactly the threshold is not lost to rate rounding
+    # (0.02 / 0.2 == 0.09999999999999999).
+    ratio = (
+        (test.response_count * train.duration_sec)
+        / (test.duration_sec * train.response_count)
+        if train.response_count > 0
+        else 0.0
+    )
     renewed = magnitude > 0.0 and ratio >= threshold
 
     return RenewalMetrics(

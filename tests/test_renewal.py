@@ -120,3 +120,62 @@ def test_renewal_handles_missing_context_names() -> None:
     metrics = analyze_renewal(phases)
     # All None -> all considered same context -> AAA
     assert metrics.design == "AAA"
+
+
+# ---------------------------------------------------------------------------
+# Hand computations (S-166). Bouton (2004) and Bouton & Bolles (1979) give
+# no numeric example this summary reproduces.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("contexts", "design"),
+    [
+        (("A", "A", "A"), "AAA"),
+        (("A", "B", "A"), "ABA"),
+        (("A", "A", "B"), "AAB"),
+        (("A", "B", "C"), "ABC"),
+        (("A", "B", "B"), "OTHER"),
+    ],
+)
+def test_classifies_all_five_partitions(contexts: tuple[str, str, str], design: str) -> None:
+    """The five set partitions of (train, extinction, test)."""
+    assert classify_renewal_design(contexts) == design
+
+
+@pytest.mark.unit
+def test_renewal_magnitude_and_ratio_by_hand() -> None:
+    # train 120/600 = 0.2/s; extinction 12/600 = 0.02/s; test 9/300 = 0.03/s.
+    # magnitude 0.01, ratio 0.15 >= 0.10 -> renewed.
+    m = analyze_renewal(
+        [
+            _phase("train", "A", 120, 600.0),
+            _phase("ext", "B", 12, 600.0),
+            _phase("test", "A", 9, 300.0),
+        ]
+    )
+    assert m.renewal_magnitude == pytest.approx(0.01, abs=1e-12)
+    assert m.renewal_ratio == pytest.approx(0.15, abs=1e-12)
+    assert m.renewed
+    # ratio exactly at the threshold counts as renewed (>=):
+    # extinction 6/600 = 0.01/s, test 6/300 = 0.02/s, ratio 0.02/0.2 = 0.10.
+    m2 = analyze_renewal(
+        [
+            _phase("train", "A", 120, 600.0),
+            _phase("ext", "B", 6, 600.0),
+            _phase("test", "A", 6, 300.0),
+        ]
+    )
+    assert m2.renewal_ratio == pytest.approx(0.10, abs=1e-12)
+    assert m2.renewed
+    # test rate equal to the extinction rate: no increase, not renewed.
+    m3 = analyze_renewal(
+        [
+            _phase("train", "A", 120, 600.0),
+            _phase("ext", "B", 12, 600.0),
+            _phase("test", "A", 6, 300.0),
+        ]
+    )
+    assert m3.renewal_magnitude == 0.0
+    assert not m3.renewed

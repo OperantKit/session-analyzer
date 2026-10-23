@@ -11,7 +11,11 @@ aggregates three behavioural components into a single
     index = (response_bias + latency_score + probability_score) / 3
 
 where each component is normalized so that ``+1`` indicates pure
-sign-tracking and ``-1`` indicates pure goal-tracking.
+sign-tracking and ``-1`` indicates pure goal-tracking. This is the
+per-session "PCA Score" of Meyer et al. (2012, Table 1), whose latency
+score divides by the CS duration (8 s in that study). Their "PCA Index
+Score" used for classification is the mean of the Day 4 and Day 5 PCA
+Scores; average the per-session indices to obtain it.
 
 Conventional classification cut-offs (Meyer et al., 2012):
 
@@ -100,9 +104,11 @@ def compute_tracking_index(
     contacts_cs, contacts_food : int
         Total contacts on the CS and food-cup across all trials.
     latency_cs, latency_food : float
-        Mean latency (seconds) to first contact within a trial. Use
-        ``cs_duration`` for trials without a contact of that type,
-        which is the convention in Meyer et al. (2012).
+        Mean latency (seconds) to first contact within a trial. Meyer
+        et al. (2012, Table 1) average the latencies but do not state how
+        trials without a contact enter the mean; scoring such trials as
+        ``cs_duration`` is a convention of this module's callers, not of
+        the paper.
     probability_cs, probability_food : float
         Proportion of trials with at least one CS / food-cup contact,
         each in ``[0, 1]``.

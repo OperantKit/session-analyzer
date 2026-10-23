@@ -100,3 +100,33 @@ def test_conditioned_reinforcement_strength_validates() -> None:
             observing_rate_correlated=1.0,
             observing_rate_uncorrelated=0.0,
         )
+
+
+# ---------------------------------------------------------------------------
+# Hand computations (S-166). Wyckoff (1952) and Dinsmoor (1983) give no
+# numeric example this summary reproduces; the 0.6 and 2.0 cut-offs are this
+# module's defaults.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_observing_rate_and_good_news_boundary_by_hand() -> None:
+    # 45 observing responses in 900 s = 3 per minute; 18 of 30 S+ = 0.6.
+    m = compute_observing_metrics(
+        observing_count=45,
+        observing_duration_sec=900.0,
+        s_plus_productions=18,
+        s_minus_productions=12,
+    )
+    assert m.observing_rate_per_min == pytest.approx(3.0, abs=1e-12)
+    assert m.s_plus_proportion == pytest.approx(0.6, abs=1e-12)
+    assert m.good_news_dominance  # 0.6 is inclusive
+
+
+@pytest.mark.unit
+def test_strength_index_threshold_inclusive() -> None:
+    s = compute_conditioned_reinforcement_strength(
+        observing_rate_correlated=6.0, observing_rate_uncorrelated=3.0
+    )
+    assert s.strength_index == pytest.approx(2.0, abs=1e-12)
+    assert s.is_conditioned_reinforcer

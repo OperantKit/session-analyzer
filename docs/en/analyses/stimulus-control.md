@@ -45,10 +45,10 @@ signal-detection sensitivity / bias.
 ### Signal detection — `SignalDetectionMetrics` / `ROCCurve`
 
 - **Theme** — When a yes/no detection task confounds sensitivity with response bias, signal detection theory (Green & Swets, 1966) decomposes performance into `d'` (sensitivity) and `c` / `β` (bias). Non-parametric `A'` and `B''` give bias-resistant alternatives. `compute_roc` constructs the empirical ROC curve and trapezoidal AUC from a series of operating points. The Hautus (1995) log-linear correction is always applied to handle ceiling/floor cells.
-- **Equation** — `d' = z(H) − z(F)`; `c = -0.5(z(H) + z(F))`; `β = exp(c · d')`
+- **Equation** — `d' = z(H) − z(F)`; `c = -0.5(z(H) + z(F))`; `β = exp(c · d')`; `A'` and Grier's `B'' = sign(H − F)[H(1 − H) − F(1 − F)] / [H(1 − H) + F(1 − F)]` follow Stanislaw & Todorov (1999, Eqs. 2 and 9), whose Figure 1 example (d' 2.00, c −0.50, ln β −1.00, A' .89, B'' −0.55) the tests reproduce
 - **Output (sdt)** — `SignalDetectionMetrics(hit_rate=0.84, false_alarm_rate=0.16, d_prime=2.0, criterion=0.0, beta=1.0, a_prime=0.92, b_double_prime=0.0, n_signal_trials=100, n_noise_trials=100)`
 - **Output (roc)** — `ROCCurve(fa_rates=[0.0, 0.01, 0.10, 0.30, 0.55, 0.90, 1.0], hit_rates=[0.0, 0.05, 0.30, 0.60, 0.85, 0.99, 1.0], auc=0.85)`
-- **References** — Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley. — Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behav. Res. Methods Instrum. Comput.*, 27(1), 46-51. <https://doi.org/10.3758/BF03203619>
+- **References** — Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley. — Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behav. Res. Methods Instrum. Comput.*, 27(1), 46-51. <https://doi.org/10.3758/BF03203619> — Grier, J. B. (1971). Nonparametric indexes for sensitivity and bias: Computing formulas. *Psychological Bulletin*, 75(6), 424-429. <https://doi.org/10.1037/h0031246> — Stanislaw, H., & Todorov, N. (1999). Calculation of signal detection theory measures. *Behav. Res. Methods Instrum. Comput.*, 31(1), 137-149. <https://doi.org/10.3758/BF03207704>
 
 ![Empirical ROC curve sweeping criterion with chance line and AUC annotation](../../assets/figures/signal_detection_roc.png)
 

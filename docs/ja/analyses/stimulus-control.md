@@ -44,10 +44,10 @@
 ### 信号検出 — `SignalDetectionMetrics` / `ROCCurve`
 
 - **テーマ** — yes/no 検出課題で感度と応答バイアスが交絡している場合、信号検出理論（Green & Swets, 1966）が `d'`（感度）と `c` / `β`（バイアス）に分解する。非パラ `A'` / `B''` はバイアス耐性のある代替。`compute_roc` は複数の operating point から経験的 ROC と台形 AUC を構成する。Hautus (1995) の log-linear 補正を常に適用してceiling / floor を扱う。
-- **式** — `d' = z(H) − z(F)`; `c = -0.5(z(H) + z(F))`; `β = exp(c · d')`
+- **式** — `d' = z(H) − z(F)`; `c = -0.5(z(H) + z(F))`; `β = exp(c · d')`。`A'` と Grier の `B'' = sign(H − F)[H(1 − H) − F(1 − F)] / [H(1 − H) + F(1 − F)]` は Stanislaw & Todorov (1999) の式 2・式 9 に従う。同論文の図 1 の例（d' 2.00、c −0.50、ln β −1.00、A' .89、B'' −0.55）をテストで再現している
 - **出力（sdt）** — `SignalDetectionMetrics(hit_rate=0.84, false_alarm_rate=0.16, d_prime=2.0, criterion=0.0, beta=1.0, a_prime=0.92, b_double_prime=0.0, n_signal_trials=100, n_noise_trials=100)`
 - **出力（roc）** — `ROCCurve(fa_rates=[0.0, 0.01, 0.10, 0.30, 0.55, 0.90, 1.0], hit_rates=[0.0, 0.05, 0.30, 0.60, 0.85, 0.99, 1.0], auc=0.85)`
-- **引用** — Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley. / Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behav. Res. Methods Instrum. Comput.*, 27(1), 46-51. <https://doi.org/10.3758/BF03203619>
+- **引用** — Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley. / Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behav. Res. Methods Instrum. Comput.*, 27(1), 46-51. <https://doi.org/10.3758/BF03203619> / Grier, J. B. (1971). Nonparametric indexes for sensitivity and bias: Computing formulas. *Psychological Bulletin*, 75(6), 424-429. <https://doi.org/10.1037/h0031246> / Stanislaw, H., & Todorov, N. (1999). Calculation of signal detection theory measures. *Behav. Res. Methods Instrum. Comput.*, 31(1), 137-149. <https://doi.org/10.3758/BF03207704>
 
 ![基準を掃引した経験的 ROC 曲線（chance line と AUC 注釈付き）](../../assets/figures/signal_detection_roc.png)
 

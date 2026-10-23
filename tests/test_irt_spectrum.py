@@ -75,3 +75,56 @@ def test_spectrum_rejects_short_input_or_bad_fs() -> None:
         compute_irt_spectrum([1.0, 2.0, 3.0])
     with pytest.raises(ValueError, match="sampling_rate"):
         compute_irt_spectrum([1.0, 2.0, 3.0, 4.0], sampling_rate=0.0)
+
+
+# ---------------------------------------------------------------------------
+# Standard functions (S-166). No published IRT table is reproduced; the
+# estimators are checked against numpy / scipy on a seeded series
+# (numpy.random.default_rng(166), 64 exponential IRTs plus a period-8
+# sinusoid).
+# ---------------------------------------------------------------------------
+
+
+def _series(n: int = 64) -> list[float]:
+    rng = np.random.default_rng(166)
+    t = np.arange(n)
+    return list(1.0 + 0.3 * np.sin(2 * np.pi * t / 8) + rng.exponential(0.2, n))
+
+
+@pytest.mark.unit
+def test_autocorrelation_matches_numpy_correlate() -> None:
+    """rho(k) = full np.correlate of the centred series / (n * var0)."""
+    x = np.asarray(_series())
+    c = x - x.mean()
+    full = np.correlate(c, c, mode="full")[c.size - 1 :]
+    expected = full[:11] / full[0]
+    acf = compute_irt_autocorrelation(list(x), max_lag=10)
+    assert acf.values == pytest.approx(tuple(expected), abs=1e-12)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("n", [64, 63])
+def test_spectrum_matches_scipy_periodogram(n: int) -> None:
+    """power = |FFT|^2 / n (two-sided, not divided by fs).
+
+    scipy.signal.periodogram(x, fs, window="boxcar", detrend="constant",
+    scaling="density") is one-sided: it equals 2 * power / fs at interior
+    frequencies and power / fs at 0 and (for even n) at fs / 2.
+    """
+    from scipy.signal import periodogram
+
+    fs = 2.0
+    x = _series(n)
+    spec = compute_irt_spectrum(x, sampling_rate=fs)
+    f, pxx = periodogram(np.asarray(x), fs=fs, window="boxcar", detrend="constant")
+    assert spec.frequencies == pytest.approx(tuple(f), abs=1e-12)
+    factor = np.full(f.size, 2.0)
+    factor[0] = 1.0
+    if n % 2 == 0:
+        factor[-1] = 1.0
+    assert np.asarray(spec.power) * factor / fs == pytest.approx(pxx, rel=1e-9, abs=1e-15)
+    # The peak is scipy's largest non-DC bin; for n = 64 that is the
+    # period-8 component, fs / 8 = 0.25 Hz.
+    assert spec.peak_frequency == pytest.approx(f[1:][np.argmax(pxx[1:])])
+    if n == 64:
+        assert spec.peak_frequency == pytest.approx(0.25)

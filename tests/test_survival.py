@@ -68,3 +68,45 @@ def test_raises_on_non_positive_times() -> None:
 def test_raises_on_length_mismatch() -> None:
     with pytest.raises(ValueError, match="same length"):
         kaplan_meier([1.0, 2.0], [False])
+
+
+# ---------------------------------------------------------------------------
+# Reference implementation (S-166).
+#
+# Data: the 6-MP arm of the leukaemia remission trial of Freireich et al.
+# (1963), as tabulated by Gehan, E. A. (1965). A generalized Wilcoxon test
+# for comparing arbitrarily singly-censored samples. Biometrika, 52(1/2),
+# 203-224. https://doi.org/10.1093/biomet/52.1-2.203 ('+' = censored).
+# Expected values: lifelines 0.30.3 ``KaplanMeierFitter`` on the same data
+# (event table and ``median_survival_time_``). A censoring tied with an
+# event (6 and 6+) counts in the risk set at that time, as in Kaplan &
+# Meier (1958).
+# ---------------------------------------------------------------------------
+
+_GEHAN_6MP = "6 6 6 6+ 7 9+ 10 10+ 11+ 13 16 17+ 19+ 20+ 22 23 25+ 32+ 32+ 34+ 35+"
+
+
+@pytest.mark.unit
+def test_matches_lifelines_on_freireich_6mp_arm() -> None:
+    raw = _GEHAN_6MP.split()
+    times = [float(x.rstrip("+")) for x in raw]
+    censored = [x.endswith("+") for x in raw]
+    curve = kaplan_meier(times, censored)
+    assert curve.times == (6.0, 7.0, 10.0, 13.0, 16.0, 22.0, 23.0)
+    assert curve.at_risk == (21, 17, 15, 12, 11, 7, 6)
+    assert curve.events == (3, 1, 1, 1, 1, 1, 1)
+    assert curve.survival == pytest.approx(
+        (
+            0.857142857143,
+            0.806722689076,
+            0.752941176471,
+            0.690196078431,
+            0.627450980392,
+            0.537815126050,
+            0.448179271709,
+        ),
+        abs=5e-13,
+    )
+    assert curve.median_survival_time == 23.0
+    assert curve.n == 21
+    assert curve.n_events == 9

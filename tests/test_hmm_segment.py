@@ -8,6 +8,8 @@ import pytest
 from session_analyzer.analytics.hmm_segment import (
     GaussianHMMFit,
     HMMSegment,
+    _forward_backward,
+    _viterbi,
     fit_gaussian_hmm,
 )
 
@@ -74,3 +76,61 @@ def test_raises_on_invalid_max_iter_or_tol() -> None:
         fit_gaussian_hmm([1.0, 2.0, 3.0], n_states=2, max_iter=0)
     with pytest.raises(ValueError, match="tol"):
         fit_gaussian_hmm([1.0, 2.0, 3.0], n_states=2, tol=0.0)
+
+
+# ---------------------------------------------------------------------------
+# Reference implementation (S-166).
+#
+# Expected values come from hmmlearn 0.3.3 ``GaussianHMM`` (1-D,
+# ``covariance_type="diag"``, ``covars_prior=0``, ``covars_weight=1``,
+# ``min_covar=1e-12`` so the M-step is plain maximum likelihood), started
+# from the same initial values as fit_gaussian_hmm (quantile means with the
+# seed-0 jitter, overall SD, uniform pi and A). The series is 300 draws from
+# ``numpy.random.default_rng(166)`` in alternating blocks of N(0.5, 0.4) and
+# N(3.0, 0.8).
+# ---------------------------------------------------------------------------
+
+
+def _reference_series() -> np.ndarray:
+    rng = np.random.default_rng(166)
+    blocks = [(0, 40), (1, 30), (0, 50), (1, 20), (0, 60), (1, 40), (0, 60)]
+    mu, sd = (0.5, 3.0), (0.4, 0.8)
+    return np.concatenate([rng.normal(mu[s], sd[s], n) for s, n in blocks])
+
+
+def _block_path() -> tuple[int, ...]:
+    blocks = [(0, 40), (1, 30), (0, 50), (1, 20), (0, 60), (1, 40), (0, 60)]
+    return tuple(s for s, n in blocks for _ in range(n))
+
+
+@pytest.mark.unit
+def test_fit_matches_hmmlearn_maximum_likelihood() -> None:
+    """Converged parameters (rel 1e-8) and log-likelihood (rel 1e-10)."""
+    fit = fit_gaussian_hmm(_reference_series(), n_states=2, tol=1e-12, max_iter=5000)
+    assert fit.converged
+    assert fit.means == pytest.approx((0.5052751772842693, 2.9511930430855795), rel=1e-8)
+    assert fit.sigmas == pytest.approx((0.4102330255239148, 0.7974978095968991), rel=1e-8)
+    a = fit.transition_matrix
+    assert a[0] == pytest.approx((0.9854095149174681, 0.014590485082531992), rel=1e-8)
+    assert a[1] == pytest.approx((0.03389141072551079, 0.9661085892744892), rel=1e-8)
+    assert fit.pi[0] == pytest.approx(1.0, abs=1e-12)
+    assert fit.log_likelihood == pytest.approx(-247.07573596938101, rel=1e-10)
+    # hmmlearn's Viterbi path equals the generating block structure here.
+    assert fit.state_sequence == _block_path()
+
+
+@pytest.mark.unit
+def test_forward_and_viterbi_match_hmmlearn_at_fixed_parameters() -> None:
+    """pi (0.6, 0.4), A [[.95, .05], [.1, .9]], N(0.5, 0.4) / N(3.0, 0.8).
+
+    hmmlearn ``score`` = -254.16971080896866; ``decode`` returns the
+    generating block path.
+    """
+    obs = _reference_series()
+    pi = np.array([0.6, 0.4])
+    a = np.array([[0.95, 0.05], [0.1, 0.9]])
+    mus = np.array([0.5, 3.0])
+    sds = np.array([0.4, 0.8])
+    ll = _forward_backward(obs, pi, a, mus, sds)[2]
+    assert ll == pytest.approx(-254.16971080896866, rel=1e-12)
+    assert tuple(int(s) for s in _viterbi(obs, pi, a, mus, sds)) == _block_path()

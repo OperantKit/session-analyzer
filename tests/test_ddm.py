@@ -76,3 +76,43 @@ def test_raises_on_non_positive_rt_or_var() -> None:
         fit_ez_diffusion(proportion_correct=0.7, mean_rt_correct=0.0, var_rt_correct=0.04)
     with pytest.raises(ValueError, match="var_rt_correct"):
         fit_ez_diffusion(proportion_correct=0.7, mean_rt_correct=0.5, var_rt_correct=0.0)
+
+
+# ---------------------------------------------------------------------------
+# Published values (S-166).
+#
+# Source: Wagenmakers, E.-J., van der Maas, H. L. J., & Grasman, R. P. P. P.
+# (2007). An EZ-diffusion model for response time and accuracy. Psychonomic
+# Bulletin & Review, 14(1), 3-22. https://doi.org/10.3758/BF03194023
+# Appendix ("R Code for the EZ-Diffusion Model"): the process v = 0.1,
+# a = 0.14, Ter = 0.300, s = 0.1 yields MRT = 0.723, VRT = 0.112,
+# Pc = .802 (rounded), and the reference R function called with these
+# rounded inputs prints v = 0.09993853, a = 0.1399702, Ter = 0.30003.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_matches_wagenmakers_2007_appendix_output() -> None:
+    """Rounded inputs (.802, .112, .723) reproduce the printed R output.
+
+    Tolerance: half a unit in the last printed place of each value
+    (5e-9 for v, 5e-8 for a, 5e-6 for Ter).
+    """
+    fit = fit_ez_diffusion(
+        proportion_correct=0.802, mean_rt_correct=0.723, var_rt_correct=0.112
+    )
+    assert fit.v == pytest.approx(0.09993853, abs=5e-9)
+    assert fit.a == pytest.approx(0.1399702, abs=5e-8)
+    assert fit.ter == pytest.approx(0.30003, abs=5e-6)
+
+
+@pytest.mark.unit
+def test_forward_model_matches_wagenmakers_2007_appendix_summary() -> None:
+    """v = 0.1, a = 0.14, Ter = 0.3 gives Pc .802, MRT 0.723, VRT 0.112.
+
+    The appendix reports these three values rounded to three decimals.
+    """
+    pc, mrt, vrt = _forward_ez(0.1, 0.14, 0.3)
+    assert round(pc, 3) == pytest.approx(0.802)
+    assert round(mrt, 3) == pytest.approx(0.723)
+    assert round(vrt, 3) == pytest.approx(0.112)

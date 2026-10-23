@@ -118,3 +118,40 @@ def test_peak_shift_validates_inputs() -> None:
             s_plus=1.0,
             s_minus=1.0,
         )
+
+
+# ---------------------------------------------------------------------------
+# Hand computations (S-166). Annau & Kamin (1961) and Hanson (1959) are APA
+# paywalled; their tables are not reproduced.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_suppression_ratio_in_cer_form() -> None:
+    """CER suppression ratio B / (A + B), B = CS responses, A = pre-CS.
+
+    Passing the pre-CS count as ``s_plus_count`` and the CS count as
+    ``s_minus_count``: A = 40, B = 10 gives 10 / 50 = 0.2.
+    """
+    r = compute_discrimination_ratio(s_plus_count=40, s_minus_count=10)
+    assert r.suppression_ratio == pytest.approx(0.2, abs=1e-12)
+    assert r.discrimination_ratio == pytest.approx(0.8, abs=1e-12)
+    # threshold 0.75 is inclusive
+    assert compute_discrimination_ratio(s_plus_count=3, s_minus_count=1).is_discriminated
+
+
+@pytest.mark.unit
+def test_peak_shift_recovers_exact_gaussian_peak() -> None:
+    """Noise-free gradient peaking at 545 with S+ = 550, S- = 570.
+
+    The fitted peak is 545 (shift +5 away from S-, 25 % of |S+ - S-|).
+    """
+    x = np.arange(500.0, 601.0, 10.0)
+    y = 80.0 * np.exp(-((x - 545.0) ** 2) / (2 * 15.0**2))
+    r = detect_peak_shift(
+        stimulus_values=list(x), response_rates=list(y), s_plus=550.0, s_minus=570.0
+    )
+    assert r.fitted_peak_value == pytest.approx(545.0, abs=1e-5)
+    assert r.shift_magnitude == pytest.approx(5.0, abs=1e-5)
+    assert r.shift_direction == "away_from_s_minus"
+    assert r.fitted_sigma == pytest.approx(15.0, abs=1e-5)

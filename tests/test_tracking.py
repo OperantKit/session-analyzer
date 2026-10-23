@@ -138,3 +138,54 @@ def test_raises_on_invalid_inputs() -> None:
             sign_threshold=0.1,
             goal_threshold=0.2,
         )
+
+
+# ---------------------------------------------------------------------------
+# Published definition (S-166).
+#
+# Meyer, P. J., Lovic, V., Saunders, B. T., Yager, L. M., Flagel, S. B.,
+# Morrow, J. D., & Robinson, T. E. (2012). PLoS ONE, 7(6), e38987.
+# https://doi.org/10.1371/journal.pone.0038987
+# Table 1: Response Bias = (lever - cup) / (lever + cup); Probability
+# Difference = p(lever) - p(cup); Latency Score = (mean cup latency - mean
+# lever latency) / 8 (CS duration 8 s); PCA Score = mean of the three.
+# Classification (Results, Fig. 5): ST if the score is 0.5 or above, GT if
+# -0.5 or less. The paper reports no worked numeric example, so the values
+# below are hand computations of Table 1.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_matches_meyer_2012_table_1_formulas() -> None:
+    # 60 lever presses, 20 cup entries; p 0.9 vs 0.4; latencies 2.0 vs 6.0 s.
+    # RB = 40/80 = 0.5; PD = 0.5; LS = (6 - 2)/8 = 0.5; PCA = 0.5 -> ST.
+    r = compute_tracking_index(
+        contacts_cs=60,
+        contacts_food=20,
+        latency_cs=2.0,
+        latency_food=6.0,
+        probability_cs=0.9,
+        probability_food=0.4,
+        cs_duration=8.0,
+    )
+    assert r.response_bias == pytest.approx(0.5, abs=1e-12)
+    assert r.probability_score == pytest.approx(0.5, abs=1e-12)
+    assert r.latency_score == pytest.approx(0.5, abs=1e-12)
+    assert r.index == pytest.approx(0.5, abs=1e-12)
+    assert r.classification is TrackingType.SIGN_TRACKER
+
+
+@pytest.mark.unit
+def test_meyer_2012_cutoff_minus_half_is_goal_tracker() -> None:
+    # Mirror image: RB = -0.5, PD = -0.5, LS = -0.5 -> PCA = -0.5 -> GT.
+    r = compute_tracking_index(
+        contacts_cs=20,
+        contacts_food=60,
+        latency_cs=6.0,
+        latency_food=2.0,
+        probability_cs=0.4,
+        probability_food=0.9,
+        cs_duration=8.0,
+    )
+    assert r.index == pytest.approx(-0.5, abs=1e-12)
+    assert r.classification is TrackingType.GOAL_TRACKER

@@ -4,9 +4,12 @@ Two related but distinct measures of discriminative stimulus control:
 
 - **Discrimination ratio**:
   ``DR = R(S+) / [R(S+) + R(S-)]``, in ``[0, 1]``.
-  Equivalently, *suppression ratio* (Annau & Kamin, 1961) is
-  ``SR = R(S-) / [R(S+) + R(S-)]`` and reports the same information
-  with reversed polarity.
+  The complementary ``SR = R(S-) / [R(S+) + R(S-)] = 1 - DR`` has the
+  form of the conditioned-suppression ratio usually cited to Annau &
+  Kamin (1961; original definition not checked here),
+  ``B / (A + B)`` with ``B`` the responses during the CS and ``A`` those
+  in the equal pre-CS period: pass the pre-CS count as ``s_plus_count``
+  and the CS count as ``s_minus_count`` to obtain it.
 
 - **Peak shift** (Hanson, 1959):
   After intermixed S+/S- training, the peak of the generalization

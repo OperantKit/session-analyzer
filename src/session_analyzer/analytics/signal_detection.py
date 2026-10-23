@@ -14,6 +14,10 @@ References
 Green, D. M., & Swets, J. A. (1966). *Signal detection theory and
 psychophysics*. Wiley.
 
+Grier, J. B. (1971). Nonparametric indexes for sensitivity and bias:
+Computing formulas. *Psychological Bulletin*, 75(6), 424-429.
+https://doi.org/10.1037/h0031246
+
 Hautus, M. J. (1995). Corrections for extreme proportions and their
 biasing effects on estimated values of d'. *Behavior Research Methods,
 Instruments, & Computers*, 27(1), 46-51.
@@ -21,6 +25,10 @@ https://doi.org/10.3758/BF03203619
 
 Macmillan, N. A., & Creelman, C. D. (2005). *Detection theory: A user's
 guide* (2nd ed.). Lawrence Erlbaum.
+
+Stanislaw, H., & Todorov, N. (1999). Calculation of signal detection
+theory measures. *Behavior Research Methods, Instruments, & Computers*,
+31(1), 137-149. https://doi.org/10.3758/BF03207704
 """
 
 from __future__ import annotations
@@ -50,7 +58,9 @@ class SignalDetectionMetrics:
     a_prime : float
         Non-parametric sensitivity (Pollack & Norman, 1964).
     b_double_prime : float
-        Non-parametric bias (Donaldson, 1992). Positive = conservative.
+        Grier's (1971) non-parametric bias in the single-formula form of
+        Stanislaw & Todorov (1999, Eq. 9), signed by ``H - F``. Range
+        ``[-1, 1]``; positive = conservative.
     n_signal_trials : int
         ``hits + misses``.
     n_noise_trials : int
@@ -133,10 +143,12 @@ def compute_sdt(
     else:
         a_prime = 0.5 - ((f - h) * (1 + f - h)) / (4 * f * (1 - h))
 
-    # Non-parametric B'' (Donaldson, 1992).
+    # Grier's B'' (Stanislaw & Todorov, 1999, Eq. 9). Without the
+    # sign(H - F) factor the H >= F formula has the wrong sign when H < F.
     numer = h * (1 - h) - f * (1 - f)
     denom = h * (1 - h) + f * (1 - f)
-    b_double_prime = numer / denom if denom > 0.0 else 0.0
+    sign = float(np.sign(h - f))
+    b_double_prime = sign * numer / denom if denom > 0.0 else 0.0
 
     return SignalDetectionMetrics(
         hit_rate=round(float(h), 6),

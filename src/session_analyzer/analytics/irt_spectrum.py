@@ -6,8 +6,8 @@ miss it. This module provides:
 
 - :func:`compute_irt_autocorrelation` — biased autocorrelation function
   ``rho(k) = E[(x_t - mu)(x_{t+k} - mu)] / sigma^2`` for ``k = 0..max_lag``.
-- :func:`compute_irt_spectrum` — power spectral density via the
-  periodogram (FFT) of the mean-centered IRT series.
+- :func:`compute_irt_spectrum` — raw periodogram (FFT) of the
+  mean-centered IRT series (see :class:`IRTSpectrum` for its scaling).
 
 References
 ----------
@@ -55,8 +55,11 @@ class IRTSpectrum:
         Frequencies in cycles per IRT-step (or, if ``sampling_rate``
         is supplied, cycles per second).
     power : tuple of float
-        Spectral density at each frequency (squared magnitude
-        normalised by ``n``).
+        Raw periodogram ``|X_k|^2 / n`` of the mean-centred series at each
+        non-negative frequency: two-sided and not divided by the sampling
+        rate. ``scipy.signal.periodogram(x, fs, scaling="density")`` (one
+        sided) equals ``2 * power / fs`` at interior frequencies and
+        ``power / fs`` at 0 and, for even ``n``, at ``fs / 2``.
     peak_frequency : float
         Frequency of maximum power (excluding the DC component).
     n : int

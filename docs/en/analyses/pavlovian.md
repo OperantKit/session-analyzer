@@ -18,7 +18,7 @@ a conditioned reinforcer.
 
 ### Observing response — `ObservingMetrics`
 
-- **Theme** — In an *observing-response* procedure (Wyckoff, 1952), a non-required response produces stimuli that signal whether the upcoming schedule period is reinforcement (S+) or extinction (S-). Observing rate is taken as an index of conditioned-reinforcer strength of the discriminative stimuli. Per Dinsmoor (1983), observing is maintained primarily by S+ presentations — `s_plus_proportion ≥ 0.6` is the conventional good-news threshold.
+- **Theme** — In an *observing-response* procedure (Wyckoff, 1952), a non-required response produces stimuli that signal whether the upcoming schedule period is reinforcement (S+) or extinction (S-). Observing rate is taken as an index of conditioned-reinforcer strength of the discriminative stimuli. Per Dinsmoor (1983), observing is maintained primarily by S+ presentations — `good_news_dominance` flags `s_plus_proportion ≥ 0.6`, a default of this module (neither Wyckoff nor Dinsmoor gives a numeric cut-off).
 - **Output** — `ObservingMetrics(observing_rate_per_min=12.0, s_plus_proportion=0.67, good_news_dominance=True, observing_count=120, s_plus_productions=80, s_minus_productions=40, observing_duration_sec=600.0)`
 - **References** — Wyckoff, L. B. (1952). The role of observing responses in discrimination learning. *Psychological Review*, 59(6), 431-442. <https://doi.org/10.1037/h0053932> — Dinsmoor, J. A. (1983). Observing and conditioned reinforcement. *Behavioral and Brain Sciences*, 6(4), 693-704. <https://doi.org/10.1017/S0140525X00017969>
 

@@ -92,3 +92,39 @@ def test_raises_on_length_mismatch() -> None:
 def test_raises_on_invalid_counts() -> None:
     with pytest.raises(ValueError, match="n_correct"):
         fit_psychometric([1.0, 2.0, 3.0], [11, 5, 5], [10, 10, 10])
+
+
+# ---------------------------------------------------------------------------
+# Reference implementation (S-166).
+#
+# With gamma = 0 and lapse = 0 the model is a binomial GLM,
+# P = F(b0 + b1 x), with mu = -b0 / b1 and sigma = 1 / b1 (F = logistic for
+# "logit", standard normal CDF for "probit"). Expected values are the
+# maximum-likelihood estimates from statsmodels 0.15.0
+# ``GLM(family=Binomial(link=Logit() | Probit()))`` on the data below; the
+# log-likelihood excludes the binomial coefficients, as fit_psychometric
+# does. psignifit 4 is not used: it reports Bayesian posterior estimates,
+# which are a different estimator.
+# ---------------------------------------------------------------------------
+
+_X = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+_NC = [3, 8, 17, 26, 33, 37]
+_NT = [40] * 6
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("link", "mu", "sigma", "ll"),
+    [
+        ("logit", 3.3895720954, 1.0102627427, -113.1267719610),
+        ("probit", 3.3972464501, 1.7184697055, -113.1360968426),
+    ],
+)
+def test_matches_statsmodels_binomial_glm(
+    link: str, mu: float, sigma: float, ll: float
+) -> None:
+    """Relative tolerance 1e-6 (Nelder-Mead vs IRLS convergence)."""
+    fit = fit_psychometric(_X, _NC, _NT, link=link)  # type: ignore[arg-type]
+    assert fit.mu == pytest.approx(mu, rel=1e-6)
+    assert fit.sigma == pytest.approx(sigma, rel=1e-6)
+    assert fit.log_likelihood == pytest.approx(ll, rel=1e-9)

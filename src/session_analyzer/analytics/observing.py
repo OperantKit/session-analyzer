@@ -47,8 +47,9 @@ class ObservingMetrics:
         Fraction of observing responses (or stimulus productions) that
         produced S+. Bounded in ``[0, 1]``.
     good_news_dominance : bool
-        ``True`` if ``s_plus_proportion >= 0.6``, the conventional
-        threshold for invoking the good-news interpretation.
+        ``True`` if ``s_plus_proportion >= good_news_threshold``
+        (default 0.6, this module's choice; Wyckoff, 1952 and Dinsmoor,
+        1983 give no numeric cut-off).
     observing_count : int
     s_plus_productions : int
     s_minus_productions : int
