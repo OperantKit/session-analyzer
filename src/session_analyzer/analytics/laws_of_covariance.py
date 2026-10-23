@@ -1,24 +1,22 @@
-"""Laws-of-covariance resurgence prediction (Podlesnik et al., 2024).
+"""Laws-of-covariance resurgence prediction (after Podlesnik & Baum, 2024).
 
-Podlesnik, Kuroda, Jimenez-Gomez & Abreu-Rodrigues (2024) re-derive the
-prediction of resurgence (and related emergent activity such as
-reinstatement and renewal) from three "laws" of operant behavior:
-
-1. **Law of allocation** — at steady state, response allocation tracks
-   reinforcement allocation.
-2. **Law of induction** — the locally-richer reinforcer context
-   elicits behavior toward that context.
-3. **Law of covariance** — when context reinforcement rates change,
-   response allocation co-varies with the change.
+Podlesnik & Baum (2024) apply the laws of allocation, induction, and
+covariance to resurgence — an increase in an extinguished target
+response when conditions for a more recently reinforced alternative
+response worsen — and to other activity related or unrelated to the
+reinforcer (phylogenetically important event). They also discuss how
+induction could enter the resurgence-as-choice framework. The article
+does not give the point prediction below; it is this module's own
+minimal formula in the spirit of the covariance law.
 
 For the canonical three-phase resurgence procedure (target trained →
 target extinction + alternative reinforcement → alternative
-extinction), the law of covariance predicts that, in phase 3, the
-target response recovers in proportion to the *reduction* in
-alternative reinforcement away from its phase-2 asymptote. With
-``R_alt^test = 0`` (full withdrawal), the prediction is full recovery
-to the phase-1 baseline rate; with ``R_alt^test = R_alt^baseline``
-(no withdrawal), the prediction is no recovery.
+extinction), the formula lets the target response recover in
+proportion to the *reduction* in alternative reinforcement away from
+its phase-2 asymptote. With ``R_alt^test = 0`` (full withdrawal), the
+prediction is full recovery to the phase-1 baseline rate; with
+``R_alt^test = R_alt^baseline`` (no withdrawal), the prediction is no
+recovery.
 
 This module implements a single-shot point prediction:
 
@@ -36,11 +34,10 @@ in :mod:`session_analyzer.analytics.resurgence`.
 
 References
 ----------
-Podlesnik, C. A., Kuroda, T., Jimenez-Gomez, C., & Abreu-Rodrigues, J.
-    (2024). Understanding resurgence and other emergent activity with
-    the laws of allocation, induction, and covariance. *Journal of the
-    Experimental Analysis of Behavior*, *121*(2), 261-281.
-    https://doi.org/10.1002/jeab.4212
+Podlesnik, C. A., & Baum, W. M. (2024). Understanding resurgence and
+    other emergent activity with the laws of allocation, induction, and
+    covariance. *Journal of the Experimental Analysis of Behavior*,
+    *122*(3), 375-391. https://doi.org/10.1002/jeab.4212
 
 Shahan, T. A., & Sweeney, M. M. (2011). A model of resurgence based on
     behavioral momentum theory. *Journal of the Experimental Analysis

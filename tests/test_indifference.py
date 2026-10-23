@@ -61,3 +61,45 @@ def test_indifference_point_n_trials() -> None:
     result = estimate_indifference_point(adjusting_amounts=amounts, stable_window=3)
     assert result.n_trials == 4
     assert result.indifference_value == pytest.approx(50.0)
+
+
+# ---------------------------------------------------------------------------
+# Hand computations
+# ---------------------------------------------------------------------------
+#
+# Richards et al. (1997) take the indifference point as the mean adjusting
+# amount over stable trials; the window length and tolerance are parameters of
+# this module. A titration against a fixed delayed value V = A / (1 + kD)
+# oscillates within one step of V, so its trailing mean lies within half a step.
+
+
+@pytest.mark.unit
+def test_window_mean_and_range_by_hand() -> None:
+    result = estimate_indifference_point(
+        adjusting_amounts=[2.0, 4.0, 10.0, 12.0, 11.0, 9.0, 10.0, 12.0],
+        stable_window=6,
+        stability_tolerance=3.0,
+    )
+    assert result.indifference_value == pytest.approx(64.0 / 6.0, abs=1e-6)
+    assert result.range_in_window == 3.0
+    assert result.stable  # range equal to the tolerance counts as stable
+    unstable = estimate_indifference_point(
+        adjusting_amounts=[2.0, 4.0, 10.0, 12.0, 11.0, 9.0, 10.0, 12.0],
+        stable_window=6,
+        stability_tolerance=2.999,
+    )
+    assert not unstable.stable
+
+
+@pytest.mark.unit
+def test_titration_converges_to_hyperbolic_value() -> None:
+    delayed_value = 10.0 / (1.0 + 0.25 * 4.0)  # = 5.0
+    step = 0.5
+    amount = 1.0
+    amounts = []
+    for _ in range(60):
+        amounts.append(amount)
+        amount += -step if amount >= delayed_value else step
+    result = estimate_indifference_point(adjusting_amounts=amounts, stable_window=10)
+    assert abs(result.indifference_value - delayed_value) <= step / 2
+    assert result.stable

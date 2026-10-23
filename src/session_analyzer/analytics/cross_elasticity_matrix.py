@@ -13,7 +13,10 @@ Diagonal entries (``epsilon_{ii}``) are own-price elasticities;
 off-diagonal entries express substitution (positive) or
 complementarity (negative). The procedure does **not** assume
 homogeneity-of-degree-zero or any particular demand-system functional
-form; it is a descriptive companion to structural fits.
+form; it is a descriptive companion to structural fits. Each entry is a
+simple (one-regressor) slope, so it equals the partial elasticity of a
+multiplicative demand system only when the log prices are uncorrelated
+across conditions (e.g., a full factorial price design).
 
 Reference
 ---------

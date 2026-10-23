@@ -28,7 +28,7 @@ simultaneously-available alternatives.
 ### Time-allocation matching — `TimeMatchingParameters`
 
 - **Theme** — The matching law applies to the *time* spent on each alternative as well as to response counts. Time allocation is sometimes a more sensitive measure of preference than response allocation, especially when response topographies differ across alternatives or responses are not discrete.
-- **Equation** — `log(T1 / T2) = a · log(R1 / R2) + log b` (Baum & Rachlin, 1969)
+- **Equation** — `log(T1 / T2) = a · log(R1 / R2) + log b` (Baum & Rachlin, 1969). Natural logs, as in `matching_law` (`log10 b` = `bias / ln 10`)
 - **Output** — `TimeMatchingParameters(sensitivity=0.79, bias=0.05, r_squared=0.95, n=6)`
 - **Reference** — Baum, W. M., & Rachlin, H. C. (1969). Choice as time allocation. *JEAB*, 12(6), 861-874. <https://doi.org/10.1901/jeab.1969.12-861>
 

@@ -87,3 +87,36 @@ def test_cod_compliance_zero_reinforcers_is_full_compliance() -> None:
 def test_cod_compliance_raises_on_invalid_cod() -> None:
     with pytest.raises(ValueError, match="cod_sec"):
         check_cod_compliance(["L", "R"], [0.0, 1.0], [2.0], cod_sec=0.0)
+
+
+# ---------------------------------------------------------------------------
+# Hand computations
+# ---------------------------------------------------------------------------
+#
+# Changeovers and the changeover delay are procedural definitions (Catania,
+# 1966; Stubbs & Pliskoff, 1969); there are no published values to match, so
+# a short sequence is worked by hand. The changeover time is the first response
+# on the new side, and a reinforcer exactly COD seconds after it is compliant.
+
+
+@pytest.mark.unit
+def test_stay_bouts_by_hand() -> None:
+    sides = ["L", "L", "R", "R", "R", "L"]
+    times = [0.0, 1.0, 2.0, 3.0, 5.0, 6.0]
+    m = analyze_stay_switch(sides, times)
+    assert m is not None
+    assert (m.n_changeovers, m.n_stays, m.n_responses) == (2, 3, 6)
+    assert m.mean_stay_responses == pytest.approx(2.0)
+    assert m.mean_stay_duration_sec == pytest.approx((1.0 + 3.0 + 0.0) / 3.0)
+    assert m.session_duration_sec == pytest.approx(6.0)
+    assert m.changeover_rate_per_min == pytest.approx(20.0)
+
+
+@pytest.mark.unit
+def test_cod_compliance_by_hand_with_boundary() -> None:
+    sides = ["L", "L", "R", "R", "R", "L"]
+    times = [0.0, 1.0, 2.0, 3.0, 5.0, 6.0]  # changeovers at 2.0 and 6.0
+    result = check_cod_compliance(sides, times, [1.0, 3.9, 4.0, 7.0], cod_sec=2.0)
+    # 1.0: no changeover yet; 3.9: 1.9 s; 4.0: exactly 2.0 s; 7.0: 1.0 s.
+    assert (result.n_reinforcers, result.n_compliant) == (4, 2)
+    assert result.compliance_rate == pytest.approx(0.5)

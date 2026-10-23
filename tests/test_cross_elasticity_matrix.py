@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import pytest
 
 from session_analyzer.analytics.cross_elasticity_matrix import (
     CrossElasticityMatrix,
     compute_cross_elasticity_matrix,
+)
+from session_analyzer.analytics.unit_price import (
+    compute_cross_price_elasticity,
+    fit_unit_price_elasticity,
 )
 
 
@@ -79,3 +84,43 @@ def test_raises_on_length_mismatch() -> None:
             {"A": [1.0, 2.0], "B": [1.0]},
             {"A": [1.0, 2.0], "B": [1.0, 2.0]},
         )
+
+
+# ---------------------------------------------------------------------------
+# Reference values (OLS and agreement with unit_price)
+# ---------------------------------------------------------------------------
+#
+# Each entry is a simple (one-regressor) log-log OLS slope. With a full
+# factorial price design the log prices are uncorrelated, so the simple slopes
+# equal the exponents of a multiplicative demand system
+# Q_i = c_i * P_A^e_iA * P_B^e_iB exactly. No published matrix was retrieved
+# (Hursh & Roma, 2013 is paywalled).
+
+
+@pytest.mark.unit
+def test_factorial_design_recovers_partial_elasticities() -> None:
+    levels = [1.0, 2.0, 4.0]
+    p_a = [a for a in levels for _ in levels]
+    p_b = [b for _ in levels for b in levels]
+    q_a = [10.0 * a**-0.8 * b**0.3 for a, b in zip(p_a, p_b, strict=True)]
+    q_b = [6.0 * a**-0.2 * b**-1.1 for a, b in zip(p_a, p_b, strict=True)]
+    result = compute_cross_elasticity_matrix({"A": q_a, "B": q_b}, {"A": p_a, "B": p_b})
+    expected = ((-0.8, 0.3), (-0.2, -1.1))
+    for i in range(2):
+        for j in range(2):
+            assert result.matrix[i][j] == pytest.approx(expected[i][j], abs=1e-12)
+
+
+@pytest.mark.unit
+def test_entries_agree_with_unit_price_and_polyfit() -> None:
+    p_a = [1.0, 2.0, 3.0, 5.0, 8.0]
+    p_b = [4.0, 2.5, 6.0, 1.5, 3.0]
+    q_a = [30.0, 18.0, 15.5, 8.0, 6.2]
+    q_b = [9.0, 12.0, 7.5, 16.0, 11.0]
+    result = compute_cross_elasticity_matrix({"A": q_a, "B": q_b}, {"A": p_a, "B": p_b})
+    own_a = fit_unit_price_elasticity(unit_prices=p_a, consumption=q_a)
+    cross_ab = compute_cross_price_elasticity(prices_other=p_b, consumption_target=q_a)
+    assert result.matrix[0][0] == pytest.approx(own_a.elasticity, abs=1e-6)
+    assert result.matrix[0][1] == pytest.approx(cross_ab.elasticity, abs=1e-6)
+    slope_ba, _ = np.polyfit(np.log(p_a), np.log(q_b), 1)
+    assert result.matrix[1][0] == pytest.approx(slope_ba, rel=1e-12)

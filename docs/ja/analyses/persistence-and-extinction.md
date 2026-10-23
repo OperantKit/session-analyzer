@@ -49,7 +49,7 @@
 
 ### 消去バースト — `ExtinctionBurstResult`
 
-- **テーマ** — 消去開始直後にしばしば応答 rate が一過的に **上昇** してから減衰する。検出器はベースライン rate と消去開始後初期窓の rate を比較し、比が `ratio_threshold`（既定 1.5）を満たすと burst をフラグ。
+- **テーマ** — 消去開始直後にしばしば応答 rate が一過的に **上昇** してから減衰する。検出器はベースライン rate と消去開始後初期窓の rate を比較し、比が `ratio_threshold`（既定 1.5）を満たすと burst をフラグ。窓は終端の時刻を含む。窓の長さと閾値は本 module の既定値で、引用文献の値ではない。
 - **出力** — `ExtinctionBurstResult(baseline_rate=0.5, burst_rate=1.0, burst_ratio=2.0, burst_detected=True, burst_window_sec=60.0, ratio_threshold=1.5)`
 - **引用** — Lerman, D. C., & Iwata, B. A. (1995). Prevalence of the extinction burst and its attenuation during treatment. *JABA*, 28(1), 93-94. <https://doi.org/10.1901/jaba.1995.28-93>
 

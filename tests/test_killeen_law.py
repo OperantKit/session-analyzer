@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from session_analyzer.analytics.killeen_law import (
@@ -56,3 +57,25 @@ def test_raises_on_length_mismatch() -> None:
 def test_raises_on_insufficient_data() -> None:
     with pytest.raises(ValueError, match="at least 2"):
         fit_killeen_law([1.0], [10.0], delta=0.05)
+
+
+# ---------------------------------------------------------------------------
+# Identifiability (Killeen, 1994; module docstring)
+# ---------------------------------------------------------------------------
+#
+# B = k a R / (a R delta + 1) = beta R / (gamma R + 1) with beta = a k and
+# gamma = a delta. Fitting with a different fixed delta must reproduce the
+# same curve and the same beta and gamma; the asymptote is k / delta.
+
+
+@pytest.mark.unit
+def test_wrong_delta_recovers_same_beta_and_gamma() -> None:
+    k, a, delta = 100.0, 0.5, 0.01
+    rates = np.array([0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 100.0])
+    responses = k * a * rates / (a * rates * delta + 1.0)
+    for fixed_delta in (0.01, 0.02, 0.005):
+        fit = fit_killeen_law(list(rates), list(responses), delta=fixed_delta)
+        assert fit.a * fit.k == pytest.approx(a * k, rel=1e-5)
+        assert fit.a * fit.delta == pytest.approx(a * delta, rel=1e-5)
+        assert fit.k / fit.delta == pytest.approx(k / delta, rel=1e-5)
+        assert fit.r_squared == pytest.approx(1.0, abs=1e-9)

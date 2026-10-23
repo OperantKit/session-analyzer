@@ -38,7 +38,7 @@ References
 ----------
 Baum, W. M., Aparicio, C. F., & Alonso-Alvarez, B. (2022). Rate matching,
     probability matching, and optimization in concurrent ratio schedules.
-    *Journal of the Experimental Analysis of Behavior*, *118*(1).
+    *Journal of the Experimental Analysis of Behavior*, *118*(1), 96-131.
     https://doi.org/10.1002/jeab.771
 
 Herrnstein, R. J. (1961). Relative and absolute strength of response as a

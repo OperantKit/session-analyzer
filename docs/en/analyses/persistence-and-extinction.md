@@ -51,7 +51,7 @@ withdrawal of an alternative (resurgence).
 
 ### Extinction-burst — `ExtinctionBurstResult`
 
-- **Theme** — Onset of extinction often produces a *transient* increase in response rate before decay. The detector compares baseline rate to rate within the first window of extinction; a burst is flagged when the ratio meets `ratio_threshold` (default 1.5).
+- **Theme** — Onset of extinction often produces a *transient* increase in response rate before decay. The detector compares baseline rate to rate within the first window of extinction; a burst is flagged when the ratio meets `ratio_threshold` (default 1.5). The window includes its end point. The window length and threshold are this module's defaults, not values from the reference.
 - **Output** — `ExtinctionBurstResult(baseline_rate=0.5, burst_rate=1.0, burst_ratio=2.0, burst_detected=True, burst_window_sec=60.0, ratio_threshold=1.5)`
 - **Reference** — Lerman, D. C., & Iwata, B. A. (1995). Prevalence of the extinction burst and its attenuation during treatment. *JABA*, 28(1), 93-94. <https://doi.org/10.1901/jaba.1995.28-93>
 

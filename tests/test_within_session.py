@@ -82,3 +82,32 @@ def test_within_session_validates_inputs() -> None:
         analyze_within_session([], session_duration=100.0, n_bins=10)
     with pytest.raises(ValueError):
         analyze_within_session([1.0], session_duration=100.0, n_bins=1)
+
+
+# ---------------------------------------------------------------------------
+# Recovery of a known inverted U
+# ---------------------------------------------------------------------------
+#
+# McSweeney, Roll & Cannon (1994) describe the rise-then-fall pattern; the
+# article was not retrieved (paywalled). A trajectory made of two exact lines
+# (+30 responses per 5-min bin up to bin 4, then -15 per bin) must give the
+# peak bin, both slopes in responses/s per bin, and a broken-line R^2 of 1.
+
+
+@pytest.mark.unit
+def test_two_line_trajectory_is_recovered_exactly() -> None:
+    counts = [30, 60, 90, 120, 150, 135, 120, 105, 90, 75, 60, 45]
+    bin_width = 300.0
+    timestamps = [
+        i * bin_width + (j + 0.5) * bin_width / c
+        for i, c in enumerate(counts)
+        for j in range(c)
+    ]
+    result = analyze_within_session(timestamps, session_duration=3600.0, n_bins=12)
+    assert result.rates == pytest.approx([c / bin_width for c in counts], abs=1e-6)
+    assert result.peak_bin == 4
+    assert result.peak_rate == pytest.approx(0.5, abs=1e-6)
+    assert result.rise_slope == pytest.approx(0.1, abs=1e-6)
+    assert result.fall_slope == pytest.approx(-0.05, abs=1e-6)
+    assert result.bilinear_r_squared == pytest.approx(1.0, abs=1e-6)
+    assert result.n_responses == sum(counts)

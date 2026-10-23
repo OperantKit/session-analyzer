@@ -11,7 +11,10 @@ across alternatives or when responses are not discrete.
 
 Mathematically identical to :func:`session_analyzer.analytics.matching.
 estimate_matching_parameters`, but typed and named for the
-time-allocation interpretation.
+time-allocation interpretation. Logarithms are natural, so the bias is
+``ln b`` (``log10 b = bias / ln 10``). Baum & Rachlin (1969) report a
+constant of proportionality below 1 for every pigeon (a right-side bias,
+i.e. ``bias < 0`` with T1 = left).
 
 References
 ----------
@@ -39,7 +42,7 @@ class TimeMatchingParameters:
         reinforcement; ``a < 1`` is undermatching (more equal time
         than predicted), ``a > 1`` is overmatching.
     bias : float
-        Intercept ``log b``. ``log b > 0`` indicates a fixed preference
+        Intercept ``ln b`` (natural log). ``ln b > 0`` indicates a fixed preference
         for alternative 1 unrelated to reinforcement.
     r_squared : float
         Coefficient of determination of the log-log fit.

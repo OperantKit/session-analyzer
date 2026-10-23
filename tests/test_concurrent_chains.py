@@ -102,3 +102,42 @@ def test_raises_on_invalid_parameters() -> None:
             right_responses=10,
             k=0.0,
         )
+
+
+# ---------------------------------------------------------------------------
+# Closed forms (Mazur, 2001: V = A / (1 + kD))
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_values_and_choice_match_hyperbolic_closed_form() -> None:
+    result = predict_concurrent_chains_choice(
+        left_amount=1.0,
+        left_delay=10.0,
+        right_amount=1.0,
+        right_delay=20.0,
+        left_responses=60,
+        right_responses=40,
+        k=0.2,
+    )
+    assert result.v_left == pytest.approx(1.0 / 3.0, rel=1e-12)
+    assert result.v_right == pytest.approx(1.0 / 5.0, rel=1e-12)
+    assert result.predicted_proportion_left == pytest.approx(0.625, rel=1e-12)
+    assert result.deviation == pytest.approx(0.6 - 0.625, rel=1e-12)
+
+
+@pytest.mark.unit
+def test_amount_delay_tradeoff_at_equal_value_predicts_indifference() -> None:
+    # A_R / A_L = (1 + k D_R) / (1 + k D_L) makes the two values equal.
+    k, d_l, d_r, a_l = 0.5, 2.0, 8.0, 2.0
+    a_r = a_l * (1.0 + k * d_r) / (1.0 + k * d_l)
+    result = predict_concurrent_chains_choice(
+        left_amount=a_l,
+        left_delay=d_l,
+        right_amount=a_r,
+        right_delay=d_r,
+        left_responses=0,
+        right_responses=0,
+        k=k,
+    )
+    assert result.predicted_proportion_left == pytest.approx(0.5, rel=1e-12)

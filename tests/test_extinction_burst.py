@@ -105,3 +105,33 @@ def test_raises_on_extinction_time_before_start() -> None:
             extinction_response_times=[5.0, 11.0],
             burst_window_sec=10.0,
         )
+
+
+# ---------------------------------------------------------------------------
+# Boundaries by hand
+# ---------------------------------------------------------------------------
+#
+# Lerman & Iwata (1995) define the burst as an initial increase in the target
+# response under extinction (abstract; they found it in 24% of 113 data sets)
+# without a fixed window or ratio, so the 60-s window and 1.5 threshold are
+# this module's parameters. The window is closed: a response exactly
+# burst_window_sec after onset counts, and a ratio equal to the threshold is a
+# burst.
+
+
+@pytest.mark.unit
+def test_ratio_at_threshold_and_closed_window() -> None:
+    baseline = [float(t) for t in range(60)]  # 1 response/s for 60 s
+    start = 100.0
+    extinction = [start + (i + 1) * 60.0 / 90.0 for i in range(90)]  # last at 160.0
+    result = detect_extinction_burst(
+        baseline_response_times=baseline,
+        baseline_duration_sec=60.0,
+        extinction_start_time=start,
+        extinction_response_times=extinction + [160.5],
+    )
+    assert extinction[-1] == pytest.approx(160.0)
+    assert result.baseline_rate == pytest.approx(1.0)
+    assert result.burst_rate == pytest.approx(1.5)
+    assert result.burst_ratio == pytest.approx(1.5)
+    assert result.burst_detected

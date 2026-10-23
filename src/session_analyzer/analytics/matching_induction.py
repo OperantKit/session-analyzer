@@ -11,9 +11,10 @@ allocation as
 with sensitivity ``a`` and bias ``log b``. In concurrent-ratio and other
 arrangements, observed allocation often departs systematically from this
 law: behavior overshoots strict matching toward the richer alternative.
-Baum & Grace (2020) argue that matching and induction (Pavlovian
-elicitation by the locally-richer reinforcer context) jointly determine
-operant performance.
+Baum & Grace (2020) argue that matching theory combined with induction
+(activity induced by the reinforcer, a phylogenetically important event)
+explains operant performance; their equations use power-function
+induction on single schedules and are not the equation below.
 
 This module implements a phenomenological three-parameter extension that
 adds an induction term proportional to the *relative* reinforcer-rate
@@ -31,6 +32,12 @@ log-ratio beyond strict matching toward the richer alternative
 (induction-driven overmatching); ``w < 0`` attenuates it (induction
 acting to equalize allocation). The strict GML is recovered at ``w = 0``.
 
+With ``r = R_1 / R_2`` the term equals ``(r - 1) / (r + 1) =
+tanh(ln(r) / 2)``, so it depends on the reinforcement ratio only, not on
+the absolute rates. ``a``, ``log b`` and ``w`` are separable only through
+the curvature of ``tanh(x / 2)`` against ``x``, which needs a wide range
+of ratios; over a narrow range ``w`` trades off against ``a``.
+
 This is one parameterization consistent with the matching + induction
 framework; the framework itself is broader than any specific equation
 form.
@@ -43,12 +50,12 @@ Baum, W. M. (1974). On two types of deviation from the matching law:
 
 Baum, W. M., & Grace, R. C. (2020). Matching theory and induction
     explain operant performance. *Journal of the Experimental Analysis
-    of Behavior*, *113*(1), 1-22. https://doi.org/10.1002/jeab.583
+    of Behavior*, *113*(2), 390-418. https://doi.org/10.1002/jeab.583
 
 Baum, W. M., Aparicio, C. F., & Alonso-Alvarez, B. (2022). Rate
     matching, probability matching, and optimization in concurrent
     ratio schedules. *Journal of the Experimental Analysis of
-    Behavior*, *117*(2), 234-252. https://doi.org/10.1002/jeab.771
+    Behavior*, *118*(1), 96-131. https://doi.org/10.1002/jeab.771
 """
 
 from __future__ import annotations
@@ -124,9 +131,10 @@ def fit_matching_with_induction(
         Per-condition reinforcement ratios ``R1 / R2``.
     reinforcement_rates_1, reinforcement_rates_2 :
         Per-condition absolute reinforcement rates on alternatives 1
-        and 2. Required (alongside ``reinforcement_ratios``) because
-        the induction term depends on the absolute rate difference, not
-        just the ratio.
+        and 2, used to form the induction term
+        ``(R1 - R2) / (R1 + R2)``. The term is scale-free: only the
+        ratio ``R1 / R2`` enters, so rates that share a ratio give the
+        same prediction.
 
     Returns
     -------

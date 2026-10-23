@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import pytest
 
 from session_analyzer.analytics.unit_price import (
@@ -100,3 +101,53 @@ def test_unit_price_elasticity_validates_lengths() -> None:
         fit_unit_price_elasticity(unit_prices=[1.0], consumption=[1.0, 2.0])
     with pytest.raises(ValueError):
         fit_unit_price_elasticity(unit_prices=[1.0], consumption=[1.0])
+
+
+# ---------------------------------------------------------------------------
+# Reference values (closed forms and OLS)
+# ---------------------------------------------------------------------------
+#
+# Hursh (1980, 1991) define unit price as cost per unit of reinforcer; the
+# module docstring's own example (FR50 / 100 uL and FR10 / 20 uL share a unit
+# price of 0.5) is checked here. No published table of fitted elasticities was
+# retrieved (Hursh & Roma, 2013 is paywalled), so the slopes are checked against
+# a known power law and against numpy.polyfit.
+
+
+@pytest.mark.unit
+def test_unit_price_equivalence_of_docstring_example() -> None:
+    assert compute_unit_prices([50.0, 10.0], [100.0, 20.0]) == [0.5, 0.5]
+
+
+@pytest.mark.unit
+def test_own_price_elasticity_recovers_power_law_exponent() -> None:
+    prices = [1.0, 2.0, 4.0, 8.0, 16.0]
+    consumption = [100.0 * p**-1.3 for p in prices]
+    fit = fit_unit_price_elasticity(unit_prices=prices, consumption=consumption)
+    assert fit.elasticity == pytest.approx(-1.3, abs=1e-6)
+    assert fit.intercept == pytest.approx(math.log(100.0), abs=1e-6)
+    assert fit.r_squared == pytest.approx(1.0, abs=1e-6)
+    assert fit.is_elastic and not fit.is_inelastic
+
+
+@pytest.mark.unit
+def test_elasticities_agree_with_numpy_polyfit_on_noisy_data() -> None:
+    prices = [1.0, 1.5, 2.0, 3.0, 5.0, 8.0]
+    consumption = [52.0, 40.0, 33.0, 21.0, 14.0, 8.5]
+    slope, intercept = np.polyfit(np.log(prices), np.log(consumption), 1)
+    own = fit_unit_price_elasticity(unit_prices=prices, consumption=consumption)
+    cross = compute_cross_price_elasticity(
+        prices_other=prices, consumption_target=consumption
+    )
+    assert own.elasticity == pytest.approx(slope, abs=1e-6)
+    assert own.intercept == pytest.approx(intercept, abs=1e-6)
+    assert cross.elasticity == own.elasticity
+
+
+@pytest.mark.unit
+def test_cross_price_elasticity_recovers_power_law_exponent() -> None:
+    prices_b = [1.0, 2.0, 4.0, 8.0]
+    q_a = [5.0 * p**0.4 for p in prices_b]
+    fit = compute_cross_price_elasticity(prices_other=prices_b, consumption_target=q_a)
+    assert fit.elasticity == pytest.approx(0.4, abs=1e-6)
+    assert fit.relationship == "substitutes"

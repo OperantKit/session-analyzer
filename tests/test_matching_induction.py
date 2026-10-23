@@ -105,3 +105,50 @@ class TestFitMatchingWithInduction:
                 reinforcement_rates_1=[1.0, 2.0],
                 reinforcement_rates_2=[1.0, 1.0],
             )
+
+
+# ---------------------------------------------------------------------------
+# Closed forms and recovery
+# ---------------------------------------------------------------------------
+#
+# The induction term (R1 - R2) / (R1 + R2) equals (r - 1) / (r + 1) =
+# tanh(ln(r) / 2) with r = R1 / R2, so it depends on the reinforcement ratio
+# only, not on the absolute rates. The three parameters are identifiable only
+# through the curvature of tanh(x / 2) against x, which needs a wide range of
+# ratios. Baum & Grace (2020) give no values for this parameterization.
+
+
+@pytest.mark.unit
+def test_induction_term_depends_on_ratio_only() -> None:
+    ratios = np.array([0.25, 0.5, 2.0, 8.0])
+    log_r = np.log(ratios)
+    slow = predict_log_ratio_with_induction(
+        log_r, ratios * 1.0, np.ones(4), a=0.9, log_b=0.1, w=0.4
+    )
+    fast = predict_log_ratio_with_induction(
+        log_r, ratios * 30.0, np.full(4, 30.0), a=0.9, log_b=0.1, w=0.4
+    )
+    assert slow == pytest.approx(fast, rel=1e-12)
+    assert slow == pytest.approx(0.9 * log_r + 0.1 + 0.4 * np.tanh(log_r / 2.0), rel=1e-12)
+
+
+@pytest.mark.unit
+def test_recovers_known_parameters_over_wide_ratio_range() -> None:
+    ratios = [1 / 27, 1 / 9, 1 / 3, 1.0, 3.0, 9.0, 27.0]
+    r2 = [10.0] * len(ratios)
+    r1 = [r * 10.0 for r in ratios]
+    b = np.exp(
+        predict_log_ratio_with_induction(
+            np.log(ratios), np.array(r1), np.array(r2), a=0.8, log_b=0.15, w=0.5
+        )
+    )
+    fit = fit_matching_with_induction(
+        responses_ratios=list(b),
+        reinforcement_ratios=ratios,
+        reinforcement_rates_1=r1,
+        reinforcement_rates_2=r2,
+    )
+    assert fit.sensitivity == pytest.approx(0.8, abs=1e-6)
+    assert fit.bias == pytest.approx(0.15, abs=1e-6)
+    assert fit.induction_weight == pytest.approx(0.5, abs=1e-6)
+    assert fit.r_squared == pytest.approx(1.0, abs=1e-9)

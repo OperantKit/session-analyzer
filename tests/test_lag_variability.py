@@ -81,3 +81,31 @@ def test_analyze_lag_variability_low_variability() -> None:
     assert metrics.u_value == pytest.approx(0.0)
     assert metrics.lag_pass_rate == pytest.approx(0.0)
     assert metrics.mean_unique_in_window == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# Hand computations and closed forms
+# ---------------------------------------------------------------------------
+#
+# Under Lag N a sequence is reinforced only if it differs from each of the
+# previous N (Page & Neuringer, 1985; the article is paywalled, so the
+# definition is checked by hand). A cycle through K distinct sequences passes
+# every trial at lag N < K and fails every trial at lag N = K.
+
+
+@pytest.mark.unit
+def test_pass_rate_and_window_uniqueness_by_hand() -> None:
+    seqs = ["A", "B", "A", "C", "C", "B"]
+    # i=2 A in {A,B} fail; i=3 C pass; i=4 C in {A,C} fail; i=5 B in {C} pass.
+    assert compute_lag_pass_rate(seqs, lag=2) == pytest.approx(0.5)
+    m = analyze_lag_variability(sequences=seqs, alphabet_size=3, sequence_length=1, lag=2)
+    # windows {A,B} {B,A} {A,C} {C} {C,B}: 2+2+2+1+2 = 9 over 5
+    assert m.mean_unique_in_window == pytest.approx(1.8)
+
+
+@pytest.mark.unit
+def test_cycle_of_k_sequences_closed_form() -> None:
+    cycle = ["LL", "LR", "RL"] * 10
+    assert compute_lag_pass_rate(cycle, lag=1) == 1.0
+    assert compute_lag_pass_rate(cycle, lag=2) == 1.0
+    assert compute_lag_pass_rate(cycle, lag=3) == 0.0

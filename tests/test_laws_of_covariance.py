@@ -1,4 +1,4 @@
-"""Tests for laws-of-covariance resurgence prediction (Podlesnik et al., 2024).
+"""Tests for laws-of-covariance resurgence prediction (after Podlesnik & Baum, 2024).
 """
 
 from __future__ import annotations
@@ -91,3 +91,25 @@ class TestPredictLawsOfCovariance:
                 alt_test_rate=0.0,
                 covariance_coefficient=-0.1,
             )
+
+
+# ---------------------------------------------------------------------------
+# Closed form
+# ---------------------------------------------------------------------------
+#
+# Podlesnik & Baum (2024) discuss resurgence with the laws of allocation,
+# induction, and covariance qualitatively (abstract); the point prediction
+# B_test = c * B_baseline * (1 - R_alt_test / R_alt_baseline) is this module's
+# own formula, so it is checked as a closed form only.
+
+
+@pytest.mark.unit
+def test_partial_withdrawal_by_hand() -> None:
+    result = predict_resurgence_laws_of_covariance(
+        baseline_target_rate=40.0,
+        alt_baseline_rate=2.0,
+        alt_test_rate=0.5,
+        covariance_coefficient=0.8,
+    )
+    assert result.fraction_alt_withdrawn == pytest.approx(0.75, rel=1e-12)
+    assert result.predicted_target_rate == pytest.approx(24.0, rel=1e-12)

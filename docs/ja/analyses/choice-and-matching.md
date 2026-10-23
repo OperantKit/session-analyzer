@@ -28,7 +28,7 @@
 ### 時間配分マッチング — `TimeMatchingParameters`
 
 - **テーマ** — マッチング法則は応答数だけでなく **滞在時間** にも適用できる。応答トポグラフィーが選択肢ごとに異なる場合や応答が連続的な場合、時間配分のほうが選好の感度が高い。
-- **式** — `log(T1 / T2) = a · log(R1 / R2) + log b`（Baum & Rachlin, 1969）
+- **式** — `log(T1 / T2) = a · log(R1 / R2) + log b`（Baum & Rachlin, 1969）。`matching_law` と同じく自然対数（`log10 b` = `bias / ln 10`）
 - **出力** — `TimeMatchingParameters(sensitivity=0.79, bias=0.05, r_squared=0.95, n=6)`
 - **引用** — Baum, W. M., & Rachlin, H. C. (1969). Choice as time allocation. *JEAB*, 12(6), 861-874. <https://doi.org/10.1901/jeab.1969.12-861>
 

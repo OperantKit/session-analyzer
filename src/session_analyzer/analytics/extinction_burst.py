@@ -6,6 +6,12 @@ baseline level for a short window before declining. This module
 quantifies that burst by comparing initial-extinction rate to baseline
 rate.
 
+Lerman & Iwata (1995) describe the burst as an initial increase in the
+target response under extinction and do not fix a window length or a
+ratio; the 60-s window and the 1.5 threshold are this module's defaults.
+The window is closed: a response exactly ``burst_window_sec`` after onset
+is counted.
+
 References
 ----------
 Lerman, D. C., & Iwata, B. A. (1995). Prevalence of the extinction
