@@ -27,12 +27,6 @@ Richardson, N. R., & Roberts, D. C. S. (1996). Progressive ratio
     schedules in drug self-administration studies in rats.
     *Journal of Neuroscience Methods*, *66*(1), 1-11.
     https://doi.org/10.1016/0165-0270(95)00153-0
-
-Ferrario, C. R., Gorny, G., Crombag, H. S., Li, Y., Kolb, B., &
-    Robinson, T. E. (2011). Methodological and analytical issues of
-    progressive ratio schedules.
-    *Journal of Neuroscience Methods*, *198*(2), 280-285.
-    https://doi.org/10.1016/j.jneumeth.2011.04.014
 """
 
 from __future__ import annotations

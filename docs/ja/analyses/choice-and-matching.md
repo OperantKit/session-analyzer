@@ -10,7 +10,7 @@
 ### `matching_law` — `MatchingParameters`（一般化マッチング法則）
 
 - **テーマ** — 並立スケジュールでは応答配分が強化配分に比例する。一般化マッチング法則は厳密マッチングを感度 `a` と bias `log b` で緩める。実証的に `a < 1`（undermatching）が最頻。
-- **式** — `log(B1/B2) = a · log(R1/R2) + log b`（Baum, 1974）
+- **式** — `log(B1/B2) = a · log(R1/R2) + log b`（Baum, 1974）。自然対数。論文は多くが `log10 b`（= `bias / ln 10`）で報告する
 - **出力** — `MatchingParameters(sensitivity=0.84, bias=0.02, r_squared=0.97, n=6)`
 - **引用** — Baum, W. M. (1974). On two types of deviation from the matching law. *JEAB*, 22(1), 231-242. <https://doi.org/10.1901/jeab.1974.22-231>
 

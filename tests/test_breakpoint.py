@@ -173,3 +173,39 @@ def test_irt_breakpoint_raises_on_non_positive_threshold() -> None:
     with pytest.raises(ValueError, match="positive"):
         estimate_irt_breakpoint([1.0, 2.0], [], irt_threshold_sec=-1.0)
 
+
+
+# ---------------------------------------------------------------------------
+# Richardson & Roberts (1996) operationalization (property checks)
+# ---------------------------------------------------------------------------
+#
+# Breakpoint = last ratio completed before a pause at least as long as the
+# criterion (Richardson & Roberts, 1996; the criterion length is
+# procedure-dependent, 5 min is the module default). No numeric dataset is
+# published for this
+# definition, so the checks build completions on the published exponential
+# series (1, 2, 4, 6, 9, 12, 15, 20, 25, 32, 40, 50, 62, 77, 95, ...).
+
+_RR_SERIES = [1, 2, 4, 6, 9, 12, 15, 20, 25, 32, 40, 50, 62, 77, 95]
+
+
+@pytest.mark.unit
+def test_breakpoint_is_last_completed_ratio_on_published_series() -> None:
+    completions = [(r, 30.0 * i) for i, r in enumerate(_RR_SERIES, start=1)]
+    last_time = completions[-1][1]
+    result = detect_breakpoint(
+        completions, session_end_time=last_time + 3600.0, pause_threshold_sec=3600.0
+    )
+    assert result.method == "pause_threshold"
+    assert result.breakpoint_ratio == 95
+    assert result.n_ratios_completed == 15
+
+
+@pytest.mark.unit
+def test_breakpoint_pause_criterion_is_inclusive_at_threshold() -> None:
+    completions = [(r, 10.0 * i) for i, r in enumerate(_RR_SERIES[:5], start=1)]
+    at = detect_breakpoint(completions, session_end_time=50.0 + 300.0)
+    below = detect_breakpoint(completions, session_end_time=50.0 + 299.999)
+    assert at.breakpoint_ratio == 9
+    assert below.breakpoint_ratio is None
+    assert below.method == "session_ended"

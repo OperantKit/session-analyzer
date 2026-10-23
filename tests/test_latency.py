@@ -86,3 +86,37 @@ def test_analyze_latencies_filters_non_positive_values() -> None:
     assert result is not None
     assert result.n == 2
     assert result.mean == pytest.approx(3.0)
+
+
+# ---------------------------------------------------------------------------
+# Hand computation and standard-library agreement (no published values)
+# ---------------------------------------------------------------------------
+#
+# The latency module cites no source and there is no published dataset for
+# it; checks pin the pairing rule by hand and the summary against Python's
+# ``statistics`` module (population SD, as documented by ``ddof=0``).
+
+
+@pytest.mark.unit
+def test_latency_pairing_and_cutoff_by_hand() -> None:
+    # SD onsets at 0, 10, 20, 30; responses at 0 (same instant, not counted),
+    # 2.5, 14, 19.9 (before third onset), 95 (beyond 60 s cut-off for onset 30).
+    onsets = [0.0, 10.0, 20.0, 30.0]
+    responses = [0.0, 2.5, 14.0, 19.9, 95.0]
+    assert compute_latencies(onsets, responses) == pytest.approx([2.5, 4.0, 75.0, 65.0])
+    assert compute_latencies(onsets, responses, max_latency_sec=60.0) == pytest.approx(
+        [2.5, 4.0]
+    )
+
+
+@pytest.mark.unit
+def test_analyze_latencies_matches_statistics_module() -> None:
+    import statistics
+
+    lat = [0.42, 0.61, 0.38, 1.25, 0.77, 0.50]
+    m = analyze_latencies(lat)
+    assert m is not None
+    assert m.mean == pytest.approx(statistics.fmean(lat), rel=1e-12)
+    assert m.median == pytest.approx(statistics.median(lat), rel=1e-12)
+    assert m.std == pytest.approx(statistics.pstdev(lat), rel=1e-12)
+    assert (m.min, m.max, m.n) == (0.38, 1.25, 6)

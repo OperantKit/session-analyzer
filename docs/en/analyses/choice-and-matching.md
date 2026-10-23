@@ -10,7 +10,7 @@ simultaneously-available alternatives.
 ### `matching_law` — `MatchingParameters` (Generalized Matching Law)
 
 - **Theme** — On concurrent schedules, subjects allocate responding in proportion to reinforcement. The Generalized Matching Law relaxes strict matching with a sensitivity `a` and bias `log b`. Undermatching (`a < 1`) is the most common empirical finding.
-- **Equation** — `log(B1/B2) = a · log(R1/R2) + log b` (Baum, 1974)
+- **Equation** — `log(B1/B2) = a · log(R1/R2) + log b` (Baum, 1974). Natural logs; the papers usually report `log10 b` (= `bias / ln 10`)
 - **Output** — `MatchingParameters(sensitivity=0.84, bias=0.02, r_squared=0.97, n=6)`
 - **Reference** — Baum, W. M. (1974). On two types of deviation from the matching law. *JEAB*, 22(1), 231-242. <https://doi.org/10.1901/jeab.1974.22-231>
 

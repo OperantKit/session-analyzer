@@ -29,7 +29,7 @@ within a session and *how* they are clustered locally.
 Related: `compute_quarter_life(reinforcement_times, response_times)`
 returns, for each inter-reinforcement interval, the fraction of the
 interval elapsed when 25 % of that interval's responses have occurred
-— a scale-free index of FI scalloping (Herrnstein & Morse, 1957).
+— a scale-free index of FI scalloping (Fry, Kelleher, & Cook, 1960).
 Uniform responding gives about 0.25; values well above 0.25 indicate a
 scallop.
 

@@ -1,7 +1,7 @@
 """Bout-decomposed response rate analysis.
 
-Implements the inter-response time (IRT) mixture-model decomposition
-described in Shull, Gaynor, & Grimes (2001):
+Decomposes response rate into engagement bouts after the conceptual model
+of Shull, Gaynor, & Grimes (2001):
 
     response rate = bout_initiation_rate * within_bout_rate * bout_duration
 
@@ -10,6 +10,13 @@ IRTs are modelled as a 2-component log-normal mixture:
   - Long component  -> inter-bout intervals (bout initiation rate)
 
 Parameters are estimated via Expectation-Maximisation (EM) on log(IRT).
+
+Shull et al. (2001) estimated visit-initiation rate and responses per
+visit graphically from log-survivor plots of IRTs. This module uses a
+different estimator (EM on a log-normal mixture), so its values for the
+same data need not equal theirs. ``mean_inter_bout_interval_sec`` and
+``within_bout_irt_sec`` are component medians (``exp`` of the log-scale
+means), not arithmetic means.
 
 References
 ----------

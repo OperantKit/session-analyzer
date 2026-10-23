@@ -49,11 +49,11 @@
 
 ### 遅延割引 — `HyperbolicDiscountingParameters` / `HyperboloidDiscountingParameters`
 
-- **テーマ** — 強化子の主観的価値が遅延でどう低下するか。Mazur の双曲式が動物標準。Rachlin の hyperboloid は指数 `s` を加え、ヒトデータに見られる非線形時間知覚を取り込む。`k` が大きいほど割引が急（衝動性高）。
+- **テーマ** — 強化子の主観的価値が遅延でどう低下するか。Mazur の双曲式が動物標準。Myerson & Green の hyperboloid は分母全体を指数 `s` で累乗し、ヒトのデータの多くをよりよく記述する。（Rachlin 2006 の `V = A / (1 + k·D^s)` は遅延そのものを `s` 乗する別の関数。）`k` が大きいほど割引が急（衝動性高）。
 - **式** — Hyperbolic `V = A / (1 + k·D)` · Hyperboloid `V = A / (1 + k·D)^s`
 - **出力（hyperbolic）** — `HyperbolicDiscountingParameters(k=0.031, r_squared=0.95, n=7)`
 - **出力（hyperboloid）** — `HyperboloidDiscountingParameters(k=0.022, s=0.81, r_squared=0.97, n=7)`
-- **引用** — Mazur, J. E. (1987). In *Quantitative analyses of behavior, Vol. 5*. / Rachlin, H. (2006). Notes on discounting. *JEAB*, 85(3), 425-435. <https://doi.org/10.1901/jeab.2006.85-05>
+- **引用** — Mazur, J. E. (1987). In *Quantitative analyses of behavior, Vol. 5*. / Myerson, J., & Green, L. (1995). Discounting of delayed rewards: Models of individual choice. *JEAB*, 64(3), 263-276. <https://doi.org/10.1901/jeab.1995.64-263> / Rachlin, H. (2006). Notes on discounting. *JEAB*, 85(3), 425-435. <https://doi.org/10.1901/jeab.2006.85-05>
 
 ![双曲割引曲線](../../assets/figures/delay_discounting.png)
 

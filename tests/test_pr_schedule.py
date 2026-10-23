@@ -188,3 +188,45 @@ def test_classify_unknown_monotone_not_linear_or_hodos() -> None:
     assert result.step_type == "unknown"
     # Next requirement = last + (last - second_to_last) = 200 + 150 = 350.
     assert result.current_requirement == 350
+
+
+# ---------------------------------------------------------------------------
+# Published ratio series (Richardson & Roberts, 1996)
+# ---------------------------------------------------------------------------
+#
+# Richardson & Roberts (1996) define the exponential PR series
+# ratio(n) = round(5 * exp(0.2 n) - 5). The article body is paywalled and was
+# not retrieved. Corroboration:
+# - Steps 1-10 (1, 2, 4, 6, 9, 12, 15, 20, 25, 32): quoted verbatim, citing
+#   Richardson & Roberts (1996), by the ConductScience "Progressive Ratio"
+#   protocol page (https://conductscience.com/conductmaze/protocols/progressive-ratio).
+# - Steps 11-20 (40, 50, 62, 77, 95, 118, 145, 178, 219, 268): the widely
+#   reproduced continuation; not checked against a retrieved source.
+
+_RR1996_FIRST_10 = [1, 2, 4, 6, 9, 12, 15, 20, 25, 32]
+_RR1996_11_TO_20 = [40, 50, 62, 77, 95, 118, 145, 178, 219, 268]
+
+
+@pytest.mark.unit
+def test_hodos_series_matches_richardson_roberts_first_10_steps() -> None:
+    from session_analyzer.analytics.pr_schedule import _hodos_requirement
+
+    assert [_hodos_requirement(n) for n in range(1, 11)] == _RR1996_FIRST_10
+
+
+@pytest.mark.unit
+def test_hodos_series_matches_richardson_roberts_steps_11_to_20() -> None:
+    from session_analyzer.analytics.pr_schedule import _hodos_requirement
+
+    assert [_hodos_requirement(n) for n in range(11, 21)] == _RR1996_11_TO_20
+
+
+@pytest.mark.unit
+def test_classify_full_richardson_roberts_series_extrapolates_step_21() -> None:
+    """Twenty completed steps classify as the exponential series; the
+    requirement in progress is step 21 = round(5 e^4.2 - 5) = 328."""
+    result = classify_pr_schedule(_RR1996_FIRST_10 + _RR1996_11_TO_20)
+    assert result.is_pr is True
+    assert result.step_type == "hodos"
+    assert result.last_completed_ratio == 268
+    assert result.current_requirement == round(5 * math.exp(4.2) - 5) == 328

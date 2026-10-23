@@ -50,11 +50,11 @@ indifference between two options sits.
 
 ### Delay discounting — `HyperbolicDiscountingParameters` / `HyperboloidDiscountingParameters`
 
-- **Theme** — How a reinforcer's subjective value falls with delay. Mazur's hyperbolic is the animal-standard; Rachlin's hyperboloid adds an `s` exponent, accommodating non-linear time perception found in human data. Larger `k` = steeper discounting (more impulsive).
+- **Theme** — How a reinforcer's subjective value falls with delay. Mazur's hyperbolic is the animal-standard; the Myerson & Green hyperboloid raises the denominator to an `s` exponent, which describes most human data better. (Rachlin's 2006 form `V = A / (1 + k·D^s)` raises delay itself to `s` and is a different function.) Larger `k` = steeper discounting (more impulsive).
 - **Equation** — Hyperbolic `V = A / (1 + k·D)` · Hyperboloid `V = A / (1 + k·D)^s`
 - **Output (hyperbolic)** — `HyperbolicDiscountingParameters(k=0.031, r_squared=0.95, n=7)`
 - **Output (hyperboloid)** — `HyperboloidDiscountingParameters(k=0.022, s=0.81, r_squared=0.97, n=7)`
-- **References** — Mazur, J. E. (1987). In *Quantitative analyses of behavior, Vol. 5*. — Rachlin, H. (2006). Notes on discounting. *JEAB*, 85(3), 425-435. <https://doi.org/10.1901/jeab.2006.85-05>
+- **References** — Mazur, J. E. (1987). In *Quantitative analyses of behavior, Vol. 5*. — Myerson, J., & Green, L. (1995). Discounting of delayed rewards: Models of individual choice. *JEAB*, 64(3), 263-276. <https://doi.org/10.1901/jeab.1995.64-263> — Rachlin, H. (2006). Notes on discounting. *JEAB*, 85(3), 425-435. <https://doi.org/10.1901/jeab.2006.85-05>
 
 ![Hyperbolic discount curve](../../assets/figures/delay_discounting.png)
 

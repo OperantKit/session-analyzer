@@ -7,9 +7,10 @@ provides two analyses:
 - :func:`compute_prps` — extract per-trial pauses as the latency from
   each reinforcer to the next response.
 - :func:`analyze_prps` — summarize a PRP sample (mean, median, spread).
-- :func:`compute_quarter_life` — Herrnstein & Morse (1957) quarter-life
-  index: the proportion of the inter-reinforcement interval elapsed
-  before 25% of the interval's responses have occurred. Values near
+- :func:`compute_quarter_life` — quarter-life index of fixed-interval
+  performance (Fry, Kelleher, & Cook, 1960): the proportion of the
+  inter-reinforcement interval elapsed before 25% of the interval's
+  responses have occurred. Values near
   0.25 indicate uniform responding; values well above 0.25 indicate an
   acceleration ("scallop") pattern typical of FI schedules.
 
@@ -19,9 +20,16 @@ Felton, M., & Lyon, D. O. (1966). The post-reinforcement pause.
     *Journal of the Experimental Analysis of Behavior*, *9*(2),
     131-134. https://doi.org/10.1901/jeab.1966.9-131
 
-Herrnstein, R. J., & Morse, W. H. (1957). A conjunctive schedule of
+Fry, W., Kelleher, R. T., & Cook, L. (1960). A mathematical index of
+    performance on fixed-interval schedules of reinforcement. *Journal of
+    the Experimental Analysis of Behavior*, *3*(3), 193-199.
+    https://doi.org/10.1901/jeab.1960.3-193
+
+Herrnstein, R. J., & Morse, W. H. (1958). A conjunctive schedule of
     reinforcement. *Journal of the Experimental Analysis of Behavior*,
     *1*(1), 15-24. https://doi.org/10.1901/jeab.1958.1-15
+    (Often cited alongside the quarter-life; its text was not checked
+    for the index definition.)
 """
 
 from __future__ import annotations
@@ -124,7 +132,7 @@ def compute_quarter_life(
     *,
     quantile: float = 0.25,
 ) -> list[float]:
-    """Compute per-interval quarter-life indices (Herrnstein & Morse, 1957).
+    """Compute per-interval quarter-life indices (Fry, Kelleher, & Cook, 1960).
 
     For each inter-reinforcement interval, the quarter-life is the
     fraction of the interval elapsed by the time ``quantile`` (default

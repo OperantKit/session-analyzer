@@ -7,6 +7,8 @@ parameters within tight tolerance. Also exercises error cases.
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -177,3 +179,49 @@ def test_single_obs_gml_unequal_responses_with_equal_reinforcers_returns_none() 
     # R1 == R2 but B1 != B2 ⇒ sensitivity is undetermined ⇒ None.
     assert estimate_single_observation_gml(20, 10, 5, 5) is None
 
+
+
+# --- Reference computations ---------------------------------------------
+#
+# Published values: Baum (1974) Table 1 (per-dataset a and log k) would be
+# the natural target, but the article body (PMC1333261, scanned PDF) could
+# not be retrieved; the abstract gives the equation only. No published
+# value is asserted here. Instead the estimator is checked against ordinary
+# least squares (numpy.polyfit, degree 1) on log ratios, which is the
+# standard GML estimator, and the single-observation solver by hand.
+
+
+@pytest.mark.unit
+def test_gml_fit_equals_ordinary_least_squares() -> None:
+    rng = np.random.default_rng(20261024)
+    x = np.linspace(-1.5, 1.5, 9)
+    y = 0.82 * x + 0.11 + rng.normal(0.0, 0.08, size=x.size)
+    result = estimate_matching_parameters(np.exp(y).tolist(), np.exp(x).tolist())
+    slope, intercept = np.polyfit(x, y, 1)
+    r = np.corrcoef(x, y)[0, 1]
+    assert result.sensitivity == pytest.approx(slope, rel=1e-9)
+    assert result.bias == pytest.approx(intercept, abs=1e-9)
+    assert result.r_squared == pytest.approx(r**2, rel=1e-9)
+
+
+@pytest.mark.unit
+def test_gml_bias_is_reported_in_natural_log_units() -> None:
+    """Baum (1974) and most matching papers report log k in base 10. The
+    estimator works on natural logs, so ``bias = ln b = ln(10) * log10 b``;
+    sensitivity is base-invariant."""
+    b = 1.6  # log10 b = 0.2041
+    x = np.array([0.25, 0.5, 1.0, 2.0, 4.0])
+    responses = (b * x**0.9).tolist()
+    result = estimate_matching_parameters(responses, x.tolist())
+    assert result.sensitivity == pytest.approx(0.9, abs=1e-9)
+    assert result.bias == pytest.approx(np.log(10.0) * np.log10(b), abs=1e-9)
+
+
+@pytest.mark.unit
+def test_single_obs_gml_hand_computation() -> None:
+    """B1/B2 = 60/20 = 3, R1/R2 = 40/10 = 4:
+    a = ln 3 / ln 4 = 0.792481..., log b = 0 so b = 1."""
+    a, b = estimate_single_observation_gml(60, 20, 40, 10)  # type: ignore[misc]
+    assert a == pytest.approx(math.log(3.0) / math.log(4.0), rel=1e-12)
+    assert a == pytest.approx(0.7924812503605781, rel=1e-12)
+    assert b == pytest.approx(1.0, abs=1e-12)

@@ -88,3 +88,49 @@ def test_hyperboloid_reduces_to_hyperbolic_when_s_is_one() -> None:
 
     assert mazur.s == pytest.approx(1.0, abs=1e-2)
     assert mazur.k == pytest.approx(hyper.k, rel=1e-2)
+
+
+# --- Reference implementation (discountingtools) ---------------------------
+#
+# Source: the discountingtools R package README (Gilroy; demo
+# ``test_single_fits_recovery.R``). Data are generated with
+# ``dd_discount_func_mazur(delays, lnk)`` = 1 / (1 + exp(lnk) * D)
+# (maxValue = 1) on the delay grid 1, 30, 180, 540, 1080, 2160, 4320, 8640,
+# with k drawn from N(0.07, 0.03) and Gaussian noise SD 0.025 added, then
+# ``fit_dd_curves(plan = "mazur")`` recovers k. R's random streams are not
+# reproducible here, so the check uses the same generator, grid and k
+# distribution centre (mean and mean +/- 1 SD) without noise: recovery
+# must then be exact (no published fitted values exist for this demo).
+
+_DDTOOLS_DELAYS = [1.0, 30.0, 180.0, 540.0, 1080.0, 2160.0, 4320.0, 8640.0]
+
+
+def _dd_discount_func_mazur(delays: list[float], lnk: float) -> list[float]:
+    return [1.0 / (1.0 + np.exp(lnk) * d) for d in delays]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("k_true", [0.04, 0.07, 0.10])
+def test_recovers_k_on_discountingtools_grid(k_true: float) -> None:
+    values = _dd_discount_func_mazur(_DDTOOLS_DELAYS, float(np.log(k_true)))
+    result = fit_hyperbolic_discounting(_DDTOOLS_DELAYS, values, amount=1.0)
+    assert result.k == pytest.approx(k_true, rel=1e-6)
+
+
+@pytest.mark.unit
+def test_hyperboloid_is_myerson_green_form_not_rachlin_form() -> None:
+    """Definition check. The fitted hyperboloid is Myerson & Green (1995) /
+    Green & Myerson (2004): V = A / (1 + kD)^s ("raising the denominator to a
+    power", Myerson & Green 1995 abstract). Rachlin (2006) instead raises
+    delay itself to a power, V = A / (1 + kD^s) (abstract: "kD^s"). Data
+    from the Myerson-Green form are recovered exactly; data from the Rachlin
+    form with s != 1 are not."""
+    delays = [0.0, 1.0, 7.0, 30.0, 90.0, 180.0, 365.0, 730.0]
+    mg = [100.0 / (1.0 + 0.02 * d) ** 0.6 for d in delays]
+    fit_mg = fit_hyperboloid_discounting(delays, mg, amount=100.0)
+    assert fit_mg.k == pytest.approx(0.02, rel=1e-4)
+    assert fit_mg.s == pytest.approx(0.6, rel=1e-4)
+
+    rachlin = [100.0 / (1.0 + 0.02 * d**0.6) for d in delays]
+    fit_r = fit_hyperboloid_discounting(delays, rachlin, amount=100.0)
+    assert fit_r.r_squared < 1.0 - 1e-6

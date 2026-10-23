@@ -3,8 +3,13 @@
 Two standard models are provided:
 
 - **Hyperbolic** (Mazur, 1987): ``V = A / (1 + k * D)``
-- **Hyperboloid** (Rachlin, 2006; Green & Myerson, 2004):
+- **Hyperboloid** (Myerson & Green, 1995; Green & Myerson, 2004):
   ``V = A / (1 + k * D)^s``
+
+The hyperboloid here raises the whole denominator to ``s``. Rachlin's
+(2006) two-parameter form raises delay itself to a power,
+``V = A / (1 + k * D^s)``; it is a different function and is not the
+model fitted by :func:`fit_hyperboloid_discounting`.
 
 where ``A`` is the undiscounted amount, ``D`` is delay, ``V`` is the
 subjective (indifference-point) value, ``k`` is the discounting rate,
@@ -23,6 +28,10 @@ Mazur, J. E. (1987). An adjusting procedure for studying delayed
     H. Rachlin (Eds.), *Quantitative analyses of behavior, Vol. 5:
     The effect of delay and of intervening events on reinforcement
     value* (pp. 55-73). Lawrence Erlbaum Associates.
+
+Myerson, J., & Green, L. (1995). Discounting of delayed rewards: Models
+    of individual choice. *Journal of the Experimental Analysis of
+    Behavior*, *64*(3), 263-276. https://doi.org/10.1901/jeab.1995.64-263
 
 Green, L., & Myerson, J. (2004). A discounting framework for choice
     with delayed and probabilistic rewards. *Psychological Bulletin*,
@@ -63,7 +72,7 @@ class HyperbolicDiscountingParameters:
 
 @dataclass(frozen=True)
 class HyperboloidDiscountingParameters:
-    """Rachlin (2006) / Green & Myerson (2004) hyperboloid fit result.
+    """Myerson & Green (1995) / Green & Myerson (2004) hyperboloid fit result.
 
     Attributes
     ----------
@@ -167,7 +176,7 @@ def fit_hyperboloid_discounting(
     *,
     amount: float,
 ) -> HyperboloidDiscountingParameters:
-    """Fit the hyperboloid (Rachlin 2006) model ``V = A / (1 + k D)^s``.
+    """Fit the Myerson & Green (1995) hyperboloid ``V = A / (1 + k D)^s``.
 
     Parameters
     ----------

@@ -92,3 +92,33 @@ def test_metrics_are_finite_and_rounded() -> None:
     ):
         assert np.isfinite(value)
     assert 0.0 <= result.pi_within <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# Known-mixture recovery (property check; no published values asserted)
+# ---------------------------------------------------------------------------
+#
+# Shull, Gaynor, & Grimes (2001) estimate visit-initiation rate and
+# responses per visit from log-survivor plots of IRTs (abstract, Part I);
+# their tables are not used as expected values because (a) the article
+# body was not retrieved and (b) this module estimates the components by
+# EM on a 2-component log-normal mixture, a different estimator, so the
+# same data need not give the same numbers. The check is recovery of a
+# known mixture with enough data for tight tolerances.
+
+
+@pytest.mark.unit
+def test_recovers_all_mixture_parameters_with_large_sample() -> None:
+    rng = np.random.default_rng(20261024)
+    within = rng.lognormal(mean=-1.2, sigma=0.35, size=6000)
+    inter = rng.lognormal(mean=2.3, sigma=0.6, size=2000)
+    result = analyze_bouts(np.concatenate([within, inter]).tolist())
+    assert result is not None and result.converged
+    assert result.pi_within == pytest.approx(0.75, abs=0.02)
+    assert np.log(result.within_bout_irt_sec) == pytest.approx(-1.2, abs=0.03)
+    assert np.log(result.mean_inter_bout_interval_sec) == pytest.approx(2.3, abs=0.05)
+    assert result.within_bout_log_sigma == pytest.approx(0.35, rel=0.05)
+    assert result.inter_bout_log_sigma == pytest.approx(0.6, rel=0.05)
+    # Geometric bout length: 1 / (1 - pi_within) ~= 4 responses per bout.
+    assert result.mean_bout_length == pytest.approx(1.0 / (1.0 - result.pi_within), rel=1e-3)
+    assert result.mean_bout_length == pytest.approx(4.0, rel=0.1)

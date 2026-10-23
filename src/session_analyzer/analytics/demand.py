@@ -19,19 +19,38 @@ From the fit, two derived indices are commonly reported:
   below ``P_max`` to elastic (slope < -1) above.
 - ``O_max`` — maximal expenditure, equal to ``P_max * Q(P_max)``.
 
-Closed-form ``P_max`` (Hursh & Roma, 2013):
+Two definitions of ``P_max`` are available (``pmax_method``):
 
-    P_max = W0(1 / (alpha * Q0 * k * ln(10))) / (alpha * Q0)   (approx.)
+- ``"exact"`` (default) — the true local maximum of expenditure. Setting
+  ``d(P * Q)/dP = 0`` with ``u = alpha * Q0 * P`` gives
+  ``u * k * ln(10) * exp(-u) = 1``, whose solution on the principal
+  Lambert-W branch is ``P_max = -W0(-1 / (k ln 10)) / (alpha * Q0)``
+  (real only for ``k * ln(10) >= e``). For smaller ``k`` there is no
+  unit-elasticity point; the numerical search over ``(0, 1/(alpha Q0)]``
+  then returns the upper end of that interval.
+- ``"approximate"`` — the derived approximation reported by the beezdemand
+  R package as ``Pmaxd`` (attributed by Kaplan et al., 2019 to Hursh, 2014
+  and Hursh & Roma, 2013): ``P_max ~= (0.083 k + 0.65) / (Q0 * alpha * k^1.5)``.
+  ``O_max`` is then ``P_max * Q(P_max)`` at that price.
 
-Here we compute ``P_max`` numerically as the interior maximum of
-``P -> P * Q(P)`` to avoid branch-choice ambiguities of the Lambert-W
-approximation.
+Two fitting spaces are available (``fit_space``):
+
+- ``"linear"`` (default) — least squares on ``Q``. Requires strictly
+  positive prices.
+- ``"log10"`` — least squares on ``log10(Q)``, the error structure of the
+  original model (Equation 2 of Kaplan et al., 2019) and of beezdemand's
+  ``equation = "hs"``. Accepts the free price ``C = 0``.
 
 References
 ----------
 Hursh, S. R., & Silberberg, A. (2008). Economic demand and essential
     value. *Psychological Review*, *115*(1), 186-198.
     https://doi.org/10.1037/0033-295X.115.1.186
+
+Kaplan, B. A., Gilroy, S. P., Reed, D. D., Koffarnus, M. N., & Hursh,
+    S. R. (2019). The R package beezdemand: Behavioral economic easy demand.
+    *Perspectives on Behavior Science*, *42*(1), 163-180.
+    https://doi.org/10.1007/s40614-018-00187-7
 
 Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical
     public policy. *Journal of the Experimental Analysis of Behavior*,
@@ -41,11 +60,13 @@ Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
+from typing import Literal
 
 import numpy as np
 from scipy.optimize import curve_fit, minimize_scalar
+from scipy.special import lambertw
 
 
 @dataclass(frozen=True)
@@ -85,8 +106,18 @@ def _demand(price: np.ndarray, q0: float, alpha: float, k: float) -> np.ndarray:
     return q0 * np.power(10.0, k * (np.exp(-alpha * q0 * price) - 1.0))
 
 
-def _compute_pmax(q0: float, alpha: float, k: float) -> tuple[float, float]:
-    """Return (p_max, o_max) at the first unit-elasticity point.
+FitSpace = Literal["linear", "log10"]
+PmaxMethod = Literal["exact", "approximate"]
+
+
+def _log10_demand(price: np.ndarray, q0: float, alpha: float, k: float) -> np.ndarray:
+    """Hursh & Silberberg (2008) exponential demand in log10 units."""
+    result: np.ndarray = math.log10(q0) + k * (np.exp(-alpha * q0 * price) - 1.0)
+    return result
+
+
+def _exact_pmax(q0: float, alpha: float, k: float) -> float:
+    """Price of the first unit-elasticity point (local expenditure maximum).
 
     Expenditure ``P * Q(P)`` under the exponential demand model is
     unimodal only on ``(0, 1/(alpha*q0)]`` — the interval bounded above
@@ -97,6 +128,11 @@ def _compute_pmax(q0: float, alpha: float, k: float) -> tuple[float, float]:
     local expenditure maximum at unit elasticity (``epsilon = -1``),
     which lies strictly below the elasticity-minimum price.
     """
+
+    branch_arg = -1.0 / (k * math.log(10.0))
+    if branch_arg >= -1.0 / math.e:
+        # Closed form on the principal branch (real when k ln 10 >= e).
+        return float(-lambertw(branch_arg, 0).real / (alpha * q0))
 
     def neg_expenditure(price: float) -> float:
         q = q0 * math.pow(10.0, k * (math.exp(-alpha * q0 * price) - 1.0))
@@ -109,9 +145,26 @@ def _compute_pmax(q0: float, alpha: float, k: float) -> tuple[float, float]:
         method="bounded",
         options={"xatol": 1e-10 * upper},
     )
-    p_max = float(result.x)
-    o_max = float(-result.fun)
-    return p_max, o_max
+    return float(result.x)
+
+
+def compute_pmax(
+    q0: float, alpha: float, k: float, *, method: PmaxMethod = "exact"
+) -> tuple[float, float]:
+    """Return ``(p_max, o_max)`` for given demand parameters.
+
+    ``method="exact"`` gives the true local maximum of expenditure;
+    ``method="approximate"`` gives ``(0.083 k + 0.65) / (q0 alpha k^1.5)``
+    (beezdemand ``Pmaxd``). In both cases ``o_max = p_max * Q(p_max)``.
+    """
+    if method == "exact":
+        p_max = _exact_pmax(q0, alpha, k)
+    elif method == "approximate":
+        p_max = (0.083 * k + 0.65) / (q0 * alpha * k**1.5)
+    else:
+        raise ValueError(f"method must be 'exact' or 'approximate', got {method!r}")
+    q_at = q0 * math.pow(10.0, k * (math.exp(-alpha * q0 * p_max) - 1.0))
+    return p_max, p_max * q_at
 
 
 def _r_squared(observed: np.ndarray, predicted: np.ndarray) -> float:
@@ -127,6 +180,8 @@ def fit_exponential_demand(
     consumption: Sequence[float],
     *,
     k: float | None = None,
+    fit_space: FitSpace = "linear",
+    pmax_method: PmaxMethod = "exact",
 ) -> DemandParameters:
     """Fit the Hursh & Silberberg (2008) exponential demand model.
 
@@ -141,6 +196,12 @@ def fit_exponential_demand(
         with ``q0`` and ``alpha``. If the data span a small log-consumption
         range, fixing ``k`` (commonly to ``log10(Qmax) - log10(Qmin) + 0.5``
         or a value used across conditions) improves identifiability.
+    fit_space : {"linear", "log10"}
+        Space in which squared residuals are minimised. ``"log10"`` is the
+        Hursh & Silberberg (2008) error structure (beezdemand ``"hs"``)
+        and admits a zero price; ``"linear"`` requires positive prices.
+    pmax_method : {"exact", "approximate"}
+        Definition of ``p_max`` (see the module docstring).
 
     Returns
     -------
@@ -163,20 +224,32 @@ def fit_exponential_demand(
         raise ValueError(
             f"exponential demand fit requires at least 3 data points, got {len(prices)}"
         )
+    if fit_space not in ("linear", "log10"):
+        raise ValueError(f"fit_space must be 'linear' or 'log10', got {fit_space!r}")
     p = np.array(prices, dtype=np.float64)
     q = np.array(consumption, dtype=np.float64)
-    if np.any(p <= 0.0) or np.any(q <= 0.0):
-        raise ValueError("prices and consumption must be strictly positive")
+    if np.any(q <= 0.0):
+        raise ValueError("consumption must be strictly positive")
+    if fit_space == "log10":
+        if np.any(p < 0.0):
+            raise ValueError("prices must be non-negative")
+    elif np.any(p <= 0.0):
+        raise ValueError(
+            "prices must be strictly positive (use fit_space='log10' for a free price)"
+        )
 
     q0_init = float(np.max(q))
-    alpha_init = 1.0 / (q0_init * float(np.median(p)))
+    positive_p = p[p > 0.0]
+    alpha_init = 1.0 / (q0_init * float(np.median(positive_p if positive_p.size else p)))
+    model = _log10_demand if fit_space == "log10" else _demand
+    target = np.log10(q) if fit_space == "log10" else q
     k_init = max(float(np.log10(q.max() / q.min()) + 0.5), 0.5)
 
     if k is None:
         popt, _ = curve_fit(
-            _demand,
+            model,
             p,
-            q,
+            target,
             p0=[q0_init, alpha_init, k_init],
             bounds=([1e-9, 1e-12, 1e-3], [np.inf, np.inf, 20.0]),
             maxfev=20_000,
@@ -185,10 +258,11 @@ def fit_exponential_demand(
     else:
         if k <= 0.0:
             raise ValueError(f"k must be positive when fixed, got {k}")
+        fixed_k = k
         popt, _ = curve_fit(
-            lambda price, q0, alpha: _demand(price, q0, alpha, k),
+            lambda price, q0, alpha: model(price, q0, alpha, fixed_k),
             p,
-            q,
+            target,
             p0=[q0_init, alpha_init],
             bounds=([1e-9, 1e-12], [np.inf, np.inf]),
             maxfev=20_000,
@@ -197,7 +271,7 @@ def fit_exponential_demand(
 
     predicted = _demand(p, q0_fit, alpha_fit, k_fit)
     r2 = _r_squared(q, predicted)
-    p_max, o_max = _compute_pmax(q0_fit, alpha_fit, k_fit)
+    p_max, o_max = compute_pmax(q0_fit, alpha_fit, k_fit, method=pmax_method)
 
     return DemandParameters(
         q0=q0_fit,

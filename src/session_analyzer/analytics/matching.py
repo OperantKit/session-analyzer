@@ -7,6 +7,11 @@
 where ``a`` is sensitivity (slope) and ``log b`` is the bias (intercept).
 Perfect matching corresponds to ``a = 1`` and ``log b = 0``.
 
+Logarithms are natural logs throughout this module. Baum (1974) and most
+of the matching literature report the intercept as ``log10 k``; convert
+with ``log10 b = bias / ln(10)``. Sensitivity ``a`` does not depend on the
+base.
+
 Two estimators are provided:
 
 - :func:`estimate_matching_parameters` — multi-condition log-log curve
