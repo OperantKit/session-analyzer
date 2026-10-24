@@ -4,7 +4,7 @@
 
 session-analyzer は、セッションのデータから累積記録を描き、行動分析学の指標を計算します。強化後休止、一般化マッチング法則、需要曲線、遅延割引、単一事例デザインの効果量などです。オペラント実験のセッションを Python で分析する研究者・学生のためのパッケージです。[OperantKit](https://github.com/OperantKit) の中では、[session-recorder](https://github.com/OperantKit/session-recorder) が書くセッションログを読みます。関数は時刻や値の単純なリストも受け取ります。
 
-- **公刊されたモデルを、テストされた 1 か所に。** 46 の分析モジュールがあり、それぞれがモデルの出典の論文を示しています。
+- **公刊されたモデルを、テストされた 1 か所に。** 47 の分析モジュールがあり、それぞれがモデルの出典の論文を示しています。
 - **入力を検査します。** 時刻が並んでいない、長さが合わない、データ点が少なすぎる、といった場合は、意味のない当てはめを返さずにエラーを出します。
 - **累積記録を慣例どおりに描きます。** リセットのあるステップ式のペンと強化の印に加え、DRL / DRO 用に反応間時間（IRT）で符号化した版もあります。
 
@@ -121,10 +121,11 @@ render_single_case_plot(case, "case1.png")
 
 ## 公表値との照合
 
-analytics の 46 本のうち、公表値と一致 6 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 27 本です。後ろの 34 本は閉形式・既知のパラメータの回復・手計算で確かめています。[module ごとの照合のしかた](docs/ja/reference-values.md)。出典に照らしたテストを持たない module があると `tests/test_reference_value_coverage.py` が失敗します。
+analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 27 本です。後ろの 34 本は閉形式・既知のパラメータの回復・手計算で確かめています。[module ごとの照合のしかた](docs/ja/reference-values.md)。出典に照らしたテストを持たない module があると `tests/test_reference_value_coverage.py` が失敗します。
 
 | module | 判定 | 出典 | 参照実装 | テストが確かめること |
 |---|---|---|---|---|
+| `aversive` | `published` | Azrin (1960) | — | 抑制比が本文の 1 日の反応数 900 / 2800 と一致、初回の罰セッションの毎分 40 → 15 未満 |
 | `ddm` | `published` | Wagenmakers, van der Maas & Grasman (2007) | EZ-diffusion (R, appendix) | 付録の出力 v 0.09993853・a 0.1399702・Ter 0.30003 |
 | `demand` | `published` | Hursh & Silberberg (2008); Kaplan et al. (2019) | beezdemand (R) | beezdemand README の出力: Q0 10.158665（`fit_space="log10"`）、Pmaxd 8.453799、Omaxd 22.63159 |
 | `pr_schedule` | `published` | Richardson & Roberts (1996) | — | 比率列の 1〜10 段が公表の列（二次資料）と一致、11〜20 段は未照合 |

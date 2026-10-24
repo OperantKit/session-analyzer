@@ -2,7 +2,7 @@
 
 [日本語版](../ja/reference-values.md)
 
-How each analysis in `session_analyzer.analytics` is checked against its source. 46 analytics modules: 6 match published values, 5 match an independent reference implementation, 1 matches the source's formulas, 7 have published values whose text was not retrieved and 27 have no published values; those 34 are checked by closed forms, recovery of known parameters and hand computation.
+How each analysis in `session_analyzer.analytics` is checked against its source. 47 analytics modules: 7 match published values, 5 match an independent reference implementation, 1 matches the source's formulas, 7 have published values whose text was not retrieved and 27 have no published values; those 34 are checked by closed forms, recovery of known parameters and hand computation.
 
 Each row is a test marked `@pytest.mark.reference(module=..., verdict=..., source=...)`. `tests/test_reference_value_coverage.py` fails when an analytics module has no such test, when a `properties` or `not-retrieved` module is missing from its allowlist with a reason, or when this table disagrees with the marks.
 
@@ -16,6 +16,7 @@ Verdicts:
 
 | Module | Verdict | Source | Reference implementation | What the test checks |
 |---|---|---|---|---|
+| `aversive` | `published` | Azrin (1960) | — | suppression ratio equals the printed daily counts 900 / 2800; first-session rate 40 → below 15 per minute |
 | `ddm` | `published` | Wagenmakers, van der Maas & Grasman (2007) | EZ-diffusion (R, appendix) | appendix output v 0.09993853, a 0.1399702, Ter 0.30003 |
 | `demand` | `published` | Hursh & Silberberg (2008); Kaplan et al. (2019) | beezdemand (R) | beezdemand README output: Q0 10.158665 (`fit_space="log10"`), Pmaxd 8.453799, Omaxd 22.63159 |
 | `pr_schedule` | `published` | Richardson & Roberts (1996) | — | ratio series steps 1-10 equal the published series (secondary protocol); 11-20 unchecked |

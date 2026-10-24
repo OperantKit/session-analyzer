@@ -1,8 +1,15 @@
 """Analytics modules: bout decomposition, matching-law fitting, choice
 allocation, response latency, progressive-ratio breakpoint detection,
 delay discounting, demand-curve fitting, single-alternative hyperbola,
-and resistance-to-change (behavioral momentum)."""
+resistance-to-change (behavioral momentum), and aversive control
+(free-operant avoidance and punishment)."""
 
+from .aversive import (
+    AvoidanceMetrics,
+    PunishmentMetrics,
+    analyze_avoidance,
+    analyze_punishment,
+)
 from .bout import BoutMetrics, analyze_bouts
 from .breakpoint import (
     BreakpointResult,
@@ -190,6 +197,7 @@ from .within_session import (
 )
 
 __all__ = [
+    "AvoidanceMetrics",
     "BlockEntropy",
     "BoutMetrics",
     "BreakpointResult",
@@ -234,6 +242,7 @@ __all__ = [
     "PeakTrialMLEMetrics",
     "PhaseSummary",
     "PsychometricFit",
+    "PunishmentMetrics",
     "ROCCurve",
     "RenewalMetrics",
     "RescorlaWagnerParameters",
@@ -273,6 +282,7 @@ __all__ = [
     "UnitPriceElasticity",
     "VariabilityMetrics",
     "WithinSessionDynamics",
+    "analyze_avoidance",
     "analyze_bouts",
     "analyze_fr_runs",
     "analyze_lag_variability",
@@ -280,6 +290,7 @@ __all__ = [
     "analyze_peak_trial_binned",
     "analyze_peak_trial_mle",
     "analyze_prps",
+    "analyze_punishment",
     "analyze_renewal",
     "analyze_resurgence",
     "analyze_scalar_timing",

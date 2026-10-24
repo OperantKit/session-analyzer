@@ -25,7 +25,7 @@ experiment.
 
 1. [Response rate & local pattern](rate-and-pattern.md) — cumulative
    record, PRP, IRT bout decomposition, FR run length, latency,
-   log-survivor.
+   log-survivor, avoidance, punishment.
 2. [Choice & matching](choice-and-matching.md) — generalized matching
    law, single-alternative hyperbola, choice allocation, concurrent-
    chains prediction, time-allocation matching.

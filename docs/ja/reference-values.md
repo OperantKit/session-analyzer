@@ -2,7 +2,7 @@
 
 [English](../en/reference-values.md)
 
-`session_analyzer.analytics` の各分析を、出典とどう照合しているかの一覧です。analytics の 46 本のうち、公表値と一致 6 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 27 本です。後ろの 34 本は閉形式・既知のパラメータの回復・手計算で確かめています。
+`session_analyzer.analytics` の各分析を、出典とどう照合しているかの一覧です。analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 27 本です。後ろの 34 本は閉形式・既知のパラメータの回復・手計算で確かめています。
 
 各行は `@pytest.mark.reference(module=..., verdict=..., source=...)` を付けたテストです。`tests/test_reference_value_coverage.py` は、印の付いたテストを持たない analytics の module があるとき、`properties`・`not-retrieved` の module が理由付きの許可リストに無いとき、この表が印と食い違うときに失敗します。
 
@@ -16,6 +16,7 @@
 
 | module | 判定 | 出典 | 参照実装 | テストが確かめること |
 |---|---|---|---|---|
+| `aversive` | `published` | Azrin (1960) | — | 抑制比が本文の 1 日の反応数 900 / 2800 と一致、初回の罰セッションの毎分 40 → 15 未満 |
 | `ddm` | `published` | Wagenmakers, van der Maas & Grasman (2007) | EZ-diffusion (R, appendix) | 付録の出力 v 0.09993853・a 0.1399702・Ter 0.30003 |
 | `demand` | `published` | Hursh & Silberberg (2008); Kaplan et al. (2019) | beezdemand (R) | beezdemand README の出力: Q0 10.158665（`fit_space="log10"`）、Pmaxd 8.453799、Omaxd 22.63159 |
 | `pr_schedule` | `published` | Richardson & Roberts (1996) | — | 比率列の 1〜10 段が公表の列（二次資料）と一致、11〜20 段は未照合 |

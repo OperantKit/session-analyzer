@@ -4,7 +4,7 @@
 
 session-analyzer draws cumulative records and computes behavior-analytic measures from session data: post-reinforcement pauses, the generalized matching law, demand curves, delay discounting, single-case effect sizes, and more. It is for researchers and students who analyze operant sessions in Python. In [OperantKit](https://github.com/OperantKit) it reads the session logs that [session-recorder](https://github.com/OperantKit/session-recorder) writes, and its functions also take plain lists of times or values.
 
-- **Published models in one tested place.** 46 analysis modules, each naming the paper its model comes from.
+- **Published models in one tested place.** 47 analysis modules, each naming the paper its model comes from.
 - **Inputs are checked.** Unsorted times, mismatched lengths, or too few data points raise an error instead of returning a meaningless fit.
 - **Cumulative records drawn the conventional way.** A stepping pen with reset and reinforcer pips, plus an IRT-coded variant for DRL / DRO.
 
@@ -121,10 +121,11 @@ These are aids to visual inspection; deciding whether an effect was demonstrated
 
 ## Checked against published values
 
-46 analytics modules: 6 match published values, 5 match an independent reference implementation, 1 matches the source's formulas, 7 have published values whose text was not retrieved and 27 have no published values; those 34 are checked by closed forms, recovery of known parameters and hand computation. [How each module is checked](docs/en/reference-values.md); `tests/test_reference_value_coverage.py` fails when a module has no test pinned to its source.
+47 analytics modules: 7 match published values, 5 match an independent reference implementation, 1 matches the source's formulas, 7 have published values whose text was not retrieved and 27 have no published values; those 34 are checked by closed forms, recovery of known parameters and hand computation. [How each module is checked](docs/en/reference-values.md); `tests/test_reference_value_coverage.py` fails when a module has no test pinned to its source.
 
 | Module | Verdict | Source | Reference implementation | What the test checks |
 |---|---|---|---|---|
+| `aversive` | `published` | Azrin (1960) | — | suppression ratio equals the printed daily counts 900 / 2800; first-session rate 40 → below 15 per minute |
 | `ddm` | `published` | Wagenmakers, van der Maas & Grasman (2007) | EZ-diffusion (R, appendix) | appendix output v 0.09993853, a 0.1399702, Ter 0.30003 |
 | `demand` | `published` | Hursh & Silberberg (2008); Kaplan et al. (2019) | beezdemand (R) | beezdemand README output: Q0 10.158665 (`fit_space="log10"`), Pmaxd 8.453799, Omaxd 22.63159 |
 | `pr_schedule` | `published` | Richardson & Roberts (1996) | — | ratio series steps 1-10 equal the published series (secondary protocol); 11-20 unchecked |

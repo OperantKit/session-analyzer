@@ -20,7 +20,7 @@
 ## カテゴリ
 
 1. [応答率・局所パターン](rate-and-pattern.md) — 累積記録、PRP、
-   IRT バウト分解、FR run length、潜時、log-survivor。
+   IRT バウト分解、FR run length、潜時、log-survivor、回避、罰。
 2. [選択・マッチング](choice-and-matching.md) — 一般化マッチング法則、
    単一選択肢双曲線、選択配分、concurrent-chains 予測、
    時間配分マッチング。
