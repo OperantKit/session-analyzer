@@ -99,12 +99,16 @@ def build_cumulative_record_figure(
     show_event_pen: bool = True,
     event_markers: Mapping[str, Sequence[EventTime]] | None = None,
     event_marker_styles: Mapping[str, EventMarkerSpec] | None = None,
+    time_range: tuple[float, float] | None = None,
 ) -> tuple[Figure, Axes, Axes | None]:
     """Build a canonical F&S cumulative-record figure.
 
     Returns the figure and its axes (main cumulative axis, optional
     event-pen axis). Callers are responsible for saving/closing the figure;
     this is the seam tests hook into so they can inspect artists directly.
+
+    ``time_range`` sets the time-axis limits ``(start, end)`` in seconds;
+    when omitted the axis spans the first to the last response.
     """
     spec = _resolve_theme(theme)
 
@@ -142,7 +146,14 @@ def build_cumulative_record_figure(
                 label="_cumulative",
             )
             main_ax.add_line(main_line)
-            main_ax.set_xlim(min(xs_wrap), max(max(xs_wrap), min(xs_wrap) + 1e-6))
+        if time_range is not None:
+            x_lo, x_hi = float(time_range[0]), float(time_range[1])
+        elif xs_wrap:
+            x_lo, x_hi = min(xs_wrap), max(xs_wrap)
+        else:
+            x_lo, x_hi = 0.0, 1.0
+        if xs_wrap:
+            main_ax.set_xlim(x_lo, max(x_hi, x_lo + 1e-6))
             y_top = (
                 reset_responses
                 if reset_responses is not None
@@ -155,16 +166,14 @@ def build_cumulative_record_figure(
         main_ax.set_title("Cumulative Record")
 
         if event_ax is not None and event_markers:
-            lo = min(xs_wrap) if xs_wrap else 0.0
-            hi = max(xs_wrap) if xs_wrap else 1.0
             draw_event_pen(
                 event_ax,
                 event_markers,
                 event_marker_styles,
                 default_color=spec.foreground,
                 linewidth=spec.line_width_pt,
-                x_lo=lo,
-                x_hi=hi,
+                x_lo=x_lo,
+                x_hi=max(x_hi, x_lo + 1e-6),
             )
             event_ax.set_xlabel("Time (seconds)")
             main_ax.set_xlabel("")
@@ -229,6 +238,7 @@ def render_cumulative_record(
     show_event_pen: bool = True,
     event_markers: Mapping[str, Sequence[EventTime]] | None = None,
     event_marker_styles: Mapping[str, EventMarkerSpec] | None = None,
+    time_range: tuple[float, float] | None = None,
 ) -> bool:
     """Render a canonical Ferster & Skinner cumulative record to ``output``.
 
@@ -251,6 +261,7 @@ def render_cumulative_record(
         show_event_pen=show_event_pen,
         event_markers=event_markers,
         event_marker_styles=event_marker_styles,
+        time_range=time_range,
     )
     try:
         fig.savefig(output, format=output_format)
@@ -280,6 +291,10 @@ def plot_cumulative_record(
     :data:`session_recorder.EVENT_TYPE_REINFORCER_START` rather than
     string literals; unknown / future record types are ignored so that
     additive format evolution does not break this view.
+
+    The time axis spans the whole log, from its first record (0 s) to its
+    last record (for example the end of the final reinforcer), not only
+    the span between the first and last responses.
     """
     records = list(iter_records(log_path))
     if not records:
@@ -305,6 +320,8 @@ def plot_cumulative_record(
         logger.info("No responses recorded in log: %s", log_path)
         return
 
+    session_end = max(float(record.timestamp) for record in records) - start_time
+
     rendered = render_cumulative_record(
         response_times,
         reinforcement_times,
@@ -316,6 +333,7 @@ def plot_cumulative_record(
         show_event_pen=show_event_pen,
         event_markers=event_markers,
         event_marker_styles=event_marker_styles,
+        time_range=(0.0, session_end),
     )
     if rendered:
         logger.info("Graph saved to %s", output_path)

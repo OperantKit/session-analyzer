@@ -64,5 +64,6 @@ epistemic status:
 
 - [`suggester.py`](../../../src/session_analyzer/suggester.py) — maps
   `contingency-dsl` AST → subset of the analyses above.
-- The top-level [`README.md`](../../../README.md) "Public API" section
-  for exact import paths and argument signatures.
+- [Modules and their sources](../modules.md) — every module in
+  `session_analyzer.analytics` and `session_analyzer.visualizer`, the
+  import paths; argument signatures are in each module's docstrings.

@@ -55,5 +55,6 @@
 
 - [`suggester.py`](../../../src/session_analyzer/suggester.py) — 
   `contingency-dsl` AST → 上記分析のサブセット への写像。
-- 最上位 [`README.md`](../../../README.md) の "Public API" セクションで
-  正確な import パスと引数シグネチャを参照。
+- [モジュールとその出典](../modules.md) — `session_analyzer.analytics` と
+  `session_analyzer.visualizer` のすべてのモジュールと import パス。
+  引数シグネチャは各モジュールの docstring にある。
