@@ -85,3 +85,45 @@ def test_skips_blank_lines(tmp_path: Path) -> None:
 
     plot_cumulative_record(log, output)
     assert output.exists()
+
+
+@pytest.mark.unit
+def test_x_axis_spans_the_logged_session(tmp_path: Path) -> None:
+    """The time axis covers the log from its first to its last record.
+
+    Shape of an ``operant run --schedule FI30s --exit-reinforcers 5`` log:
+    the session starts at 0 s, the first response comes later, and the
+    session ends 0.5 s after the last response (reinforcer access).
+    """
+    from unittest import mock
+
+    import session_analyzer.visualizer.cumulative_record as cr
+
+    log = tmp_path / "fi30.txt"
+    _write_osl(
+        log,
+        [
+            {"timestamp": 0.0, "type": "state_change"},
+            {"timestamp": 1.8606, "type": "response"},
+            {"timestamp": 30.5, "type": "response"},
+            {"timestamp": 30.5, "type": "reinforcer_start"},
+            {"timestamp": 154.064, "type": "response"},
+            {"timestamp": 154.064, "type": "reinforcer_start"},
+            {"timestamp": 154.564, "type": "reinforcer_end"},
+            {"timestamp": 154.564, "type": "state_change"},
+        ],
+    )
+    captured: dict[str, tuple[float, float]] = {}
+    build = cr.build_cumulative_record_figure
+
+    def spy(*args, **kwargs):
+        fig, main_ax, event_ax = build(*args, **kwargs)
+        captured["main"] = main_ax.get_xlim()
+        captured["event"] = event_ax.get_xlim()
+        return fig, main_ax, event_ax
+
+    with mock.patch.object(cr, "build_cumulative_record_figure", spy):
+        plot_cumulative_record(log, tmp_path / "out.png")
+
+    assert captured["main"] == pytest.approx((0.0, 154.564))
+    assert captured["event"] == pytest.approx((0.0, 154.564))
