@@ -34,3 +34,15 @@ Use behavior-analytic terms: *reinforcer* (not "reward"), *discriminative stimul
 - Python 3.11+. Create the environment with `python -m venv .venv` and `.venv/bin/python -m pip install -e ".[dev]"`; run `.venv/bin/pytest`.
 - `README.md` (English) is canonical; keep `README.ja.md` in sync in the same commit.
 - Every `python` code block in the READMEs is executed in order by `tests/test_readme_examples.py`.
+
+## Why not a 50-line hand-written analysis script?
+
+Short scripts usually get a few things subtly wrong; this package fixes them in one tested place:
+
+- **Published models with their equations and citations.** 43 analyses listed above (44 analysis modules), from the generalized matching law (Baum, 1974) and Herrnstein's hyperbola to demand curves, delay discounting, peak-procedure MLE, signal detection, and Rescorla-Wagner fits. Every analysis module except the latency summary cites its source in the module docstring.
+- **Input checks that fail loudly.** For example, `compute_prps` raises on unsorted times and `estimate_matching_parameters` raises on mismatched lengths or fewer than two positive ratio pairs instead of returning a fit of nothing.
+- **Reads the session log directly.** Parsing of OKL v1 is delegated to session-recorder (`iter_records`), so analyses see the same events that were recorded, including the phase markers that the renewal analysis uses.
+- **Cumulative records drawn the conventional way.** A stepping pen with reset, reinforcer pips at a fixed angle, and an event pen, plus an IRT-coded variant for DRL / DRO.
+- **Design-aware suggestions.** `session_analyzer.suggester` maps a contingency-dsl AST to the analyses worth computing for that design (for example, matching for `Conc(VI, VI)`).
+- **Tested.** 560 tests (`pytest`), plus the examples in this README.
+
