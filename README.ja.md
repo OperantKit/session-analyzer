@@ -14,16 +14,19 @@ AI コーディングエージェント向けの案内は [AGENTS.md](AGENTS.md)
 
 ## インストール
 
-Python 3.11 以上が必要です。session-analyzer はまだ PyPI に登録されていないため、`pip install session-analyzer` は今のところ使えません。session-analyzer と、それが必要とする OperantKit のパッケージを依存の解決をせずに GitHub から入れ、使う 3 つの外部ライブラリを足してください。
+
+Python 3.11 以上が必要です。session-analyzer はまだ PyPI に登録されていません。session-analyzer と、それが必要とする OperantKit のパッケージを一緒に GitHub から入れます。使う 3 つの外部ライブラリ（NumPy・SciPy・Matplotlib）は PyPI から入ります。
 
 ```bash
-G=git+https://github.com/OperantKit
-pip install --no-deps $G/contingency-dsl-py $G/contingency-py $G/experiment-core \
-  $G/session-recorder $G/session-analyzer
-pip install numpy scipy matplotlib
+# PyPI に公開されるまでは、OperantKit の依存と一緒に GitHub から入れる。
+pip install git+https://github.com/OperantKit/contingency-dsl-py \
+            git+https://github.com/OperantKit/contingency-py \
+            git+https://github.com/OperantKit/experiment-core \
+            git+https://github.com/OperantKit/session-recorder \
+            git+https://github.com/OperantKit/session-analyzer
 ```
 
-`pip check` はこれらの開発版どうしのバージョンの食い違いを報告しますが、以下の例の動作には影響しません。
+依存は pip が解決するので、`pip check` は何も報告しません。
 
 ## 例
 
