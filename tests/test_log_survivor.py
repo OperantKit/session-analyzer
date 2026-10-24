@@ -107,6 +107,11 @@ def _exponential_quantiles(n: int, rate: float, shift: float) -> list[float]:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="log_survivor",
+    verdict="properties",
+    source="Shull (1991)",
+)
 def test_poisson_log_survivor_is_a_line_with_slope_minus_rate() -> None:
     curve = compute_log_survivor(_exponential_quantiles(50, 2.0, 0.1))
     assert curve is not None

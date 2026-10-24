@@ -96,6 +96,11 @@ _ALL_LEN3 = ["AAA", "AAB", "ABA", "ABB", "BAA", "BAB", "BBA", "BBB"]
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="variability",
+    verdict="properties",
+    source="Page & Neuringer (1985)",
+)
 def test_u_value_closed_forms() -> None:
     every = compute_u_value(_ALL_LEN3, alphabet_size=2, sequence_length=3)
     assert every.u_value == pytest.approx(1.0)

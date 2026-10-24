@@ -100,6 +100,11 @@ def test_cod_compliance_raises_on_invalid_cod() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="stay_switch",
+    verdict="properties",
+    source="Stubbs & Pliskoff (1969)",
+)
 def test_stay_bouts_by_hand() -> None:
     sides = ["L", "L", "R", "R", "R", "L"]
     times = [0.0, 1.0, 2.0, 3.0, 5.0, 6.0]

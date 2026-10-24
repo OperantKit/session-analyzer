@@ -192,6 +192,11 @@ def test_single_obs_gml_unequal_responses_with_equal_reinforcers_returns_none() 
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="matching",
+    verdict="not-retrieved",
+    source="Baum (1974)",
+)
 def test_gml_fit_equals_ordinary_least_squares() -> None:
     rng = np.random.default_rng(20261024)
     x = np.linspace(-1.5, 1.5, 9)

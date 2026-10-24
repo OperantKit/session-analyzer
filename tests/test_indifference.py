@@ -74,6 +74,11 @@ def test_indifference_point_n_trials() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="indifference",
+    verdict="properties",
+    source="Mazur (1987)",
+)
 def test_window_mean_and_range_by_hand() -> None:
     result = estimate_indifference_point(
         adjusting_amounts=[2.0, 4.0, 10.0, 12.0, 11.0, 9.0, 10.0, 12.0],

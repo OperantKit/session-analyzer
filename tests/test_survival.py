@@ -87,6 +87,11 @@ _GEHAN_6MP = "6 6 6 6+ 7 9+ 10 10+ 11+ 13 16 17+ 19+ 20+ 22 23 25+ 32+ 32+ 34+ 3
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="survival",
+    verdict="reference-implementation",
+    source="Kaplan & Meier (1958)",
+)
 def test_matches_lifelines_on_freireich_6mp_arm() -> None:
     raw = _GEHAN_6MP.split()
     times = [float(x.rstrip("+")) for x in raw]

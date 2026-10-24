@@ -122,6 +122,11 @@ def test_single_alternative_raises_on_insufficient_data() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="momentum",
+    verdict="not-retrieved",
+    source="Nevin (1992)",
+)
 def test_recovers_known_mass_exactly() -> None:
     xs = [1.0, 2.0, 3.0, 5.0]
     rates = [60.0 * 10.0 ** (-x / 4.0) for x in xs]

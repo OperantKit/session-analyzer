@@ -31,6 +31,7 @@ From an OKL v1 log: `session-analyzer plot session.okl --output cumulative_recor
 - [README](https://github.com/OperantKit/session-analyzer/blob/main/README.md): analysis list, 30-second example, why not to hand-roll analysis scripts, public API, CLI
 - [AGENTS.md](https://github.com/OperantKit/session-analyzer/blob/main/AGENTS.md): when to use this package and what not to do
 - [Analysis catalog](https://github.com/OperantKit/session-analyzer/blob/main/docs/en/analyses/index.md): equation, example output, and citation for each analysis
+- [Reference values](https://github.com/OperantKit/session-analyzer/blob/main/docs/en/reference-values.md): how each of the 46 analyses is checked against its source (published value, reference implementation, or closed forms), guarded by a test
 
 ## Related packages
 

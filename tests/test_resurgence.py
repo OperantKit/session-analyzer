@@ -121,6 +121,11 @@ def test_resurgence_default_windows() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="resurgence",
+    verdict="properties",
+    source="Epstein (1985)",
+)
 def test_metrics_match_hand_computation_with_windows() -> None:
     m = analyze_resurgence(
         target_rates_phase1=[40.0, 50.0, 60.0],

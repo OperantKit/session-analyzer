@@ -95,6 +95,11 @@ def test_within_session_validates_inputs() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="within_session",
+    verdict="properties",
+    source="McSweeney, Roll & Cannon (1994)",
+)
 def test_two_line_trajectory_is_recovered_exactly() -> None:
     counts = [30, 60, 90, 120, 150, 135, 120, 105, 90, 75, 60, 45]
     bin_width = 300.0

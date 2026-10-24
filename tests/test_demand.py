@@ -118,6 +118,11 @@ _APT_ID19_CONSUMPTION = [10.0, 10.0, 10.0, 8.0, 8.0, 8.0, 7.0, 7.0, 7.0,
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="demand",
+    verdict="published",
+    source="Hursh & Silberberg (2008); Kaplan et al. (2019)",
+)
 def test_log10_fit_matches_beezdemand_hs_output_for_apt_id19() -> None:
     """beezdemand ``fit_demand_fixed(apt, equation="hs")``, id 19, k = 2.
 

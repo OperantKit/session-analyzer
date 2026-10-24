@@ -114,6 +114,11 @@ def _power_cumulative_interval(n: int, p: float, start: float, length: float) ->
     ("p", "expected"),
     [(1.0, 0.25), (2.0, 0.5), (3.0, 0.25 ** (1.0 / 3.0))],
 )
+@pytest.mark.reference(
+    module="prp",
+    verdict="properties",
+    source="Fry, Kelleher & Cook (1960)",
+)
 def test_quarter_life_matches_closed_form_for_power_cumulative(
     p: float, expected: float
 ) -> None:

@@ -108,6 +108,11 @@ def test_metrics_are_finite_and_rounded() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="bout",
+    verdict="properties",
+    source="Shull, Gaynor & Grimes (2001)",
+)
 def test_recovers_all_mixture_parameters_with_large_sample() -> None:
     rng = np.random.default_rng(20261024)
     within = rng.lognormal(mean=-1.2, sigma=0.35, size=6000)

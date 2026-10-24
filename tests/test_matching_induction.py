@@ -119,6 +119,11 @@ class TestFitMatchingWithInduction:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="matching_induction",
+    verdict="properties",
+    source="Baum & Grace (2020)",
+)
 def test_induction_term_depends_on_ratio_only() -> None:
     ratios = np.array([0.25, 0.5, 2.0, 8.0])
     log_r = np.log(ratios)

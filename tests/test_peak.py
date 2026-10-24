@@ -108,6 +108,11 @@ def _low_high_low() -> list[float]:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="peak",
+    verdict="not-retrieved",
+    source="Church, Meck & Gibbon (1994)",
+)
 def test_binned_analysis_recovers_known_states() -> None:
     m = analyze_peak_trial_binned(_low_high_low(), 60.0, bin_width=1.0)
     assert m is not None

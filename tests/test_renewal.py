@@ -139,6 +139,11 @@ def test_renewal_handles_missing_context_names() -> None:
         (("A", "B", "B"), "OTHER"),
     ],
 )
+@pytest.mark.reference(
+    module="renewal",
+    verdict="properties",
+    source="Bouton (2004)",
+)
 def test_classifies_all_five_partitions(contexts: tuple[str, str, str], design: str) -> None:
     """The five set partitions of (train, extinction, test)."""
     assert classify_renewal_design(contexts) == design

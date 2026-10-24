@@ -115,6 +115,11 @@ def test_unit_price_elasticity_validates_lengths() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="unit_price",
+    verdict="properties",
+    source="Hursh (1980)",
+)
 def test_unit_price_equivalence_of_docstring_example() -> None:
     assert compute_unit_prices([50.0, 10.0], [100.0, 20.0]) == [0.5, 0.5]
 

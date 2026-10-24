@@ -154,6 +154,11 @@ def test_raises_on_invalid_min_responses() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="schneider_segment",
+    verdict="not-retrieved",
+    source="Schneider (1969)",
+)
 def test_recovers_known_breakpoint_and_rates_from_exact_two_line_record() -> None:
     low = [10.0, 20.0, 30.0]  # count k at t = k / 0.1
     high = [30.0 + j / 2.0 for j in range(1, 101)]  # count 3 + j at 30 + j / 2

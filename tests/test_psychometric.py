@@ -120,6 +120,11 @@ _NT = [40] * 6
         ("probit", 3.3972464501, 1.7184697055, -113.1360968426),
     ],
 )
+@pytest.mark.reference(
+    module="psychometric",
+    verdict="reference-implementation",
+    source="Wichmann & Hill (2001)",
+)
 def test_matches_statsmodels_binomial_glm(
     link: str, mu: float, sigma: float, ll: float
 ) -> None:

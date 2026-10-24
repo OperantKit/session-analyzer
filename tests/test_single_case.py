@@ -69,6 +69,11 @@ def _flip(values: tuple[int, ...]) -> tuple[int, ...]:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="single_case",
+    verdict="published",
+    source="Parker, Vannest & Davis (2011)",
+)
 def test_nap_singlecasees_parker2011b() -> None:
     assert nap(P2011B_A, P2011B_B) == pytest.approx(0.9166667, abs=EXACT)
 

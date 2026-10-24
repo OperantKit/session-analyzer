@@ -80,6 +80,11 @@ def test_time_matching_filters_non_positive() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="time_matching",
+    verdict="not-retrieved",
+    source="Baum & Rachlin (1969)",
+)
 def test_proportional_time_allocation_gives_unit_slope_and_negative_bias() -> None:
     reinforcement = [0.25, 0.5, 1.0, 2.0, 4.0]
     time = [0.8 * r for r in reinforcement]

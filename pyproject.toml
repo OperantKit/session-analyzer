@@ -71,6 +71,7 @@ markers = [
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",
   "unit: pure unit tests with no external dependencies",
   "integration: tests that exercise cross-module interactions",
+  "reference(module, verdict, source): the test that pins an analytics module to its source; see tests/test_reference_value_coverage.py",
 ]
 
 [tool.coverage.run]

@@ -156,6 +156,11 @@ def test_raises_on_invalid_inputs() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="tracking",
+    verdict="definition",
+    source="Meyer et al. (2012)",
+)
 def test_matches_meyer_2012_table_1_formulas() -> None:
     # 60 lever presses, 20 cup entries; p 0.9 vs 0.4; latencies 2.0 vs 6.0 s.
     # RB = 40/80 = 0.5; PD = 0.5; LS = (6 - 2)/8 = 0.5; PCA = 0.5 -> ST.

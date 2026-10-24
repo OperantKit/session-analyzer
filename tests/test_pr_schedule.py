@@ -208,6 +208,11 @@ _RR1996_11_TO_20 = [40, 50, 62, 77, 95, 118, 145, 178, 219, 268]
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="pr_schedule",
+    verdict="published",
+    source="Richardson & Roberts (1996)",
+)
 def test_hodos_series_matches_richardson_roberts_first_10_steps() -> None:
     from session_analyzer.analytics.pr_schedule import _hodos_requirement
 

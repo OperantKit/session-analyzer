@@ -127,6 +127,11 @@ def test_peak_shift_validates_inputs() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="stimulus_control",
+    verdict="properties",
+    source="Hanson (1959)",
+)
 def test_suppression_ratio_in_cer_form() -> None:
     """CER suppression ratio B / (A + B), B = CS responses, A = pre-CS.
 

@@ -98,6 +98,11 @@ def test_analyze_latencies_filters_non_positive_values() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="latency",
+    verdict="properties",
+    source="none cited",
+)
 def test_latency_pairing_and_cutoff_by_hand() -> None:
     # SD onsets at 0, 10, 20, 30; responses at 0 (same instant, not counted),
     # 2.5, 14, 19.9 (before third onset), 95 (beyond 60 s cut-off for onset 30).

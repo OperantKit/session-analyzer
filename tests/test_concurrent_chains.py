@@ -110,6 +110,11 @@ def test_raises_on_invalid_parameters() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="concurrent_chains",
+    verdict="properties",
+    source="Mazur (2001)",
+)
 def test_values_and_choice_match_hyperbolic_closed_form() -> None:
     result = predict_concurrent_chains_choice(
         left_amount=1.0,

@@ -111,6 +111,11 @@ def _dd_discount_func_mazur(delays: list[float], lnk: float) -> list[float]:
 
 @pytest.mark.unit
 @pytest.mark.parametrize("k_true", [0.04, 0.07, 0.10])
+@pytest.mark.reference(
+    module="discounting",
+    verdict="reference-implementation",
+    source="Myerson & Green (1995)",
+)
 def test_recovers_k_on_discountingtools_grid(k_true: float) -> None:
     values = _dd_discount_func_mazur(_DDTOOLS_DELAYS, float(np.log(k_true)))
     result = fit_hyperbolic_discounting(_DDTOOLS_DELAYS, values, amount=1.0)

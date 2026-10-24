@@ -113,6 +113,11 @@ _DE_BRUIJN_2_4 = "0000100110101111"
 
 @pytest.mark.unit
 @pytest.mark.parametrize("n", [1, 2, 3, 4])
+@pytest.mark.reference(
+    module="ngram_entropy",
+    verdict="properties",
+    source="Towse & Neil (1998)",
+)
 def test_block_entropy_of_de_bruijn_sequence_is_n_bits(n: int) -> None:
     symbols = list(_DE_BRUIJN_2_4 + _DE_BRUIJN_2_4[: n - 1])
     result = compute_block_entropy(symbols, order=n)

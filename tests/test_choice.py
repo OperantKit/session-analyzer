@@ -126,6 +126,11 @@ class TestClassifyChoiceMode:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="choice",
+    verdict="properties",
+    source="Herrnstein (1961)",
+)
 def test_allocation_matches_hand_computation_for_three_operanda() -> None:
     alloc = compute_choice_allocation([30, 50, 20])
     assert alloc.proportions == pytest.approx((0.3, 0.5, 0.2), rel=1e-12)

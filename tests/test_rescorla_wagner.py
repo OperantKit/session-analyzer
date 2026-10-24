@@ -75,6 +75,11 @@ def test_fit_raises_on_insufficient_trials() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="rescorla_wagner",
+    verdict="properties",
+    source="Rescorla & Wagner (1972)",
+)
 def test_acquisition_matches_closed_form() -> None:
     trace = simulate_rescorla_wagner([True] * 20, alpha_beta=0.2, lambda_=1.0)
     expected = [1.0 - 0.8**n for n in range(1, 21)]

@@ -115,6 +115,11 @@ def _profiled_fit(kernel) -> tuple[float, float]:  # type: ignore[no-untyped-def
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="generalization",
+    verdict="not-retrieved",
+    source="Guttman & Kalish (1956)",
+)
 def test_gaussian_fit_matches_profiled_least_squares() -> None:
     r0, sigma = _profiled_fit(lambda d, s: np.exp(-(d**2) / (2 * s**2)))
     fit = fit_gaussian_gradient(list(_D), list(_R))

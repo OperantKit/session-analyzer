@@ -94,6 +94,11 @@ def test_analyze_lag_variability_low_variability() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="lag_variability",
+    verdict="properties",
+    source="Page & Neuringer (1985)",
+)
 def test_pass_rate_and_window_uniqueness_by_hand() -> None:
     seqs = ["A", "B", "A", "C", "C", "B"]
     # i=2 A in {A,B} fail; i=3 C pass; i=4 C in {A,C} fail; i=5 B in {C} pass.

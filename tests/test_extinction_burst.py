@@ -120,6 +120,11 @@ def test_raises_on_extinction_time_before_start() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="extinction_burst",
+    verdict="properties",
+    source="Lerman & Iwata (1995)",
+)
 def test_ratio_at_threshold_and_closed_window() -> None:
     baseline = [float(t) for t in range(60)]  # 1 response/s for 60 s
     start = 100.0

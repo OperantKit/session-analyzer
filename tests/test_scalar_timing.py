@@ -78,6 +78,11 @@ def assess_scalar_property_raises_if_too_few_criteria() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="scalar_timing",
+    verdict="properties",
+    source="Gibbon (1977)",
+)
 def test_cv_matches_hand_computation() -> None:
     r = analyze_scalar_timing([8.0, 10.0, 12.0])
     assert r is not None

@@ -98,6 +98,11 @@ def test_raises_on_length_mismatch() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="cross_elasticity_matrix",
+    verdict="properties",
+    source="Hursh & Roma (2013)",
+)
 def test_factorial_design_recovers_partial_elasticities() -> None:
     levels = [1.0, 2.0, 4.0]
     p_a = [a for a in levels for _ in levels]

@@ -138,6 +138,11 @@ def _counts(h: float, f: float) -> dict[str, int]:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="signal_detection",
+    verdict="published",
+    source="Stanislaw & Todorov (1999)",
+)
 def test_matches_stanislaw_todorov_1999_figure_1() -> None:
     """Figure 1 values, tolerance half a unit in the second decimal."""
     from scipy.stats import norm

@@ -92,6 +92,11 @@ def _series(n: int = 64) -> list[float]:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="irt_spectrum",
+    verdict="properties",
+    source="Wei (2006)",
+)
 def test_autocorrelation_matches_numpy_correlate() -> None:
     """rho(k) = full np.correlate of the centred series / (n * var0)."""
     x = np.asarray(_series())

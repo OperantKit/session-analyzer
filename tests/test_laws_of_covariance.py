@@ -104,6 +104,11 @@ class TestPredictLawsOfCovariance:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="laws_of_covariance",
+    verdict="properties",
+    source="Podlesnik & Baum (2024)",
+)
 def test_partial_withdrawal_by_hand() -> None:
     result = predict_resurgence_laws_of_covariance(
         baseline_target_rate=40.0,

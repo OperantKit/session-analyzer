@@ -66,6 +66,11 @@ def test_raises_on_unsorted_inputs() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="run_length",
+    verdict="properties",
+    source="Schlinger, Derenne & Baron (2008)",
+)
 def test_runs_match_hand_computation() -> None:
     m = analyze_fr_runs(
         [2.0, 3.0, 4.0, 10.0, 13.0, 15.0, 17.0, 19.0, 25.0],

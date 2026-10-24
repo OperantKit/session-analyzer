@@ -69,6 +69,11 @@ def test_raises_on_insufficient_data() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="killeen_law",
+    verdict="not-retrieved",
+    source="Killeen (1994)",
+)
 def test_wrong_delta_recovers_same_beta_and_gamma() -> None:
     k, a, delta = 100.0, 0.5, 0.01
     rates = np.array([0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 100.0])

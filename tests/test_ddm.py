@@ -92,6 +92,11 @@ def test_raises_on_non_positive_rt_or_var() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="ddm",
+    verdict="published",
+    source="Wagenmakers, van der Maas & Grasman (2007)",
+)
 def test_matches_wagenmakers_2007_appendix_output() -> None:
     """Rounded inputs (.802, .112, .723) reproduce the printed R output.
 

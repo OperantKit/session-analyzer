@@ -94,6 +94,11 @@ _REF_Y = {
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="hierarchical_gml",
+    verdict="reference-implementation",
+    source="Gelman & Hill (2007)",
+)
 def test_matches_statsmodels_mixedlm_ml_estimates() -> None:
     fit = fit_hierarchical_gml(_REF_Y, dict.fromkeys(_REF_Y, _REF_X))
     assert fit.mu_sensitivity == pytest.approx(0.8589999999999997, rel=1e-6)

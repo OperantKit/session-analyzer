@@ -110,6 +110,11 @@ def test_conditioned_reinforcement_strength_validates() -> None:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="observing",
+    verdict="properties",
+    source="Dinsmoor (1983)",
+)
 def test_observing_rate_and_good_news_boundary_by_hand() -> None:
     # 45 observing responses in 900 s = 3 per minute; 18 of 30 S+ = 0.6.
     m = compute_observing_metrics(

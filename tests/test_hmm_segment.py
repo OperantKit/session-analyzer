@@ -104,6 +104,11 @@ def _block_path() -> tuple[int, ...]:
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="hmm_segment",
+    verdict="reference-implementation",
+    source="Rabiner (1989)",
+)
 def test_fit_matches_hmmlearn_maximum_likelihood() -> None:
     """Converged parameters (rel 1e-8) and log-likelihood (rel 1e-10)."""
     fit = fit_gaussian_hmm(_reference_series(), n_states=2, tol=1e-12, max_iter=5000)

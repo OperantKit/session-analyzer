@@ -190,6 +190,11 @@ _RR_SERIES = [1, 2, 4, 6, 9, 12, 15, 20, 25, 32, 40, 50, 62, 77, 95]
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="breakpoint",
+    verdict="properties",
+    source="Richardson & Roberts (1996)",
+)
 def test_breakpoint_is_last_completed_ratio_on_published_series() -> None:
     completions = [(r, 30.0 * i) for i, r in enumerate(_RR_SERIES, start=1)]
     last_time = completions[-1][1]

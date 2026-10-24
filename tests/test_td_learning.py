@@ -106,6 +106,11 @@ def _run_episodes(n_episodes: int, *, alpha: float, gamma: float) -> tuple[float
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="td_learning",
+    verdict="properties",
+    source="Sutton (1988)",
+)
 def test_converges_to_discounted_return_on_deterministic_chain() -> None:
     """V(s) -> gamma^(steps to reward - 1): 0.81, 0.9, 1 for gamma = 0.9."""
     v = _run_episodes(300, alpha=0.5, gamma=0.9)

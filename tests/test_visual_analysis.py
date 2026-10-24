@@ -46,6 +46,11 @@ P2011 = SingleCaseSeries(values=(2, 3, 5, 3, 4, 5, 5, 7, 6), phases=("A",) * 4 +
 
 
 @pytest.mark.unit
+@pytest.mark.reference(
+    module="visual_analysis",
+    verdict="published",
+    source="Kratochwill et al. (2010)",
+)
 def test_trend_matches_scan_trend_output() -> None:
     a, b = describe_phases(JOHANNA)
     assert a.intercept == pytest.approx(54.400, abs=5e-4)
