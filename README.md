@@ -4,7 +4,7 @@
 
 session-analyzer draws cumulative records and computes behavior-analytic measures from session data: post-reinforcement pauses, the generalized matching law, demand curves, delay discounting, single-case effect sizes, and more. It is for researchers and students who analyze operant sessions in Python. In [OperantKit](https://github.com/OperantKit) it reads the session logs that [session-recorder](https://github.com/OperantKit/session-recorder) writes, and its functions also take plain lists of times or values.
 
-- **Published models in one tested place.** 47 analysis modules, each naming the paper its model comes from.
+- **Published models in one tested place.** Each analysis module names the paper its model comes from.
 - **Inputs are checked.** Unsorted times, mismatched lengths, or too few data points raise an error instead of returning a meaningless fit.
 - **Cumulative records drawn the conventional way.** A stepping pen with reset and reinforcer pips, plus an IRT-coded variant for DRL / DRO.
 
