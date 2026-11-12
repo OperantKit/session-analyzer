@@ -38,7 +38,7 @@ simultaneously-available alternatives.
 
 - **Theme** — Raw per-operandum response proportions. Useful as the baseline view before fitting a matching-law equation; also surfaces "exclusive choice" when allocation collapses onto one alternative (a common failure mode of undertraining or saturated preference).
 - **Output** — `ChoiceAllocation(proportions=(0.62, 0.38), counts=(248, 152), total=400)` and `ExclusiveChoiceResult(is_exclusive=False, dominant_operandum=None, dominant_proportion=None, threshold=0.95)`
-- **Reference** — Catania, A. C. (1966). Concurrent performances. *JEAB*, 9(3), 253-263. <https://doi.org/10.1901/jeab.1966.9-253>
+- **Reference** — Catania, A. C. (1966). Concurrent operants. In W. K. Honig (Ed.), *Operant behavior: Areas of research and application* (pp. 213-270). Appleton-Century-Crofts.
 
 ![Two-operandum allocation bar chart](../../assets/figures/choice_allocation.png)
 

@@ -38,7 +38,7 @@
 
 - **テーマ** — operandum ごとの素の応答比率。マッチング法則をフィットする前のベースライン。配分が片側に潰れる「排他的選択」の検出にも使える（訓練不足・選好飽和の典型）。
 - **出力** — `ChoiceAllocation(proportions=(0.62, 0.38), counts=(248, 152), total=400)`、`ExclusiveChoiceResult(is_exclusive=False, dominant_operandum=None, dominant_proportion=None, threshold=0.95)`
-- **引用** — Catania, A. C. (1966). Concurrent performances. *JEAB*, 9(3), 253-263. <https://doi.org/10.1901/jeab.1966.9-253>
+- **引用** — Catania, A. C. (1966). Concurrent operants. In W. K. Honig (Ed.), *Operant behavior: Areas of research and application* (pp. 213-270). Appleton-Century-Crofts.
 
 ![2-operandum 配分の棒グラフ](../../assets/figures/choice_allocation.png)
 
