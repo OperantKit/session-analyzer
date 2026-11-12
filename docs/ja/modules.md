@@ -19,7 +19,7 @@
 | `log_survivor` | 反応間時間の対数生存分析と、折れ線によるバウトの当てはめ | Shull (1991) |
 | `irt_spectrum` | 反応間時間の自己相関とピリオドグラム | |
 | `latency` | 反応潜時の要約 | |
-| `prp` | 強化後休止（PRP）の要約と quarter-life 指標 | Felton & Lyon (1966); Herrnstein & Morse (1957) |
+| `prp` | 強化後休止（PRP）の要約と quarter-life 指標 | Felton & Lyon (1966); Herrnstein & Morse (1958) |
 | `run_length` | FR のラン長の分解 | Schlinger, Derenne, & Baron (2008) |
 | `schneider_segment` | 休止と反応連続の 2 状態への分割 | Schneider (1969) |
 | `within_session` | セッション内の反応率の推移 | McSweeney, Roll, & Cannon (1994) |
@@ -83,7 +83,7 @@
 - Hanson, H. M. (1959). Effects of discrimination training on stimulus generalization. *Journal of Experimental Psychology*, 58(5), 321-334. https://doi.org/10.1037/h0042606
 - Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behavior Research Methods, Instruments, & Computers*, 27(1), 46-51. https://doi.org/10.3758/BF03203619
 - Herrnstein, R. J. (1970). On the law of effect. *Journal of the Experimental Analysis of Behavior*, 13(2), 243-266. https://doi.org/10.1901/jeab.1970.13-243
-- Herrnstein, R. J., & Morse, W. H. (1957). A conjunctive schedule of reinforcement. *Journal of the Experimental Analysis of Behavior*, 1(1), 15-24. https://doi.org/10.1901/jeab.1958.1-15
+- Herrnstein, R. J., & Morse, W. H. (1958). A conjunctive schedule of reinforcement. *Journal of the Experimental Analysis of Behavior*, 1(1), 15-24. https://doi.org/10.1901/jeab.1958.1-15
 - Hodos, W. (1961). Progressive ratio as a measure of reward strength. *Science*, 134(3483), 943-944. https://doi.org/10.1126/science.134.3483.943
 - Hursh, S. R. (1980). Economic concepts for the analysis of behavior. *Journal of the Experimental Analysis of Behavior*, 34(2), 219-238. https://doi.org/10.1901/jeab.1980.34-219
 - Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical public policy. *Journal of the Experimental Analysis of Behavior*, 99(1), 98-124. https://doi.org/10.1002/jeab.7

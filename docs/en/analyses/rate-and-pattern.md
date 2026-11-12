@@ -63,7 +63,7 @@ scallop.
 
 - **Theme** — Time from stimulus onset (or trial start) to the first response. Short latencies signal strong stimulus control; long latencies suggest extinction, satiation, or poor discrimination.
 - **Output** — `LatencyMetrics(mean=2.05, median=1.78, std=0.81, min=0.42, max=6.10, n=96)` (seconds)
-- **Reference** — Standard descriptor — see e.g. Blough, D. S. (1956). *JEAB*, 3(1), 3-13. <https://doi.org/10.1901/jeab.1960.3-3>
+- **Reference** — Standard descriptor
 
 ![Latency histogram with median marker](../../assets/figures/latency.png)
 

@@ -19,7 +19,7 @@ Every module in `session_analyzer.analytics` (46 modules), plus the two cumulati
 | `log_survivor` | Log-survivor IRT analysis with bilinear bout fit | Shull (1991) |
 | `irt_spectrum` | IRT autocorrelation and periodogram spectrum | |
 | `latency` | Response latency summaries | |
-| `prp` | Post-reinforcement pause (PRP) summaries and quarter-life index | Felton & Lyon (1966); Herrnstein & Morse (1957) |
+| `prp` | Post-reinforcement pause (PRP) summaries and quarter-life index | Felton & Lyon (1966); Herrnstein & Morse (1958) |
 | `run_length` | FR run-length decomposition | Schlinger, Derenne, & Baron (2008) |
 | `schneider_segment` | Two-state break-and-run segmentation | Schneider (1969) |
 | `within_session` | Within-session response-rate dynamics | McSweeney, Roll, & Cannon (1994) |
@@ -83,7 +83,7 @@ The table gives the main published model behind each analysis. Each module's doc
 - Hanson, H. M. (1959). Effects of discrimination training on stimulus generalization. *Journal of Experimental Psychology*, 58(5), 321-334. https://doi.org/10.1037/h0042606
 - Hautus, M. J. (1995). Corrections for extreme proportions and their biasing effects on estimated values of d'. *Behavior Research Methods, Instruments, & Computers*, 27(1), 46-51. https://doi.org/10.3758/BF03203619
 - Herrnstein, R. J. (1970). On the law of effect. *Journal of the Experimental Analysis of Behavior*, 13(2), 243-266. https://doi.org/10.1901/jeab.1970.13-243
-- Herrnstein, R. J., & Morse, W. H. (1957). A conjunctive schedule of reinforcement. *Journal of the Experimental Analysis of Behavior*, 1(1), 15-24. https://doi.org/10.1901/jeab.1958.1-15
+- Herrnstein, R. J., & Morse, W. H. (1958). A conjunctive schedule of reinforcement. *Journal of the Experimental Analysis of Behavior*, 1(1), 15-24. https://doi.org/10.1901/jeab.1958.1-15
 - Hodos, W. (1961). Progressive ratio as a measure of reward strength. *Science*, 134(3483), 943-944. https://doi.org/10.1126/science.134.3483.943
 - Hursh, S. R. (1980). Economic concepts for the analysis of behavior. *Journal of the Experimental Analysis of Behavior*, 34(2), 219-238. https://doi.org/10.1901/jeab.1980.34-219
 - Hursh, S. R., & Roma, P. G. (2013). Behavioral economics and empirical public policy. *Journal of the Experimental Analysis of Behavior*, 99(1), 98-124. https://doi.org/10.1002/jeab.7
