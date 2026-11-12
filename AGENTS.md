@@ -12,11 +12,11 @@ Logs come from session-recorder (`OklSink`), usually fed by session-runner or op
 
 ## Why use it instead of writing your own
 
-- 43 analyses from published models; every analysis module except the latency summary cites its source in the module docstring, and the analysis catalog in `docs/` gives the equation and an example output for each.
+- Analyses from published models (matching law, demand, delay discounting, peak procedure, signal detection, and more); every analysis module except the latency summary cites its source in the module docstring, and the analysis catalog in `docs/` gives the equation and an example output for each.
 - Inputs are checked: unsorted times, mismatched lengths, or too few positive ratio pairs raise `ValueError` instead of producing a fit of nothing.
 - OKL v1 parsing is delegated to session-recorder (`iter_records`), so analyses read exactly the events that were recorded, including phase markers.
 - Cumulative records follow the conventional form (stepping pen with reset, reinforcer pips, event pen) and have an IRT-coded variant for DRL / DRO.
-- 488 tests, plus the README examples executed by `tests/test_readme_examples.py`.
+- Tested with `pytest`, including the README examples executed by `tests/test_readme_examples.py`.
 
 ## Do not
 
@@ -39,10 +39,10 @@ Use behavior-analytic terms: *reinforcer* (not "reward"), *discriminative stimul
 
 Short scripts usually get a few things subtly wrong; this package fixes them in one tested place:
 
-- **Published models with their equations and citations.** 43 analyses listed above (44 analysis modules), from the generalized matching law (Baum, 1974) and Herrnstein's hyperbola to demand curves, delay discounting, peak-procedure MLE, signal detection, and Rescorla-Wagner fits. Every analysis module except the latency summary cites its source in the module docstring.
+- **Published models with their equations and citations.** The analyses listed in the analysis catalog under `docs/`, from the generalized matching law (Baum, 1974) and Herrnstein's hyperbola to demand curves, delay discounting, peak-procedure MLE, signal detection, and Rescorla-Wagner fits. Every analysis module except the latency summary cites its source in the module docstring.
 - **Input checks that fail loudly.** For example, `compute_prps` raises on unsorted times and `estimate_matching_parameters` raises on mismatched lengths or fewer than two positive ratio pairs instead of returning a fit of nothing.
 - **Reads the session log directly.** Parsing of OKL v1 is delegated to session-recorder (`iter_records`), so analyses see the same events that were recorded, including the phase markers that the renewal analysis uses.
 - **Cumulative records drawn the conventional way.** A stepping pen with reset, reinforcer pips at a fixed angle, and an event pen, plus an IRT-coded variant for DRL / DRO.
 - **Design-aware suggestions.** `session_analyzer.suggester` maps a contingency-dsl AST to the analyses worth computing for that design (for example, matching for `Conc(VI, VI)`).
-- **Tested.** 560 tests (`pytest`), plus the examples in this README.
+- **Tested.** A `pytest` suite, plus the examples in the README.
 
