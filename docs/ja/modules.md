@@ -2,16 +2,16 @@
 
 [English](../en/modules.md)
 
-`session_analyzer.analytics` のすべてのモジュール（46 個）と、`session_analyzer.visualizer` の 2 つの累積記録の図を、それぞれが引く出典とともに挙げます。主な分析の式と出力例は [分析カタログ](analyses/index.md) を参照してください。
+`session_analyzer.analytics` のすべてのモジュール (46 個) と、`session_analyzer.visualizer` の 2 つの累積記録の図を、それぞれが引く出典とともに挙げます。主な分析の式と出力例は [分析カタログ](analyses/index.md) を参照してください。
 
-## 図（`session_analyzer.visualizer`）
+## 図 (`session_analyzer.visualizer`)
 
 | 関数 | 描くもの |
 |---|---|
 | `plot_cumulative_record` | 強化の印を付けた累積反応記録 |
-| `plot_irt_coded_cumulative_record` | DRL / DRO 用の、反応間時間（IRT）で符号化した累積記録 |
+| `plot_irt_coded_cumulative_record` | DRL / DRO 用の、反応間時間 (IRT) で符号化した累積記録 |
 
-## 分析（`session_analyzer.analytics`）
+## 分析 (`session_analyzer.analytics`)
 
 | モジュール | 分析 | 出典 |
 |---|---|---|
@@ -19,39 +19,39 @@
 | `log_survivor` | 反応間時間の対数生存分析と、折れ線によるバウトの当てはめ | Shull (1991) |
 | `irt_spectrum` | 反応間時間の自己相関とピリオドグラム | |
 | `latency` | 反応潜時の要約 | |
-| `prp` | 強化後休止（PRP）の要約と quarter-life 指標 | Felton & Lyon (1966); Herrnstein & Morse (1958) |
+| `prp` | 強化後休止 (PRP) の要約と quarter-life 指標 | Felton & Lyon (1966); Herrnstein & Morse (1958) |
 | `run_length` | FR のラン長の分解 | Schlinger, Derenne, & Baron (2008) |
 | `schneider_segment` | 休止と反応連続の 2 状態への分割 | Schneider (1969) |
 | `within_session` | セッション内の反応率の推移 | McSweeney, Roll, & Cannon (1994) |
 | `matching` | 一般化マッチング法則の当てはめ、単一選択肢の双曲線 | Baum (1974); Herrnstein (1970) |
 | `hierarchical_gml` | 階層的な経験ベイズによる一般化マッチング法則の当てはめ | Gelman & Hill (2007) |
-| `matching_induction` | マッチングと誘導（induction）による当てはめ | Baum & Grace (2020) |
+| `matching_induction` | マッチングと誘導 (induction) による当てはめ | Baum & Grace (2020) |
 | `time_matching` | 時間配分のマッチング | Baum & Rachlin (1969) |
 | `choice` | 並立スケジュールでの選択の配分 | |
-| `stay_switch` | 並立スケジュールでの滞在と切替の分解、切替遅延（COD）の遵守 | Stubbs & Pliskoff (1969) |
+| `stay_switch` | 並立スケジュールでの滞在と切替の分解、切り替え遅延 (COD) の遵守 | Stubbs & Pliskoff (1969) |
 | `concurrent_chains` | 並立連鎖スケジュールの双曲割引による予測 | Mazur (2001) |
 | `killeen_law` | Killeen の強化の数理原理 | Killeen (1994) |
-| `breakpoint` | 累進比率（PR）の breakpoint の検出 | Richardson & Roberts (1996) |
+| `breakpoint` | 累進比率 (PR) の breakpoint の検出 | Richardson & Roberts (1996) |
 | `pr_schedule` | 累進比率スケジュールの分類 | Hodos (1961); Richardson & Roberts (1996) |
 | `demand` | P_max / O_max を含む指数型需要曲線の当てはめ | Hursh & Silberberg (2008) |
 | `unit_price` | 単価弾力性と交差価格弾力性 | Hursh (1980); Hursh & Roma (2013) |
 | `cross_elasticity_matrix` | 複数の財の交差弾力性の行列 | Hursh & Roma (2013) |
 | `discounting` | 遅延割引の当てはめ | Mazur (1987); Rachlin (2006) |
 | `indifference` | 調整手続きによる無差別点 | Mazur (1987) |
-| `peak` | ピーク手続きの分析（ビン集計と 3 状態の最尤推定） | Roberts (1981); Church, Meck, & Gibbon (1994) |
+| `peak` | ピーク手続きの分析 (ビン集計と 3 状態の最尤推定) | Roberts (1981); Church, Meck, & Gibbon (1994) |
 | `scalar_timing` | スカラー計時の要約とスカラー性の検定 | Gibbon (1977) |
-| `generalization` | 刺激般化勾配（ガウス型と指数型） | Guttman & Kalish (1956); Shepard (1987) |
+| `generalization` | 刺激般化勾配 (ガウス型と指数型) | Guttman & Kalish (1956); Shepard (1987) |
 | `stimulus_control` | 弁別比とピークシフト | Hanson (1959); Annau & Kamin (1961) |
-| `signal_detection` | 信号検出理論（d'、c、β、A'、B''）と ROC / AUC | Green & Swets (1966); Hautus (1995) |
-| `psychometric` | 心理測定関数の当てはめ（ロジット / プロビット） | Wichmann & Hill (2001) |
+| `signal_detection` | 信号検出理論 (d'、c、β、A'、B'') と ROC / AUC | Green & Swets (1966); Hautus (1995) |
+| `psychometric` | 心理測定関数の当てはめ (ロジット / プロビット) | Wichmann & Hill (2001) |
 | `ddm` | EZ 拡散モデルのパラメータ推定 | Wagenmakers, van der Maas, & Grasman (2007) |
 | `momentum` | 変化への抵抗 / 行動モメンタム | Nevin (1992) |
 | `survival` | Kaplan-Meier の生存曲線 / 消去曲線 | Kaplan & Meier (1958) |
 | `extinction_burst` | 消去バーストの検出 | Lerman & Iwata (1995) |
-| `resurgence` | リサージェンス（標的反応と代替反応の 3 フェイズの手続き） | Epstein (1985); Shahan & Sweeney (2011) |
+| `resurgence` | リサージェンス (標的反応と代替反応の 3 フェイズの手続き) | Epstein (1985); Shahan & Sweeney (2011) |
 | `laws_of_covariance` | 共変の法則によるリサージェンスの予測 | Podlesnik & Baum (2024) |
-| `renewal` | リニューアルの分類（ABA / ABC / AAB） | Bouton (2004) |
-| `tracking` | パブロフ型の接近反応のトラッキング指標（サイントラッキングとゴールトラッキング） | Flagel et al. (2007); Meyer et al. (2012) |
+| `renewal` | リニューアルの分類 (ABA / ABC / AAB) | Bouton (2004) |
+| `tracking` | パブロフ型の接近反応のトラッキング指標 (サイントラッキングとゴールトラッキング) | Flagel et al. (2007); Meyer et al. (2012) |
 | `observing` | 観察反応と条件性強化の強さ | Wyckoff (1952); Dinsmoor (1983) |
 | `rescorla_wagner` | Rescorla-Wagner モデルの連合強度のシミュレーションと当てはめ | Rescorla & Wagner (1972) |
 | `td_learning` | 表形式の TD(0) 強化学習の推移 | Sutton (1988); Schultz, Dayan, & Montague (1997) |
@@ -62,7 +62,7 @@
 | `single_case` | 単一事例デザインの非重複の効果量：NAP、PND、Tau、Tau-U | Parker & Vannest (2009); Scruggs, Mastropieri, & Casto (1987); Parker, Vannest, Davis, & Sauber (2011) |
 | `visual_analysis` | 単一事例デザインの視覚的分析の補助：水準・傾向・変動・即時性・重なり | Kratochwill et al. (2010) |
 
-この表には、各分析のもとになった主な公刊モデルを挙げています。各モジュールの docstring には、ここに挙げていない文献も含む完全な文献リストがあります（たとえば `irt_spectrum`、`choice`、累積記録の図）。
+この表には、各分析のもとになった主な公刊モデルを挙げています。各モジュールの docstring には、ここに挙げていない文献も含む完全な文献リストがあります (たとえば `irt_spectrum`、`choice`、累積記録の図)。
 
 ## 参考文献
 
