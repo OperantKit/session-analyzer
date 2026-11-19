@@ -186,6 +186,8 @@ These are aids to visual inspection; deciding whether an effect was demonstrated
 
 ```bash
 python -m venv .venv
+# Until the PyPI release, install the OperantKit dependencies from GitHub first.
+.venv/bin/python -m pip install git+https://github.com/OperantKit/session-recorder
 .venv/bin/python -m pip install -e ".[dev]"
 .venv/bin/pytest
 ```

@@ -186,6 +186,8 @@ analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装
 
 ```bash
 python -m venv .venv
+# PyPI に公開されるまでは、OperantKit の依存を先に GitHub から入れる。
+.venv/bin/python -m pip install git+https://github.com/OperantKit/session-recorder
 .venv/bin/python -m pip install -e ".[dev]"
 .venv/bin/pytest
 ```
