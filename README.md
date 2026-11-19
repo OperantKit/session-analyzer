@@ -36,8 +36,7 @@ Write a short FR 5 session with session-recorder, measure the post-reinforcement
 import math
 from pathlib import Path
 
-from experiment_core import ReinforcerStartEvent, ResponseEvent
-from session_recorder import OklSink, iter_records
+from session_recorder import OklSink, ReinforcerStartEvent, ResponseEvent, iter_records
 from session_analyzer import plot_cumulative_record
 from session_analyzer.analytics import analyze_prps, compute_prps, estimate_matching_parameters
 
