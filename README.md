@@ -178,7 +178,7 @@ These are aids to visual inspection; deciding whether an effect was demonstrated
 
 ## Limitations
 
-- Only the single-case non-overlap measures (`single_case`) are tested against published reference values. The other analyses cite their sources but are not yet checked against the numbers reported in the original papers; check the one you use against the original before you report it.
+- Modules whose verdict in [Checked against published values](#checked-against-published-values) is `not-retrieved` or `properties` are not compared with numbers printed in a source; they are checked by closed forms, recovery of known parameters and hand computation. Look up the verdict of the analysis you use, and for these two verdicts compare your results with the original before you report them.
 - Logs must be OKL v1. Data from other systems have to be converted first (session-recorder converts MED-PC data files for the programs it has a protocol for).
 
 ## Development

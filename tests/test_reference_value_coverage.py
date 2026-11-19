@@ -143,3 +143,75 @@ def test_coverage_table_lists_every_module_with_its_verdict(table: Path) -> None
         row = re.search(rf"^\| `{module}` \|.*$", text, re.M)
         assert row, f"{table.name}: no row for {module}"
         assert f"`{best.get(module)}`" in row.group(0), f"{table.name}: verdict of {module} differs"
+
+
+# The sentence above each coverage table states how many modules have each
+# verdict. The counts in it are checked against the marks, so the sentence and
+# the table cannot drift apart.
+_SUMMARY_EN = re.compile(
+    r"(\d+) analytics modules: (\d+) match published values, "
+    r"(\d+) match an independent reference implementation, "
+    r"(\d+) match(?:es)? the source's formulas, "
+    r"(\d+) ha(?:ve|s) published values whose text was not retrieved and "
+    r"(\d+) ha(?:ve|s) no published values; th(?:ose|is|ese) (\d+)"
+)
+_SUMMARY_JA = re.compile(
+    r"analytics の (\d+) 本のうち、公表値と一致 (\d+) 本、独立な参照実装と一致 (\d+) 本、"
+    r"原典の式と一致 (\d+) 本、公表値はあるが本文を取れていない (\d+) 本、"
+    r"公表値の無い (\d+) 本です。後ろの (\d+) 本"
+)
+_SUMMARY_ORDER = ("published", "reference-implementation", "definition", "not-retrieved", "properties")
+
+
+def _verdict_counts() -> dict[str, int]:
+    marks = _reference_marks()
+    counts = dict.fromkeys(VERDICTS, 0)
+    for module in _analytics_modules():
+        counts[marks[module][0][0]] += 1
+    return counts
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("table", TABLES, ids=lambda p: str(p.relative_to(ROOT)))
+def test_summary_sentence_counts_equal_the_marks(table: Path) -> None:
+    text = table.read_text(encoding="utf-8")
+    pattern = _SUMMARY_JA if table.name.endswith(".ja.md") or "/ja/" in table.as_posix() else _SUMMARY_EN
+    found = pattern.search(text)
+    assert found, f"{table.name}: no summary sentence matching {pattern.pattern!r}"
+    counts = _verdict_counts()
+    expected = (
+        len(_analytics_modules()),
+        *(counts[v] for v in _SUMMARY_ORDER),
+        sum(counts[v] for v in WEAK),
+    )
+    stated = tuple(int(n) for n in found.groups())
+    assert stated == expected, f"{table.name}: summary says {stated}, marks give {expected}"
+
+
+# The Limitations section of the README must not narrow or widen what the
+# coverage table says: it names the weak verdicts (the modules not compared
+# with printed numbers) and refers to the table, instead of naming modules.
+READMES = {ROOT / "README.md": "Limitations", ROOT / "README.ja.md": "制限"}
+
+
+def _section(text: str, heading: str) -> str:
+    found = re.search(rf"^## {re.escape(heading)}\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+    assert found, f"no '## {heading}' section"
+    return found.group(1)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("readme", sorted(READMES), ids=lambda p: p.name)
+def test_limitations_agree_with_the_coverage_table(readme: Path) -> None:
+    section = _section(readme.read_text(encoding="utf-8"), READMES[readme])
+    quoted = set(re.findall(r"`([^`]+)`", section))
+    named_modules = sorted(quoted & _analytics_modules())
+    assert not named_modules, (
+        f"{readme.name}: Limitations names modules {named_modules}; "
+        "refer to the verdicts in the coverage table instead"
+    )
+    named_verdicts = quoted & VERDICTS
+    assert named_verdicts == WEAK, (
+        f"{readme.name}: Limitations names verdicts {sorted(named_verdicts)}, "
+        f"expected the weak verdicts {sorted(WEAK)}"
+    )
