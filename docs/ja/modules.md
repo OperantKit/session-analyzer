@@ -53,7 +53,7 @@
 | `renewal` | リニューアルの分類 (ABA / ABC / AAB) | Bouton (2004) |
 | `tracking` | パブロフ型の接近反応のトラッキング指標 (サイントラッキングとゴールトラッキング) | Flagel et al. (2007); Meyer et al. (2012) |
 | `observing` | 観察反応と条件性強化の強さ | Wyckoff (1952); Dinsmoor (1983) |
-| `rescorla_wagner` | Rescorla-Wagner モデルの連合強度のシミュレーションと当てはめ | Rescorla & Wagner (1972) |
+| `rescorla_wagner` | Rescorla-Wagner モデルの連合強度のシミュレーション (単一 CS と複合 CS) と単一 CS の当てはめ | Rescorla & Wagner (1972) |
 | `td_learning` | 表形式の TD(0) 強化学習の推移 | Sutton (1988); Schultz, Dayan, & Montague (1997) |
 | `variability` | オペラント変動性の U 値 | Page & Neuringer (1985) |
 | `lag_variability` | Lag-N の達成率 | Neuringer (2002) |

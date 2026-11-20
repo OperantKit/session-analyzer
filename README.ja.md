@@ -72,7 +72,7 @@ print(round(fit.sensitivity, 3), round(fit.bias, 3), round(fit.r_squared, 3))  #
 
 ## 中身
 
-- **分析**(`session_analyzer.analytics`)：反応率と局所的なパターン (強化後休止、バウト、反応間時間の対数生存、FR のラン)、選択とマッチング (一般化マッチング法則、時間配分、切り替え遅延の遵守、並立連鎖)、価値と経済 (累進比率の breakpoint、需要、遅延割引、単価)、計時 (ピーク手続き、スカラー計時)、刺激性制御 (般化勾配、信号検出)、持続と消去 (行動モメンタム、リサージェンス、リニューアル、消去バースト)、パブロフ型の指標 (サイントラッキングとゴールトラッキング、Rescorla-Wagner)、変動性、単一事例デザイン。[すべてのモジュールとその出典](docs/ja/modules.md)と、主な分析の[式と出力例](docs/ja/analyses/index.md)があります。
+- **分析**(`session_analyzer.analytics`)：反応率と局所的なパターン (強化後休止、バウト、反応間時間の対数生存、FR のラン)、選択とマッチング (一般化マッチング法則、時間配分、切り替え遅延の遵守、並立連鎖)、価値と経済 (累進比率の breakpoint、需要、遅延割引、単価)、計時 (ピーク手続き、スカラー計時)、刺激性制御 (般化勾配、信号検出)、持続と消去 (行動モメンタム、リサージェンス、リニューアル、消去バースト)、パブロフ型の指標 (サイントラッキングとゴールトラッキング、単一 CS と複合 CS の Rescorla-Wagner)、変動性、単一事例デザイン。[すべてのモジュールとその出典](docs/ja/modules.md)と、主な分析の[式と出力例](docs/ja/analyses/index.md)があります。
 - **図**(`session_analyzer.visualizer`)：`plot_cumulative_record`、`plot_irt_coded_cumulative_record`、`render_single_case_plot`。
 - **分析の提案**(`session_analyzer.suggester`)：[contingency-dsl](https://github.com/OperantKit/contingency-dsl) の式を与えると、そのデザインで計算する価値のある分析を返します (たとえば `Conc(VI, VI)` ならマッチング法則)。[session-visualizer](https://github.com/OperantKit/session-visualizer) と [operantkit-frontend](https://github.com/OperantKit/operantkit-frontend) にとって、実験デザインから分析への正規の対応づけです。対応表・HTTP の取り決め・TypeScript の型は [DSL にもとづく分析の提案](docs/ja/suggestions.md) にあります。
 
@@ -164,7 +164,7 @@ analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装
 | `observing` | `properties` | Dinsmoor (1983) | — | 率と比の手計算 |
 | `prp` | `properties` | Fry, Kelleher & Cook (1960) | — | 累積が t^p のとき quarter-life = 0.25^(1/p) |
 | `renewal` | `properties` | Bouton (2004) | — | 文脈の設計の全組と比の手計算 |
-| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n) |
+| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n)。複合 CS は誤差の和、A+ の後の AX+ での阻止 (blocking)、単一 CS は刺激 1 つの場合と一致 |
 | `resurgence` | `properties` | Epstein (1985) | — | 窓つきの平均・差・比の手計算 |
 | `run_length` | `properties` | Schlinger, Derenne & Baron (2008) | — | 休止とランの手計算 |
 | `scalar_timing` | `properties` | Gibbon (1977) | — | 変動係数の手計算 |

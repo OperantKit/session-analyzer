@@ -55,8 +55,13 @@ from .ngram_entropy import (
 )
 from .psychometric import PsychometricFit, fit_psychometric
 from .rescorla_wagner import (
+    CompoundRescorlaWagner,
+    CompoundTrace,
+    CompoundTrial,
+    CompoundTrialRecord,
     RescorlaWagnerParameters,
     fit_rescorla_wagner,
+    simulate_compound_rescorla_wagner,
     simulate_rescorla_wagner,
 )
 from .scalar_timing import (
@@ -245,6 +250,10 @@ __all__ = [
     "PunishmentMetrics",
     "ROCCurve",
     "RenewalMetrics",
+    "CompoundRescorlaWagner",
+    "CompoundTrace",
+    "CompoundTrial",
+    "CompoundTrialRecord",
     "RescorlaWagnerParameters",
     "ResurgenceMetrics",
     "RunMetrics",
@@ -347,6 +356,7 @@ __all__ = [
     "fit_matching_with_induction",
     "fit_psychometric",
     "fit_rescorla_wagner",
+    "simulate_compound_rescorla_wagner",
     "fit_single_alternative_matching",
     "fit_unit_price_elasticity",
     "kaplan_meier",

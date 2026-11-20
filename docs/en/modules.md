@@ -53,7 +53,7 @@ Every module in `session_analyzer.analytics` (46 modules), plus the two cumulati
 | `renewal` | Renewal classification (ABA / ABC / AAB) | Bouton (2004) |
 | `tracking` | Pavlovian conditioned-approach tracking index (sign- vs. goal-tracking) | Flagel et al. (2007); Meyer et al. (2012) |
 | `observing` | Observing response and conditioned-reinforcement strength | Wyckoff (1952); Dinsmoor (1983) |
-| `rescorla_wagner` | Rescorla-Wagner associative-strength simulation and fit | Rescorla & Wagner (1972) |
+| `rescorla_wagner` | Rescorla-Wagner associative-strength simulation (single and compound CS) and single-CS fit | Rescorla & Wagner (1972) |
 | `td_learning` | Tabular TD(0) reinforcement-learning trace | Sutton (1988); Schultz, Dayan, & Montague (1997) |
 | `variability` | Operant-variability U-value | Page & Neuringer (1985) |
 | `lag_variability` | Lag-N pass rate | Neuringer (2002) |

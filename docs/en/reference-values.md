@@ -53,7 +53,7 @@ Verdicts:
 | `observing` | `properties` | Dinsmoor (1983) | — | rates and ratios by hand |
 | `prp` | `properties` | Fry, Kelleher & Cook (1960) | — | quarter-life equals 0.25^(1/p) for power cumulative records |
 | `renewal` | `properties` | Bouton (2004) | — | all context designs and ratios by hand |
-| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n) |
+| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n); compound CS: summed error, blocking after A+ pretraining, single CS equals the one-stimulus case |
 | `resurgence` | `properties` | Epstein (1985) | — | windowed means, differences and ratios by hand |
 | `run_length` | `properties` | Schlinger, Derenne & Baron (2008) | — | pause and run by hand |
 | `scalar_timing` | `properties` | Gibbon (1977) | — | coefficient of variation by hand |

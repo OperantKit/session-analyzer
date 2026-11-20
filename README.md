@@ -72,7 +72,7 @@ The pauses after the first and second reinforcers are 6 s and 8 s, and the gener
 
 ## What is inside
 
-- **Analyses** in `session_analyzer.analytics`: response rate and local pattern (PRP, bouts, IRT log-survivor, FR runs), choice and matching (generalized matching law, time allocation, changeover-delay compliance, concurrent chains), value and economics (progressive-ratio breakpoint, demand, delay discounting, unit price), timing (peak procedure, scalar timing), stimulus control (generalization gradients, signal detection), persistence and extinction (behavioral momentum, resurgence, renewal, extinction burst), Pavlovian measures (sign- and goal-tracking, Rescorla-Wagner), variability, and single-case designs. [Every module and its source](docs/en/modules.md); [equations and example output](docs/en/analyses/index.md) for the main analyses.
+- **Analyses** in `session_analyzer.analytics`: response rate and local pattern (PRP, bouts, IRT log-survivor, FR runs), choice and matching (generalized matching law, time allocation, changeover-delay compliance, concurrent chains), value and economics (progressive-ratio breakpoint, demand, delay discounting, unit price), timing (peak procedure, scalar timing), stimulus control (generalization gradients, signal detection), persistence and extinction (behavioral momentum, resurgence, renewal, extinction burst), Pavlovian measures (sign- and goal-tracking, Rescorla-Wagner for single and compound CSs), variability, and single-case designs. [Every module and its source](docs/en/modules.md); [equations and example output](docs/en/analyses/index.md) for the main analyses.
 - **Plots** in `session_analyzer.visualizer`: `plot_cumulative_record`, `plot_irt_coded_cumulative_record`, and `render_single_case_plot`.
 - **Analysis suggestions** in `session_analyzer.suggester`: given a [contingency-dsl](https://github.com/OperantKit/contingency-dsl) expression, the analyses worth computing for that design (for example the matching law for `Conc(VI, VI)`). It is the authoritative mapping from experiment design to analyses for [session-visualizer](https://github.com/OperantKit/session-visualizer) and [operantkit-frontend](https://github.com/OperantKit/operantkit-frontend); see [DSL-driven analysis suggestions](docs/en/suggestions.md) for the mapping, the HTTP contract, and the TypeScript types.
 
@@ -164,7 +164,7 @@ These are aids to visual inspection; deciding whether an effect was demonstrated
 | `observing` | `properties` | Dinsmoor (1983) | — | rates and ratios by hand |
 | `prp` | `properties` | Fry, Kelleher & Cook (1960) | — | quarter-life equals 0.25^(1/p) for power cumulative records |
 | `renewal` | `properties` | Bouton (2004) | — | all context designs and ratios by hand |
-| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n) |
+| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n); compound CS: summed error, blocking after A+ pretraining, single CS equals the one-stimulus case |
 | `resurgence` | `properties` | Epstein (1985) | — | windowed means, differences and ratios by hand |
 | `run_length` | `properties` | Schlinger, Derenne & Baron (2008) | — | pause and run by hand |
 | `scalar_timing` | `properties` | Gibbon (1977) | — | coefficient of variation by hand |

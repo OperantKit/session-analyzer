@@ -38,3 +38,24 @@ a conditioned reinforcer.
 - **Reference** — Rescorla, R. A., & Wagner, A. R. (1972). A theory of Pavlovian conditioning. In *Classical conditioning II* (pp. 64-99). Appleton-Century-Crofts.
 
 ![Rescorla-Wagner trace across acquisition / extinction / reacquisition phases](../../assets/figures/rescorla_wagner.png)
+
+### Rescorla-Wagner, compound CS — `CompoundTrace`
+
+- **Theme** — The same update over a compound of stimuli: every presented stimulus `i` changes by `α_i·β·(λ_t − ΣV)`, where the sum runs over the stimuli presented on the trial, and stimuli not presented are left unchanged. Each trial is a `CompoundTrial(stimuli, us, stage)`; a context that is treated as an element is one more stimulus in `stimuli`. Associative strength is kept separately per US label: a trial delivering US `u` drives the `u` system toward `lambda_by_us[u]` and every other system toward 0, and a US label without an asymptote counts as a trial without a US. `beta_nonreinforced` sets `β` on trials without the US. `simulate_rescorla_wagner` is the one-stimulus case with `α = alpha_beta` and `β = 1`, and gives the same trace.
+- **Equation** — `V_i ← V_i + α_i·β·(λ_t − Σ_{j∈S_t} V_j)` for `i ∈ S_t`
+- **Output** — after 40 `A+` trials and 10 `AX+` trials with `α = 0.3`, `λ = 1`: `trace.final()` ≈ `{"A": 1.0, "X": 0.0}` (blocking)
+- **Reference** — Rescorla, R. A., & Wagner, A. R. (1972). A theory of Pavlovian conditioning. In *Classical conditioning II* (pp. 64-99). Appleton-Century-Crofts.
+
+```python
+from session_analyzer.analytics import (
+    CompoundRescorlaWagner,
+    CompoundTrial,
+    simulate_compound_rescorla_wagner,
+)
+
+a = CompoundTrial(frozenset({"A"}), "us", stage="pretraining")
+ax = CompoundTrial(frozenset({"A", "X"}), "us", stage="compound")
+model = CompoundRescorlaWagner({}, alpha_default=0.3, lambda_by_us={"us": 1.0})
+trace = simulate_compound_rescorla_wagner([a] * 40 + [ax] * 10, model)
+trace.final()  # X stays near 0
+```

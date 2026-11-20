@@ -53,7 +53,7 @@
 | `observing` | `properties` | Dinsmoor (1983) | — | 率と比の手計算 |
 | `prp` | `properties` | Fry, Kelleher & Cook (1960) | — | 累積が t^p のとき quarter-life = 0.25^(1/p) |
 | `renewal` | `properties` | Bouton (2004) | — | 文脈の設計の全組と比の手計算 |
-| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n) |
+| `rescorla_wagner` | `properties` | Rescorla & Wagner (1972) | — | V_n = λ(1 − (1 − αβ)^n)。複合 CS は誤差の和、A+ の後の AX+ での阻止 (blocking)、単一 CS は刺激 1 つの場合と一致 |
 | `resurgence` | `properties` | Epstein (1985) | — | 窓つきの平均・差・比の手計算 |
 | `run_length` | `properties` | Schlinger, Derenne & Baron (2008) | — | 休止とランの手計算 |
 | `scalar_timing` | `properties` | Gibbon (1977) | — | 変動係数の手計算 |

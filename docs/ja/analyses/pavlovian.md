@@ -37,3 +37,24 @@
 - **引用** — Rescorla, R. A., & Wagner, A. R. (1972). A theory of Pavlovian conditioning. In *Classical conditioning II* (pp. 64-99). Appleton-Century-Crofts.
 
 ![獲得 / 消去 / 再獲得を通じた Rescorla-Wagner トレース](../../assets/figures/rescorla_wagner.png)
+
+### Rescorla-Wagner (複合 CS) — `CompoundTrace`
+
+- **テーマ** — 同じ更新を複数の刺激の複合に当てる。提示された各刺激 `i` は `α_i·β·(λ_t − ΣV)` だけ変わり、和はその試行で提示された刺激についてとる。提示されなかった刺激は変わらない。各試行は `CompoundTrial(stimuli, us, stage)` で、文脈を要素として扱うときは `stimuli` に刺激を 1 つ足す。連合強度は US のラベルごとに別に持つ。US `u` を提示した試行は `u` の系を `lambda_by_us[u]` へ、他の系を 0 へ近づける。漸近値の無い US のラベルは US の無い試行として数える。`beta_nonreinforced` は US の無い試行の `β`。`simulate_rescorla_wagner` は `α = alpha_beta`、`β = 1` の刺激 1 つの場合で、同じトレースを返す。
+- **式** — `i ∈ S_t` について `V_i ← V_i + α_i·β·(λ_t − Σ_{j∈S_t} V_j)`
+- **出力** — `α = 0.3`、`λ = 1` で `A+` を 40 試行、`AX+` を 10 試行行った後の `trace.final()` ≈ `{"A": 1.0, "X": 0.0}` (阻止 (blocking))
+- **引用** — Rescorla, R. A., & Wagner, A. R. (1972). A theory of Pavlovian conditioning. In *Classical conditioning II* (pp. 64-99). Appleton-Century-Crofts.
+
+```python
+from session_analyzer.analytics import (
+    CompoundRescorlaWagner,
+    CompoundTrial,
+    simulate_compound_rescorla_wagner,
+)
+
+a = CompoundTrial(frozenset({"A"}), "us", stage="pretraining")
+ax = CompoundTrial(frozenset({"A", "X"}), "us", stage="compound")
+model = CompoundRescorlaWagner({}, alpha_default=0.3, lambda_by_us={"us": 1.0})
+trace = simulate_compound_rescorla_wagner([a] * 40 + [ax] * 10, model)
+trace.final()  # X は 0 の近くに留まる
+```
