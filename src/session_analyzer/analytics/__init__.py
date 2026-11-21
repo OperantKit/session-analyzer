@@ -18,6 +18,13 @@ from .breakpoint import (
     detect_breakpoint,
     estimate_irt_breakpoint,
 )
+from .change_point import (
+    AcquisitionSummary,
+    ChangePointResult,
+    acquisition_summary,
+    change_points,
+    change_points_from_times,
+)
 from .choice import (
     ChoiceAllocation,
     ChoiceMode,
@@ -202,6 +209,11 @@ from .within_session import (
 )
 
 __all__ = [
+    "AcquisitionSummary",
+    "ChangePointResult",
+    "acquisition_summary",
+    "change_points",
+    "change_points_from_times",
     "AvoidanceMetrics",
     "BlockEntropy",
     "BoutMetrics",

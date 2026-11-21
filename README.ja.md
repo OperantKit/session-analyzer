@@ -123,7 +123,7 @@ render_single_case_plot(case, "case1.png")
 
 ## 公表値との照合
 
-analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 27 本です。後ろの 34 本は閉形式・既知のパラメータの回復・手計算で確かめています。[module ごとの照合のしかた](docs/ja/reference-values.md)。出典に照らしたテストを持たない module があると `tests/test_reference_value_coverage.py` が失敗します。
+analytics の 48 本のうち、公表値と一致 7 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 28 本です。後ろの 35 本は閉形式・既知のパラメータの回復・手計算で確かめています。[module ごとの照合のしかた](docs/ja/reference-values.md)。出典に照らしたテストを持たない module があると `tests/test_reference_value_coverage.py` が失敗します。
 
 | module | 判定 | 出典 | 参照実装 | テストが確かめること |
 |---|---|---|---|---|
@@ -149,6 +149,7 @@ analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装
 | `time_matching` | `not-retrieved` | Baum & Rachlin (1969) | `numpy.polyfit` | データの表は本文未取得。最小二乗・`matching` と一致 |
 | `bout` | `properties` | Shull, Gaynor & Grimes (2001) | — | 既知の 2 成分混合を回復 (原著の対数生存法とは推定法が違う) |
 | `breakpoint` | `properties` | Richardson & Roberts (1996) | — | 公表の比率列の上で最後に完了した比率 (閾値ちょうどを含む) |
+| `change_point` | `properties` | Gallistel, Fairhurst & Balsam (2004) | — | 0/1・回数・事象の時刻の列で既知の率の段差を回復し、定常列で出る変化点の数を抑える |
 | `choice` | `properties` | Herrnstein (1961) | — | 比率としきい値の手計算 |
 | `concurrent_chains` | `properties` | Mazur (2001) | — | V = A/(1 + kD) の閉形式 |
 | `cross_elasticity_matrix` | `properties` | Hursh & Roma (2013) | `numpy.polyfit` | 偏弾力性を回復、`unit_price` と一致 |

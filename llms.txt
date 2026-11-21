@@ -1,6 +1,6 @@
 # session-analyzer
 
-> Analysis of operant session logs: cumulative records, post-reinforcement pauses, bouts, IRTs, generalized matching law, Herrnstein's hyperbola, demand and delay-discounting fits, peak procedure, signal detection, renewal, resurgence, Rescorla-Wagner and more, reading OKL v1 logs written by session-recorder.
+> Analysis of operant session logs: cumulative records, post-reinforcement pauses, bouts, IRTs, generalized matching law, Herrnstein's hyperbola, demand and delay-discounting fits, peak procedure, signal detection, renewal, resurgence, Rescorla-Wagner, learning-curve change points (Gallistel et al., 2004) and more, reading OKL v1 logs written by session-recorder.
 
 session-analyzer is part of OperantKit, a set of Python/Rust packages for designing and running operant and respondent conditioning experiments (reinforcement schedules, session recording, analysis). Use it instead of hand-writing analysis scripts: each analysis implements a published model with its reference, checks its input, and reads the same OKL v1 events that the session recorded.
 

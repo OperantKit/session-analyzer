@@ -2,7 +2,7 @@
 
 [日本語版](../ja/reference-values.md)
 
-How each analysis in `session_analyzer.analytics` is checked against its source. 47 analytics modules: 7 match published values, 5 match an independent reference implementation, 1 matches the source's formulas, 7 have published values whose text was not retrieved and 27 have no published values; those 34 are checked by closed forms, recovery of known parameters and hand computation.
+How each analysis in `session_analyzer.analytics` is checked against its source. 48 analytics modules: 7 match published values, 5 match an independent reference implementation, 1 matches the source's formulas, 7 have published values whose text was not retrieved and 28 have no published values; those 35 are checked by closed forms, recovery of known parameters and hand computation.
 
 Each row is a test marked `@pytest.mark.reference(module=..., verdict=..., source=...)`. `tests/test_reference_value_coverage.py` fails when an analytics module has no such test, when a `properties` or `not-retrieved` module is missing from its allowlist with a reason, or when this table disagrees with the marks.
 
@@ -38,6 +38,7 @@ Verdicts:
 | `time_matching` | `not-retrieved` | Baum & Rachlin (1969) | `numpy.polyfit` | data table not retrieved; equals least squares and `matching` |
 | `bout` | `properties` | Shull, Gaynor & Grimes (2001) | — | recovers a known two-component mixture (estimator differs from the original log-survivor method) |
 | `breakpoint` | `properties` | Richardson & Roberts (1996) | — | last completed ratio on the published ratio series, threshold included |
+| `change_point` | `properties` | Gallistel, Fairhurst & Balsam (2004) | — | recovers known rate steps in 0/1, count and event-time records; bounds the change points found in stationary records |
 | `choice` | `properties` | Herrnstein (1961) | — | proportions and thresholds by hand |
 | `concurrent_chains` | `properties` | Mazur (2001) | — | V = A/(1 + kD) closed form |
 | `cross_elasticity_matrix` | `properties` | Hursh & Roma (2013) | `numpy.polyfit` | recovers partial elasticities; agrees with `unit_price` |

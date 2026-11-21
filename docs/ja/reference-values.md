@@ -2,7 +2,7 @@
 
 [English](../en/reference-values.md)
 
-`session_analyzer.analytics` の各分析を、出典とどう照合しているかの一覧です。analytics の 47 本のうち、公表値と一致 7 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 27 本です。後ろの 34 本は閉形式・既知のパラメータの回復・手計算で確かめています。
+`session_analyzer.analytics` の各分析を、出典とどう照合しているかの一覧です。analytics の 48 本のうち、公表値と一致 7 本、独立な参照実装と一致 5 本、原典の式と一致 1 本、公表値はあるが本文を取れていない 7 本、公表値の無い 28 本です。後ろの 35 本は閉形式・既知のパラメータの回復・手計算で確かめています。
 
 各行は `@pytest.mark.reference(module=..., verdict=..., source=...)` を付けたテストです。`tests/test_reference_value_coverage.py` は、印の付いたテストを持たない analytics の module があるとき、`properties`・`not-retrieved` の module が理由付きの許可リストに無いとき、この表が印と食い違うときに失敗します。
 
@@ -38,6 +38,7 @@
 | `time_matching` | `not-retrieved` | Baum & Rachlin (1969) | `numpy.polyfit` | データの表は本文未取得。最小二乗・`matching` と一致 |
 | `bout` | `properties` | Shull, Gaynor & Grimes (2001) | — | 既知の 2 成分混合を回復 (原著の対数生存法とは推定法が違う) |
 | `breakpoint` | `properties` | Richardson & Roberts (1996) | — | 公表の比率列の上で最後に完了した比率 (閾値ちょうどを含む) |
+| `change_point` | `properties` | Gallistel, Fairhurst & Balsam (2004) | — | 0/1・回数・事象の時刻の列で既知の率の段差を回復し、定常列で出る変化点の数を抑える |
 | `choice` | `properties` | Herrnstein (1961) | — | 比率としきい値の手計算 |
 | `concurrent_chains` | `properties` | Mazur (2001) | — | V = A/(1 + kD) の閉形式 |
 | `cross_elasticity_matrix` | `properties` | Hursh & Roma (2013) | `numpy.polyfit` | 偏弾力性を回復、`unit_price` と一致 |

@@ -2,7 +2,7 @@
 
 [日本語版](../ja/modules.md)
 
-Every module in `session_analyzer.analytics` (46 modules), plus the two cumulative-record plots in `session_analyzer.visualizer`, with the source each one cites. For the equations and example output of the main analyses, see the [analysis catalog](analyses/index.md).
+Every module in `session_analyzer.analytics` (48 modules), plus the two cumulative-record plots in `session_analyzer.visualizer`, with the source each one cites. For the equations and example output of the main analyses, see the [analysis catalog](analyses/index.md).
 
 ## Plots (`session_analyzer.visualizer`)
 
@@ -23,6 +23,7 @@ Every module in `session_analyzer.analytics` (46 modules), plus the two cumulati
 | `run_length` | FR run-length decomposition | Schlinger, Derenne, & Baron (2008) |
 | `schneider_segment` | Two-state break-and-run segmentation | Schneider (1969) |
 | `within_session` | Within-session response-rate dynamics | McSweeney, Roll, & Cannon (1994) |
+| `change_point` | Change points of a learning curve (binomial test), onset latency, dynamic interval, first fraction | Gallistel, Fairhurst, & Balsam (2004) |
 | `matching` | Generalized matching law fit; single-alternative hyperbola | Baum (1974); Herrnstein (1970) |
 | `hierarchical_gml` | Hierarchical empirical-Bayes generalized matching law fit | Gelman & Hill (2007) |
 | `matching_induction` | Matching-with-induction fit | Baum & Grace (2020) |
@@ -76,6 +77,7 @@ The table gives the main published model behind each analysis. Each module's doc
 - Epstein, R. (1985). Extinction-induced resurgence: Preliminary investigations and possible applications. *The Psychological Record*, 35(2), 143-153. https://doi.org/10.1007/BF03394918
 - Felton, M., & Lyon, D. O. (1966). The post-reinforcement pause. *Journal of the Experimental Analysis of Behavior*, 9(2), 131-134. https://doi.org/10.1901/jeab.1966.9-131
 - Flagel, S. B., Watson, S. J., Robinson, T. E., & Akil, H. (2007). Individual differences in the propensity to approach signals vs goals promote different adaptations in the dopamine system of rats. *Psychopharmacology*, 191(3), 599-607. https://doi.org/10.1007/s00213-006-0535-8
+- Gallistel, C. R., Fairhurst, S., & Balsam, P. (2004). The learning curve: Implications of a quantitative analysis. *Proceedings of the National Academy of Sciences*, 101(36), 13124-13131. https://doi.org/10.1073/pnas.0404965101
 - Gelman, A., & Hill, J. (2007). *Data analysis using regression and multilevel/hierarchical models*. Cambridge University Press.
 - Gibbon, J. (1977). Scalar expectancy theory and Weber's law in animal timing. *Psychological Review*, 84(3), 279-325. https://doi.org/10.1037/0033-295X.84.3.279
 - Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley.

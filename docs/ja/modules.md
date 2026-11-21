@@ -2,7 +2,7 @@
 
 [English](../en/modules.md)
 
-`session_analyzer.analytics` のすべてのモジュール (46 個) と、`session_analyzer.visualizer` の 2 つの累積記録の図を、それぞれが引く出典とともに挙げます。主な分析の式と出力例は [分析カタログ](analyses/index.md) を参照してください。
+`session_analyzer.analytics` のすべてのモジュール (48 個) と、`session_analyzer.visualizer` の 2 つの累積記録の図を、それぞれが引く出典とともに挙げます。主な分析の式と出力例は [分析カタログ](analyses/index.md) を参照してください。
 
 ## 図 (`session_analyzer.visualizer`)
 
@@ -23,6 +23,7 @@
 | `run_length` | FR のラン長の分解 | Schlinger, Derenne, & Baron (2008) |
 | `schneider_segment` | 休止と反応連続の 2 状態への分割 | Schneider (1969) |
 | `within_session` | セッション内の反応率の推移 | McSweeney, Roll, & Cannon (1994) |
+| `change_point` | 学習曲線の変化点（二項の検定）、立ち上がりの潜時・動的区間・first fraction | Gallistel, Fairhurst, & Balsam (2004) |
 | `matching` | 一般化マッチング法則の当てはめ、単一選択肢の双曲線 | Baum (1974); Herrnstein (1970) |
 | `hierarchical_gml` | 階層的な経験ベイズによる一般化マッチング法則の当てはめ | Gelman & Hill (2007) |
 | `matching_induction` | マッチングと誘導 (induction) による当てはめ | Baum & Grace (2020) |
@@ -76,6 +77,7 @@
 - Epstein, R. (1985). Extinction-induced resurgence: Preliminary investigations and possible applications. *The Psychological Record*, 35(2), 143-153. https://doi.org/10.1007/BF03394918
 - Felton, M., & Lyon, D. O. (1966). The post-reinforcement pause. *Journal of the Experimental Analysis of Behavior*, 9(2), 131-134. https://doi.org/10.1901/jeab.1966.9-131
 - Flagel, S. B., Watson, S. J., Robinson, T. E., & Akil, H. (2007). Individual differences in the propensity to approach signals vs goals promote different adaptations in the dopamine system of rats. *Psychopharmacology*, 191(3), 599-607. https://doi.org/10.1007/s00213-006-0535-8
+- Gallistel, C. R., Fairhurst, S., & Balsam, P. (2004). The learning curve: Implications of a quantitative analysis. *Proceedings of the National Academy of Sciences*, 101(36), 13124-13131. https://doi.org/10.1073/pnas.0404965101
 - Gelman, A., & Hill, J. (2007). *Data analysis using regression and multilevel/hierarchical models*. Cambridge University Press.
 - Gibbon, J. (1977). Scalar expectancy theory and Weber's law in animal timing. *Psychological Review*, 84(3), 279-325. https://doi.org/10.1037/0033-295X.84.3.279
 - Green, D. M., & Swets, J. A. (1966). *Signal detection theory and psychophysics*. Wiley.

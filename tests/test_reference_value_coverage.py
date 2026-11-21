@@ -72,6 +72,7 @@ PROPERTIES_ONLY: dict[str, str] = {
     "td_learning": "the fixed point has a closed form",
     "renewal": "the module reports descriptive statistics",
     "observing": "the module reports rates and ratios",
+    "change_point": "example inputs were found only in a GPL-3 package",
 }
 
 TABLES = [
