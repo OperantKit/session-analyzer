@@ -171,3 +171,36 @@ def test_recovers_known_breakpoint_and_rates_from_exact_two_line_record() -> Non
     assert result.high_rate == pytest.approx(2.0, rel=1e-9)
     assert result.n_low == 3
     assert result.n_high == 100
+
+
+# ---------------------------------------------------------------------------
+# Same breakpoint on every supported Python version
+# ---------------------------------------------------------------------------
+#
+# The built-in ``sum`` of floats is compensated from Python 3.12 on and plain
+# before that. When state 1 holds no response, a range of breakpoints fits the
+# record equally well, so the last bits of the sums decide which one is
+# chosen. The expected grid steps are what correctly rounded sums choose; the
+# check is that the choice is the same on every version, not that a step is
+# better than the others of its range.
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("response_times", "step"),
+    [
+        ([18.9, 19.9, 22.4, 28.9, 31.7, 36.1, 44.9, 48.0, 52.8], 50),
+        ([16.5, 18.2, 27.1, 27.7, 35.4, 48.9, 54.1, 57.5], 51),
+        ([20.2, 20.6, 21.6, 32.1, 59.6], 143),
+        ([19.1, 19.5, 24.9, 27.1, 33.1, 42.5, 51.3, 51.4, 54.0], 59),
+        ([23.0, 29.4, 32.7, 34.2, 46.1, 51.3], 60),
+    ],
+)
+def test_breakpoint_does_not_depend_on_the_python_version(
+    response_times: list[float], step: int
+) -> None:
+    result = schneider_two_state(
+        response_times, interval_start=0.0, interval_end=60.0, grid=200
+    )
+    assert result is not None
+    assert result.break_time == pytest.approx(60.0 * step / 200, abs=1e-9)

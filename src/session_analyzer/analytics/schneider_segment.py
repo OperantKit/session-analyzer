@@ -24,6 +24,7 @@ Schneider, B. A. (1969). A two-state analysis of fixed-interval
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -75,11 +76,13 @@ def _fit_two_lines(
 
     Returns ``(sse, low, high)`` or ``None`` when no slope is identified.
     """
-    s11 = sum(u * u for u in x1)
-    s22 = sum(v * v for v in x2)
-    s12 = sum(u * v for u, v in zip(x1, x2, strict=True))
-    s1y = sum(u * c for u, c in zip(x1, y, strict=True))
-    s2y = sum(v * c for v, c in zip(x2, y, strict=True))
+    # fsum, not sum: the rounding of sum differs between Python versions, and
+    # the last bits choose among breakpoints that fit equally well.
+    s11 = math.fsum(u * u for u in x1)
+    s22 = math.fsum(v * v for v in x2)
+    s12 = math.fsum(u * v for u, v in zip(x1, x2, strict=True))
+    s1y = math.fsum(u * c for u, c in zip(x1, y, strict=True))
+    s2y = math.fsum(v * c for v, c in zip(x2, y, strict=True))
     det = s11 * s22 - s12 * s12
     if det <= 0.0:
         return None
@@ -89,7 +92,9 @@ def _fit_two_lines(
         low, high = 0.0, s2y / s22
     elif high < 0.0:
         low, high = s1y / s11, 0.0
-    sse = sum((c - low * u - high * v) ** 2 for u, v, c in zip(x1, x2, y, strict=True))
+    sse = math.fsum(
+        (c - low * u - high * v) ** 2 for u, v, c in zip(x1, x2, y, strict=True)
+    )
     return sse, low, high
 
 
