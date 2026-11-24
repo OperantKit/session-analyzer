@@ -76,7 +76,7 @@
 ### Schneider の 2 状態セグメンテーション — `SchneiderTwoStateResult`
 
 - **テーマ** — Schneider (1969) は FI 累積記録を 2 つの状態 (休止 → 走行) でモデル化した。原典の数値手続きに従い、強化間間隔 1 つの累積記録に、breakpoint までの原点を通る直線と、breakpoint でそれに接続する直線の 2 本を最小二乗で当てる。breakpoint を間隔の格子上で動かし、二乗誤差の和が最小の点を採る。2 本の傾き (反応率) は負にならないよう制約し、状態 1 に反応が 1 つも無くてもよい。
-- **出力** — `SchneiderTwoStateResult(break_time=25.5, pause_duration=25.5, run_duration=34.5, low_rate=0.02, high_rate=0.97, slope_difference=0.95, n_low=0, n_high=32)`
+- **出力** — `SchneiderTwoStateResult(break_time=25.8, pause_duration=25.8, run_duration=34.2, low_rate=0.03, high_rate=0.97, slope_difference=0.94, n_low=0, n_high=32)`
 - **引用** — Schneider, B. A. (1969). A two-state analysis of fixed-interval responding in the pigeon. *JEAB*, 12(5), 677-687. <https://doi.org/10.1901/jeab.1969.12-677>
 
 ![最小二乗の breakpoint で分割した累積記録](../../assets/figures/schneider_segment.png)
