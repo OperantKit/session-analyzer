@@ -36,6 +36,9 @@ CANONICAL_PIP_LENGTH_PT: float = 7.0
 CANONICAL_RESET_RESPONSES: int = 550
 """Canonical Gerbrands C-3/C-4 reset threshold (Lattal, 2004)."""
 
+_HEADROOM_FRACTION: float = 0.05
+_MIN_HEADROOM_RESPONSES: float = 1.0
+
 
 EventTime = Union[float, tuple[float, str]]
 """Either a bare time (rendered as a point marker) or ``(time, "on"|"off")``
@@ -88,6 +91,20 @@ def wrap_cumulative(
         ys.append(current)
         mark_index.append((t, current))
     return xs, ys, mark_index
+
+
+def response_axis_top(peak: float, reset_responses: int | None) -> float:
+    """Return the upper limit of the response axis for a trace peaking at ``peak``.
+
+    ``reset_responses`` is where the pen resets, not how tall the axis is: a
+    trace that never reaches it gets an axis that fits the trace plus headroom
+    (5 % of the peak, at least one response), never above ``reset_responses``.
+    A trace that reaches it, or that has no reset, ends at its own peak.
+    """
+    if reset_responses is None:
+        return peak
+    headroom = max(_MIN_HEADROOM_RESPONSES, peak * _HEADROOM_FRACTION)
+    return min(peak + headroom, reset_responses)
 
 
 def find_response_y(

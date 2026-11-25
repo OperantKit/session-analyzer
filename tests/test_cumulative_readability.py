@@ -1,7 +1,8 @@
 """Readability of the cumulative-record figure.
 
 The legend must tell responses and reinforcement apart, and the event-pen
-axis is drawn only when there are events to draw on it.
+axis is drawn only when there are events to draw on it. The response axis
+fits a record shorter than the pen-reset interval.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from session_analyzer.visualizer.cumulative_diff import (  # noqa: E402
     build_irt_coded_figure,
 )
 from session_analyzer.visualizer.cumulative_record import (  # noqa: E402
+    CANONICAL_RESET_RESPONSES,
     build_cumulative_record_figure,
 )
 
@@ -137,3 +139,55 @@ class TestNoEmptyEventPen:
         assert event_ax is not None
         assert len(fig.axes) == 2
         plt.close(fig)
+
+
+def _y_top(n_responses: int, **kwargs: object) -> float:
+    times = [float(i) for i in range(1, n_responses + 1)]
+    fig, main_ax, _ = build_cumulative_record_figure(times, [], **kwargs)
+    bottom, top = main_ax.get_ylim()
+    plt.close(fig)
+    assert bottom == 0
+    return float(top)
+
+
+def _irt_y_top(n_responses: int, **kwargs: object) -> float:
+    fig, main_ax, _ = build_irt_coded_figure(
+        response_points=[(float(i), i, True) for i in range(1, n_responses + 1)],
+        reinforcement_points=[],
+        irt_threshold_sec=1.0,
+        **kwargs,
+    )
+    bottom, top = main_ax.get_ylim()
+    plt.close(fig)
+    assert bottom == 0
+    return float(top)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("y_top", [_y_top, _irt_y_top], ids=["plain", "irt"])
+class TestResponseAxisFitsTheRecord:
+    def test_short_record_is_not_drawn_on_the_reset_scale(self, y_top) -> None:
+        assert y_top(9) == 10
+
+    def test_single_response_has_headroom(self, y_top) -> None:
+        assert y_top(1) == 2
+
+    def test_headroom_grows_with_the_record(self, y_top) -> None:
+        assert y_top(100) == pytest.approx(105)
+
+    def test_headroom_never_passes_the_reset_interval(self, y_top) -> None:
+        assert y_top(549) == CANONICAL_RESET_RESPONSES
+
+    def test_record_that_reaches_the_reset_interval(self, y_top) -> None:
+        assert y_top(550) == CANONICAL_RESET_RESPONSES
+
+    def test_record_that_wraps_keeps_the_reset_scale(self, y_top) -> None:
+        assert y_top(600) == CANONICAL_RESET_RESPONSES
+
+    def test_custom_interval_below_and_above(self, y_top) -> None:
+        assert y_top(3, reset_responses=5) == 4
+        assert y_top(10, reset_responses=5) == 5
+
+    def test_without_reset_the_axis_ends_at_the_last_response(self, y_top) -> None:
+        assert y_top(9, reset_responses=None) == 9
+        assert y_top(600, reset_responses=None) == 600

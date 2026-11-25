@@ -46,6 +46,7 @@ from ._cumulative_core import (
     has_event_pen,
     pip_legend_handle,
     reinforcement_mark_color,
+    response_axis_top,
     wrap_cumulative,
 )
 from .themes import ThemeSpec, get_theme
@@ -113,6 +114,12 @@ def build_cumulative_record_figure(
     ``time_range`` sets the time-axis limits ``(start, end)`` in seconds;
     when omitted the axis spans the first to the last response.
 
+    ``reset_responses`` is the pen-reset interval. A record with fewer
+    responses than that gets a response axis that fits the record, so short
+    records drawn one by one do not share a vertical scale; once the record
+    reaches the interval the axis ends at ``reset_responses``. With ``None``
+    the axis ends at the last response.
+
     The event-pen axis is split off only when ``show_event_pen`` is true
     and ``event_markers`` has at least one channel; otherwise the figure has
     the cumulative axis alone and the third item is ``None``. Reinforcement
@@ -164,12 +171,7 @@ def build_cumulative_record_figure(
             x_lo, x_hi = 0.0, 1.0
         if xs_wrap:
             main_ax.set_xlim(x_lo, max(x_hi, x_lo + 1e-6))
-            y_top = (
-                reset_responses
-                if reset_responses is not None
-                else (max(ys_wrap) if ys_wrap else 1)
-            )
-            main_ax.set_ylim(0, max(y_top, max(ys_wrap) if ys_wrap else 1))
+            main_ax.set_ylim(0, response_axis_top(max(ys_wrap), reset_responses))
 
         main_ax.set_xlabel("Time (seconds)")
         main_ax.set_ylabel("Cumulative Responses")

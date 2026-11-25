@@ -51,6 +51,7 @@ from ._cumulative_core import (
     draw_pip,
     find_response_y,
     has_event_pen,
+    response_axis_top,
     wrap_cumulative,
 )
 from .themes import ThemeSpec, get_theme
@@ -110,7 +111,8 @@ def build_irt_coded_figure(
     ``response_points`` is a sequence of ``(rel_time, cum_count, is_long_irt)``
     tuples. ``reinforcement_points`` is ``(rel_time, cum_count_at_event)``.
     ``cum_count`` values are the *unwrapped* cumulative counts; wrap logic
-    is applied internally.
+    is applied internally. The response axis fits a record shorter than
+    ``reset_responses``, as in :func:`build_cumulative_record_figure`.
     """
     spec = _resolve_theme(theme)
 
@@ -160,12 +162,7 @@ def build_irt_coded_figure(
             )
             main_ax.add_line(backdrop)
             main_ax.set_xlim(min(xs_wrap), max(xs_wrap) if max(xs_wrap) > min(xs_wrap) else min(xs_wrap) + 1e-6)
-            y_top = (
-                reset_responses
-                if reset_responses is not None
-                else (max(ys_wrap) if ys_wrap else 1)
-            )
-            main_ax.set_ylim(0, max(y_top, max(ys_wrap) if ys_wrap else 1))
+            main_ax.set_ylim(0, response_axis_top(max(ys_wrap), reset_responses))
 
         # Scatter IRT-coded response points at their wrapped y positions.
         short_xy: list[tuple[float, int]] = []
