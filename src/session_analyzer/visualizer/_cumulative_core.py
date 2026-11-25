@@ -20,8 +20,10 @@ from typing import Union
 
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.colors import to_hex
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
+from matplotlib.path import Path as MarkerPath
 
 CANONICAL_PIP_ANGLE_DEG: float = -30.0
 """Canonical Ferster & Skinner reinforcement-pip angle, measured in display
@@ -153,6 +155,60 @@ def draw_pip(
         label="_pip",
     )
     ax.add_line(line)
+
+
+def has_event_pen(
+    show_event_pen: bool,
+    event_markers: Mapping[str, Sequence[EventTime]] | None,
+) -> bool:
+    """Whether to split off an event-pen axis.
+
+    The event pen is drawn only when it is enabled and there is at least one
+    event channel to put on it; an empty pen would be a blank panel.
+    """
+    return bool(show_event_pen and event_markers)
+
+
+def reinforcement_mark_color(foreground: str, palette: Sequence[str]) -> str:
+    """Color for reinforcement pips, distinct from the response trace.
+
+    Takes the last palette entry that differs from ``foreground`` (the
+    response-trace color), so the legend can tell the two series apart.
+    Falls back to ``foreground`` when the palette has no other color.
+    """
+    fg = to_hex(foreground)
+    for color in reversed(list(palette)):
+        if to_hex(color) != fg:
+            return color
+    return foreground
+
+
+def pip_legend_handle(
+    *,
+    color: str,
+    angle_deg: float,
+    length_pt: float,
+    linewidth: float,
+) -> Line2D:
+    """Legend sample for the reinforcement pip: a short diagonal stroke.
+
+    Drawn as an unfilled path marker (no connecting line), so the sample
+    has the same slant as the pips on the record instead of a flat line.
+    """
+    rad = math.radians(angle_deg)
+    dx, dy = 0.5 * math.cos(rad), 0.5 * math.sin(rad)
+    stroke = MarkerPath([(-dx, -dy), (dx, dy)], [MarkerPath.MOVETO, MarkerPath.LINETO])
+    return Line2D(
+        [],
+        [],
+        color=color,
+        linestyle="None",
+        marker=stroke,
+        markersize=length_pt,
+        markeredgewidth=linewidth,
+        markerfacecolor="none",
+        label="Reinforcement",
+    )
 
 
 def draw_event_pen(

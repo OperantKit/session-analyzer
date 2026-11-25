@@ -9,7 +9,8 @@ https://doi.org/10.1901/jeab.2004.82-329
 Canonical defaults (Gerbrands C-3/C-4):
 - Reinforcement pip: short diagonal tick ~30 deg below horizontal
 - Pen reset: every 550 responses (pen returns to baseline)
-- Event pen: separate on/off trace below the cumulative record
+- Event pen: separate on/off trace below the cumulative record (drawn
+  only when there are events to put on it)
 """
 
 from __future__ import annotations
@@ -47,8 +48,8 @@ class TestCanonicalDefaults:
         )
         assert fig is not None
         assert main_ax is not None
-        # Event pen axis exists by default (canonical F&S)
-        assert event_ax is not None
+        # Event pen is on by default but drawn only when there are events.
+        assert event_ax is None
         plt.close(fig)
 
 
@@ -147,10 +148,11 @@ class TestPenReset:
 
 @pytest.mark.unit
 class TestEventPen:
-    def test_event_pen_axis_present_by_default(self) -> None:
+    def test_event_pen_axis_present_by_default_with_events(self) -> None:
         fig, _, event_ax = build_cumulative_record_figure(
             response_times=[0.1, 0.2],
             reinforcement_times=[],
+            event_markers={"SD": [(0.1, "on"), (0.2, "off")]},
         )
         assert event_ax is not None
         plt.close(fig)

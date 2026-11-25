@@ -43,6 +43,9 @@ from ._cumulative_core import (
     draw_event_pen,
     draw_pip,
     find_response_y,
+    has_event_pen,
+    pip_legend_handle,
+    reinforcement_mark_color,
     wrap_cumulative,
 )
 from .themes import ThemeSpec, get_theme
@@ -109,14 +112,21 @@ def build_cumulative_record_figure(
 
     ``time_range`` sets the time-axis limits ``(start, end)`` in seconds;
     when omitted the axis spans the first to the last response.
+
+    The event-pen axis is split off only when ``show_event_pen`` is true
+    and ``event_markers`` has at least one channel; otherwise the figure has
+    the cumulative axis alone and the third item is ``None``. Reinforcement
+    pips use a palette color distinct from the response trace, and the
+    legend shows them as a diagonal stroke.
     """
     spec = _resolve_theme(theme)
+    pip_color = reinforcement_mark_color(spec.foreground, spec.palette)
 
     with matplotlib.rc_context(theme_to_rcparams(spec)):
         fig = Figure(figsize=(spec.figure_width_in, spec.figure_height_in))
 
         event_ax: Axes | None
-        if show_event_pen:
+        if has_event_pen(show_event_pen, event_markers):
             axes = fig.subplots(
                 2,
                 1,
@@ -177,10 +187,6 @@ def build_cumulative_record_figure(
             )
             event_ax.set_xlabel("Time (seconds)")
             main_ax.set_xlabel("")
-        elif event_ax is not None:
-            event_ax.set_yticks([])
-            event_ax.set_xlabel("Time (seconds)")
-            main_ax.set_xlabel("")
 
         # Legend proxies: only emit when the corresponding data is present.
         if xs_wrap:
@@ -195,12 +201,11 @@ def build_cumulative_record_figure(
             )
         if reinforcement_times:
             main_ax.add_line(
-                Line2D(
-                    [],
-                    [],
-                    color=spec.foreground,
+                pip_legend_handle(
+                    color=pip_color,
+                    angle_deg=pip_angle_deg,
+                    length_pt=pip_length_pt,
                     linewidth=spec.line_width_pt,
-                    label="Reinforcement",
                 )
             )
         main_ax.legend(loc="best")
@@ -219,7 +224,7 @@ def build_cumulative_record_figure(
                 float(y_at_r),
                 angle_deg=pip_angle_deg,
                 length_pt=pip_length_pt,
-                color=spec.foreground,
+                color=pip_color,
                 linewidth=spec.line_width_pt,
             )
     return fig, main_ax, event_ax

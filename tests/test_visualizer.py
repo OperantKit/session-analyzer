@@ -113,17 +113,28 @@ def test_x_axis_spans_the_logged_session(tmp_path: Path) -> None:
             {"timestamp": 154.564, "type": "state_change"},
         ],
     )
-    captured: dict[str, tuple[float, float]] = {}
+    captured: dict[str, tuple[float, float] | None] = {}
     build = cr.build_cumulative_record_figure
 
     def spy(*args, **kwargs):
         fig, main_ax, event_ax = build(*args, **kwargs)
         captured["main"] = main_ax.get_xlim()
-        captured["event"] = event_ax.get_xlim()
+        captured["event"] = None if event_ax is None else event_ax.get_xlim()
         return fig, main_ax, event_ax
 
     with mock.patch.object(cr, "build_cumulative_record_figure", spy):
         plot_cumulative_record(log, tmp_path / "out.png")
+
+    assert captured["main"] == pytest.approx((0.0, 154.564))
+    # No event channels were given, so there is no event-pen axis.
+    assert captured["event"] is None
+
+    with mock.patch.object(cr, "build_cumulative_record_figure", spy):
+        plot_cumulative_record(
+            log,
+            tmp_path / "out_events.png",
+            event_markers={"SD": [(0.0, "on"), (154.564, "off")]},
+        )
 
     assert captured["main"] == pytest.approx((0.0, 154.564))
     assert captured["event"] == pytest.approx((0.0, 154.564))

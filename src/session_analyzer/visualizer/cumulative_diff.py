@@ -50,6 +50,7 @@ from ._cumulative_core import (
     draw_event_pen,
     draw_pip,
     find_response_y,
+    has_event_pen,
     wrap_cumulative,
 )
 from .themes import ThemeSpec, get_theme
@@ -129,7 +130,7 @@ def build_irt_coded_figure(
     with matplotlib.rc_context(theme_to_rcparams(spec)):
         fig = Figure(figsize=(spec.figure_width_in, spec.figure_height_in))
         event_ax: Axes | None
-        if show_event_pen:
+        if has_event_pen(show_event_pen, event_markers):
             axes = fig.subplots(
                 2, 1, sharex=True, gridspec_kw={"height_ratios": [4, 1]}
             )
@@ -230,10 +231,6 @@ def build_irt_coded_figure(
                 x_lo=lo,
                 x_hi=hi,
             )
-            event_ax.set_xlabel("Time (seconds)")
-            main_ax.set_xlabel("")
-        elif event_ax is not None:
-            event_ax.set_yticks([])
             event_ax.set_xlabel("Time (seconds)")
             main_ax.set_xlabel("")
 

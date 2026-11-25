@@ -81,6 +81,7 @@ class TestEventPenCanonical:
             response_points=[(0.1, 1, True)],
             reinforcement_points=[],
             irt_threshold_sec=1.0,
+            event_markers={"probe": [0.1]},
         )
         assert event_ax is not None
         plt.close(fig)
